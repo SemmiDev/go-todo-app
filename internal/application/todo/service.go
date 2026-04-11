@@ -20,6 +20,7 @@ type Service struct {
 	tagRepo     output.TagRepository
 	todoTagRepo output.TodoTagRepository
 	cacheRepo   output.CacheRepository
+	transactor  output.Transactor
 }
 
 // Compile-time interface conformance checks.
@@ -33,8 +34,15 @@ func NewService(
 	tagRepo output.TagRepository,
 	todoTagRepo output.TodoTagRepository,
 	cacheRepo output.CacheRepository,
+	transactor output.Transactor,
 ) *Service {
-	return &Service{todoRepo: todoRepo, tagRepo: tagRepo, todoTagRepo: todoTagRepo, cacheRepo: cacheRepo}
+	return &Service{
+		todoRepo:    todoRepo,
+		tagRepo:     tagRepo,
+		todoTagRepo: todoTagRepo,
+		cacheRepo:   cacheRepo,
+		transactor:  transactor,
+	}
 }
 
 // ─── Tag operations ───────────────────────────────────────────────────────────
@@ -121,16 +129,24 @@ func (s *Service) CreateTodo(ctx context.Context, p input.CreateTodoParams) (*to
 	if err != nil {
 		return nil, fmt.Errorf("%w: %s", apperr.ErrValidation, err)
 	}
-	if err := s.todoRepo.Create(ctx, t); err != nil {
+
+	err = s.transactor.RunInTx(ctx, func(txCtx context.Context) error {
+		if err := s.todoRepo.Create(txCtx, t); err != nil {
+			return err
+		}
+		if len(p.TagIDs) > 0 {
+			if err := s.todoTagRepo.SetTags(txCtx, t.ID(), p.TagIDs); err != nil {
+				return err
+			}
+			tags, _ := s.todoTagRepo.GetTagsForTodo(txCtx, t.ID())
+			t.SetTags(tags)
+		}
+		return nil
+	})
+	if err != nil {
 		return nil, err
 	}
-	if len(p.TagIDs) > 0 {
-		if err := s.todoTagRepo.SetTags(ctx, t.ID(), p.TagIDs); err != nil {
-			return nil, err
-		}
-		tags, _ := s.todoTagRepo.GetTagsForTodo(ctx, t.ID())
-		t.SetTags(tags)
-	}
+
 	return t, nil
 }
 
@@ -174,16 +190,24 @@ func (s *Service) UpdateTodo(ctx context.Context, p input.UpdateTodoParams) (*to
 	if err := t.Update(p.Title, p.Description, p.Status, p.Priority, p.DueDate); err != nil {
 		return nil, fmt.Errorf("%w: %s", apperr.ErrValidation, err)
 	}
-	if err := s.todoRepo.Update(ctx, t); err != nil {
+
+	err = s.transactor.RunInTx(ctx, func(txCtx context.Context) error {
+		if err := s.todoRepo.Update(txCtx, t); err != nil {
+			return err
+		}
+		if p.TagIDs != nil {
+			if err := s.todoTagRepo.SetTags(txCtx, t.ID(), p.TagIDs); err != nil {
+				return err
+			}
+		}
+		tags, _ := s.todoTagRepo.GetTagsForTodo(txCtx, t.ID())
+		t.SetTags(tags)
+		return nil
+	})
+	if err != nil {
 		return nil, err
 	}
-	if p.TagIDs != nil {
-		if err := s.todoTagRepo.SetTags(ctx, t.ID(), p.TagIDs); err != nil {
-			return nil, err
-		}
-	}
-	tags, _ := s.todoTagRepo.GetTagsForTodo(ctx, t.ID())
-	t.SetTags(tags)
+
 	_ = s.cacheRepo.Delete(ctx, fmt.Sprintf("todo:%s", t.ID().String()))
 	return t, nil
 }

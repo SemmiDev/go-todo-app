@@ -87,9 +87,9 @@ func run(ctx context.Context, cfg *config.AppConfig, logger *slog.Logger) error 
 		GoogleClientID:       cfg.GoogleClientID,
 		GoogleClientSecret:   cfg.GoogleClientSecret,
 		GoogleCallbackURL:    cfg.GoogleCallbackURL,
-	})
+	}, db)
 	memcachedRepo := memcached.NewCacheRepo(cfg.MemcachedURL)
-	todoSvc := todoapp.NewService(todoRepo, tagRepo, todoTagRepo, memcachedRepo)
+	todoSvc := todoapp.NewService(todoRepo, tagRepo, todoTagRepo, memcachedRepo, db)
 
 	// ─── Validator ───────────────────────────────────────────────────────────
 	val := validation.New()

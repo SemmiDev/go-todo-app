@@ -33,6 +33,7 @@ type Service struct {
 	tokenMaker  token.Maker
 	oauthCfg    *oauth2.Config
 	cfg         Config
+	transactor  output.Transactor
 }
 
 // Compile-time interface conformance check.
@@ -43,6 +44,7 @@ func NewService(
 	sessionRepo output.SessionRepository,
 	tokenMaker token.Maker,
 	cfg Config,
+	transactor output.Transactor,
 ) *Service {
 	return &Service{
 		userRepo:    userRepo,
@@ -59,7 +61,8 @@ func NewService(
 			},
 			Endpoint: google.Endpoint,
 		},
-		cfg: cfg,
+		cfg:        cfg,
+		transactor: transactor,
 	}
 }
 
@@ -100,45 +103,58 @@ func (s *Service) ExchangeAndLogin(ctx context.Context, p input.ExchangeAndLogin
 		return nil, fmt.Errorf("google email not verified")
 	}
 
-	u, err := s.userRepo.GetOrCreateByEmail(ctx, info.Email, info.Name)
-	if err != nil {
-		return nil, fmt.Errorf("upsert user: %w", err)
-	}
+	var u *user.User
+	var accessToken, refreshToken string
+	var accessPayload, refreshPayload *token.Payload
 
-	// Create access token.
-	accessToken, accessPayload, err := s.tokenMaker.CreateToken(
-		u.ID(),
-		u.Email(),
-		s.cfg.AccessTokenDuration,
-		token.TokenTypeAccessToken,
-	)
-	if err != nil {
-		return nil, fmt.Errorf("create access token: %w", err)
-	}
+	err = s.transactor.RunInTx(ctx, func(txCtx context.Context) error {
+		var txErr error
+		u, txErr = s.userRepo.GetOrCreateByEmail(txCtx, info.Email, info.Name)
+		if txErr != nil {
+			return fmt.Errorf("upsert user: %w", txErr)
+		}
 
-	// Create refresh token.
-	refreshToken, refreshPayload, err := s.tokenMaker.CreateToken(
-		u.ID(),
-		u.Email(),
-		s.cfg.RefreshTokenDuration,
-		token.TokenTypeRefreshToken,
-	)
-	if err != nil {
-		return nil, fmt.Errorf("create refresh token: %w", err)
-	}
+		// Create access token.
+		accessToken, accessPayload, txErr = s.tokenMaker.CreateToken(
+			u.ID(),
+			u.Email(),
+			s.cfg.AccessTokenDuration,
+			token.TokenTypeAccessToken,
+		)
+		if txErr != nil {
+			return fmt.Errorf("create access token: %w", txErr)
+		}
 
-	// Persist session with the refresh token.
-	if err := s.sessionRepo.Create(ctx, &session.Session{
-		ID:           refreshPayload.ID,
-		UserID:       u.ID(),
-		RefreshToken: refreshToken,
-		UserAgent:    p.UserAgent,
-		ClientIP:     p.ClientIP,
-		IsBlocked:    false,
-		ExpiresAt:    refreshPayload.ExpiredAt,
-		CreatedAt:    time.Now().UTC(),
-	}); err != nil {
-		return nil, fmt.Errorf("create session: %w", err)
+		// Create refresh token.
+		refreshToken, refreshPayload, txErr = s.tokenMaker.CreateToken(
+			u.ID(),
+			u.Email(),
+			s.cfg.RefreshTokenDuration,
+			token.TokenTypeRefreshToken,
+		)
+		if txErr != nil {
+			return fmt.Errorf("create refresh token: %w", txErr)
+		}
+
+		// Persist session with the refresh token.
+		if txErr := s.sessionRepo.Create(txCtx, &session.Session{
+			ID:           refreshPayload.ID,
+			UserID:       u.ID(),
+			RefreshToken: refreshToken,
+			UserAgent:    p.UserAgent,
+			ClientIP:     p.ClientIP,
+			IsBlocked:    false,
+			ExpiresAt:    refreshPayload.ExpiredAt,
+			CreatedAt:    time.Now().UTC(),
+		}); txErr != nil {
+			return fmt.Errorf("create session: %w", txErr)
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
 	}
 
 	return &input.LoginResult{
