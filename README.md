@@ -2,6 +2,12 @@
 
 A production-grade, asynchronous Todo tracking system built entirely in Go using strict Hexagonal Architecture (Ports & Adapters).
 
+## Preview
+
+![Preview 1](docs/ss/1.png)
+![Preview 2](docs/ss/2.png)
+![Preview 3](docs/ss/3.png)
+
 ## Key Technologies
 - Core: Go 1.22+, strict Hexagonal Architecture.
 - Interfaces: gRPC & HTTP (via grpc-gateway), Buf schema definitions.
