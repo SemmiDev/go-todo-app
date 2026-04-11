@@ -1,6 +1,6 @@
 # Go Todo App
 
-A production-grade, asynchronous Todo tracking system built entirely in Go using strict Hexagonal Architecture (Ports & Adapters).
+A production-grade task management system built entirely in Go using strict Hexagonal Architecture.
 
 ## Preview
 
