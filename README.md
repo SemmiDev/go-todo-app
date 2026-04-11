@@ -1,6 +1,6 @@
 # Go Todo App
 
-A production-grade task management system built entirely in Go using strict Hexagonal Architecture.
+A todo application built with hexagonal architecture, gRPC, and grpc-gateway.
 
 ## Preview
 
