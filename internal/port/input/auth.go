@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/semmidev/go-todo-app/internal/domain/session"
 	"github.com/semmidev/go-todo-app/internal/domain/user"
 )
 
@@ -37,6 +38,17 @@ type LogoutParams struct {
 	SessionID uuid.UUID `json:"session_id" validate:"required,uuid"`
 }
 
+// ListSessionsParams holds parameters for listing user sessions.
+type ListSessionsParams struct {
+	UserID uuid.UUID `json:"user_id" validate:"required,uuid"`
+}
+
+// RevokeSessionParams holds parameters for revoking a user session.
+type RevokeSessionParams struct {
+	SessionID uuid.UUID `json:"session_id" validate:"required,uuid"`
+	UserID    uuid.UUID `json:"user_id" validate:"required,uuid"`
+}
+
 // ─── Auth Results ──────────────────────────────────────────────────────────────
 
 // LoginResult holds the result of a successful OAuth exchange and login.
@@ -64,4 +76,6 @@ type AuthUseCase interface {
 	ValidateToken(ctx context.Context, p ValidateTokenParams) (*user.User, error)
 	RenewAccessToken(ctx context.Context, p RenewAccessTokenParams) (*RenewTokenResult, error)
 	Logout(ctx context.Context, p LogoutParams) error
+	ListSessions(ctx context.Context, p ListSessionsParams) ([]*session.Session, error)
+	RevokeSession(ctx context.Context, p RevokeSessionParams) error
 }

@@ -25,6 +25,4 @@ coverage.out
 
 # Reference material and documentation that doesn't need to be compiled
 REFERENCES/
-docs/
 README.md
-*.md

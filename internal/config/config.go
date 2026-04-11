@@ -60,7 +60,7 @@ func Load() *AppConfig {
 	viper.SetDefault("SMTP_FROM", "noreply@todo-app.local")
 
 	// Scheduler defaults
-	viper.SetDefault("REMINDER_CRON", "0 * * * *")   // every hour
+	viper.SetDefault("REMINDER_CRON", "0 * * * *") // every hour
 	viper.SetDefault("REMINDER_WINDOW", "24h")
 	viper.SetDefault("APP_URL", "http://localhost:8080")
 

@@ -152,17 +152,17 @@ func Reconstitute(
 	}
 }
 
-func (t *Todo) ID() uuid.UUID          { return t.id }
-func (t *Todo) UserID() uuid.UUID      { return t.userID }
-func (t *Todo) Title() string          { return t.title }
-func (t *Todo) Description() string    { return t.description }
-func (t *Todo) Status() Status         { return t.status }
-func (t *Todo) Priority() Priority     { return t.priority }
-func (t *Todo) DueDate() *time.Time    { return t.dueDate }
-func (t *Todo) CreatedAt() time.Time   { return t.createdAt }
-func (t *Todo) UpdatedAt() time.Time   { return t.updatedAt }
-func (t *Todo) Tags() []*Tag           { return t.tags }
-func (t *Todo) ReminderSent() bool     { return t.reminderSent }
+func (t *Todo) ID() uuid.UUID                { return t.id }
+func (t *Todo) UserID() uuid.UUID            { return t.userID }
+func (t *Todo) Title() string                { return t.title }
+func (t *Todo) Description() string          { return t.description }
+func (t *Todo) Status() Status               { return t.status }
+func (t *Todo) Priority() Priority           { return t.priority }
+func (t *Todo) DueDate() *time.Time          { return t.dueDate }
+func (t *Todo) CreatedAt() time.Time         { return t.createdAt }
+func (t *Todo) UpdatedAt() time.Time         { return t.updatedAt }
+func (t *Todo) Tags() []*Tag                 { return t.tags }
+func (t *Todo) ReminderSent() bool           { return t.reminderSent }
 func (t *Todo) IsOwnedBy(uid uuid.UUID) bool { return t.userID == uid }
 
 // MarkReminderSent records that a reminder email has been sent for this todo.

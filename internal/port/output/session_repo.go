@@ -11,6 +11,7 @@ import (
 type SessionRepository interface {
 	Create(ctx context.Context, s *session.Session) error
 	GetByID(ctx context.Context, id uuid.UUID) (*session.Session, error)
+	ListByUserID(ctx context.Context, userID uuid.UUID) ([]*session.Session, error)
 	Delete(ctx context.Context, id uuid.UUID) error
 	DeleteByUserID(ctx context.Context, userID uuid.UUID) error
 	DeleteExpired(ctx context.Context) error

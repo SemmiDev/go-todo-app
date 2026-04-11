@@ -49,6 +49,23 @@ message RenewAccessTokenResponse {
   google.protobuf.Timestamp  access_token_expires_at = 2;
 }
 
+message Session {
+  string                     id         = 1;
+  string                     user_agent = 2;
+  string                     client_ip  = 3;
+  bool                       is_current = 4;
+  google.protobuf.Timestamp  created_at = 5;
+  google.protobuf.Timestamp  expires_at = 6;
+}
+
+message ListSessionsResponse {
+  repeated Session sessions = 1;
+}
+
+message RevokeSessionRequest {
+  string session_id = 1;
+}
+
 service AuthService {
   rpc GetAuthURL(GetAuthURLRequest) returns (GetAuthURLResponse) {
     option (google.api.http) = {
@@ -57,7 +74,7 @@ service AuthService {
   }
   rpc ExchangeCode(ExchangeCodeRequest) returns (LoginResponse) {
     option (google.api.http) = {
-      post: "/v1/auth/callback"
+      post: "/v1/auth/google/callback"
       body: "*"
     };
   }
@@ -76,6 +93,16 @@ service AuthService {
   rpc GetMe(google.protobuf.Empty) returns (GetMeResponse) {
     option (google.api.http) = {
       get: "/v1/auth/me"
+    };
+  }
+  rpc ListSessions(google.protobuf.Empty) returns (ListSessionsResponse) {
+    option (google.api.http) = {
+      get: "/v1/auth/sessions"
+    };
+  }
+  rpc RevokeSession(RevokeSessionRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/v1/auth/sessions/{session_id}"
     };
   }
 }

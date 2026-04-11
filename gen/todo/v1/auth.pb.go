@@ -448,6 +448,178 @@ func (x *RenewAccessTokenResponse) GetAccessTokenExpiresAt() *timestamppb.Timest
 	return nil
 }
 
+type Session struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	UserAgent     string                 `protobuf:"bytes,2,opt,name=user_agent,json=userAgent,proto3" json:"user_agent,omitempty"`
+	ClientIp      string                 `protobuf:"bytes,3,opt,name=client_ip,json=clientIp,proto3" json:"client_ip,omitempty"`
+	IsCurrent     bool                   `protobuf:"varint,4,opt,name=is_current,json=isCurrent,proto3" json:"is_current,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	ExpiresAt     *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Session) Reset() {
+	*x = Session{}
+	mi := &file_todo_v1_auth_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Session) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Session) ProtoMessage() {}
+
+func (x *Session) ProtoReflect() protoreflect.Message {
+	mi := &file_todo_v1_auth_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Session.ProtoReflect.Descriptor instead.
+func (*Session) Descriptor() ([]byte, []int) {
+	return file_todo_v1_auth_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *Session) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *Session) GetUserAgent() string {
+	if x != nil {
+		return x.UserAgent
+	}
+	return ""
+}
+
+func (x *Session) GetClientIp() string {
+	if x != nil {
+		return x.ClientIp
+	}
+	return ""
+}
+
+func (x *Session) GetIsCurrent() bool {
+	if x != nil {
+		return x.IsCurrent
+	}
+	return false
+}
+
+func (x *Session) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+func (x *Session) GetExpiresAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.ExpiresAt
+	}
+	return nil
+}
+
+type ListSessionsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Sessions      []*Session             `protobuf:"bytes,1,rep,name=sessions,proto3" json:"sessions,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListSessionsResponse) Reset() {
+	*x = ListSessionsResponse{}
+	mi := &file_todo_v1_auth_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListSessionsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListSessionsResponse) ProtoMessage() {}
+
+func (x *ListSessionsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_todo_v1_auth_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListSessionsResponse.ProtoReflect.Descriptor instead.
+func (*ListSessionsResponse) Descriptor() ([]byte, []int) {
+	return file_todo_v1_auth_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *ListSessionsResponse) GetSessions() []*Session {
+	if x != nil {
+		return x.Sessions
+	}
+	return nil
+}
+
+type RevokeSessionRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RevokeSessionRequest) Reset() {
+	*x = RevokeSessionRequest{}
+	mi := &file_todo_v1_auth_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RevokeSessionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RevokeSessionRequest) ProtoMessage() {}
+
+func (x *RevokeSessionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_todo_v1_auth_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RevokeSessionRequest.ProtoReflect.Descriptor instead.
+func (*RevokeSessionRequest) Descriptor() ([]byte, []int) {
+	return file_todo_v1_auth_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *RevokeSessionRequest) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
 var File_todo_v1_auth_proto protoreflect.FileDescriptor
 
 const file_todo_v1_auth_proto_rawDesc = "" +
@@ -478,14 +650,32 @@ const file_todo_v1_auth_proto_rawDesc = "" +
 	"\rrefresh_token\x18\x01 \x01(\tR\frefreshToken\"\x90\x01\n" +
 	"\x18RenewAccessTokenResponse\x12!\n" +
 	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\x12Q\n" +
-	"\x17access_token_expires_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\x14accessTokenExpiresAt2\xe6\x03\n" +
+	"\x17access_token_expires_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\x14accessTokenExpiresAt\"\xea\x01\n" +
+	"\aSession\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n" +
+	"\n" +
+	"user_agent\x18\x02 \x01(\tR\tuserAgent\x12\x1b\n" +
+	"\tclient_ip\x18\x03 \x01(\tR\bclientIp\x12\x1d\n" +
+	"\n" +
+	"is_current\x18\x04 \x01(\bR\tisCurrent\x129\n" +
+	"\n" +
+	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"\n" +
+	"expires_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\texpiresAt\"D\n" +
+	"\x14ListSessionsResponse\x12,\n" +
+	"\bsessions\x18\x01 \x03(\v2\x10.todo.v1.SessionR\bsessions\"5\n" +
+	"\x14RevokeSessionRequest\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x01 \x01(\tR\tsessionId2\xbf\x05\n" +
 	"\vAuthService\x12[\n" +
 	"\n" +
-	"GetAuthURL\x12\x1a.todo.v1.GetAuthURLRequest\x1a\x1b.todo.v1.GetAuthURLResponse\"\x14\x82\xd3\xe4\x93\x02\x0e\x12\f/v1/auth/url\x12b\n" +
-	"\fExchangeCode\x12\x1c.todo.v1.ExchangeCodeRequest\x1a\x16.todo.v1.LoginResponse\"\x1c\x82\xd3\xe4\x93\x02\x16:\x01*\"\x11/v1/auth/callback\x12r\n" +
+	"GetAuthURL\x12\x1a.todo.v1.GetAuthURLRequest\x1a\x1b.todo.v1.GetAuthURLResponse\"\x14\x82\xd3\xe4\x93\x02\x0e\x12\f/v1/auth/url\x12i\n" +
+	"\fExchangeCode\x12\x1c.todo.v1.ExchangeCodeRequest\x1a\x16.todo.v1.LoginResponse\"#\x82\xd3\xe4\x93\x02\x1d:\x01*\"\x18/v1/auth/google/callback\x12r\n" +
 	"\x10RenewAccessToken\x12 .todo.v1.RenewAccessTokenRequest\x1a!.todo.v1.RenewAccessTokenResponse\"\x19\x82\xd3\xe4\x93\x02\x13:\x01*\"\x0e/v1/auth/renew\x12T\n" +
 	"\x06Logout\x12\x16.google.protobuf.Empty\x1a\x16.google.protobuf.Empty\"\x1a\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/v1/auth/logout\x12L\n" +
-	"\x05GetMe\x12\x16.google.protobuf.Empty\x1a\x16.todo.v1.GetMeResponse\"\x13\x82\xd3\xe4\x93\x02\r\x12\v/v1/auth/meB4Z2github.com/semmidev/go-todo-app/gen/todo/v1;todov1b\x06proto3"
+	"\x05GetMe\x12\x16.google.protobuf.Empty\x1a\x16.todo.v1.GetMeResponse\"\x13\x82\xd3\xe4\x93\x02\r\x12\v/v1/auth/me\x12`\n" +
+	"\fListSessions\x12\x16.google.protobuf.Empty\x1a\x1d.todo.v1.ListSessionsResponse\"\x19\x82\xd3\xe4\x93\x02\x13\x12\x11/v1/auth/sessions\x12n\n" +
+	"\rRevokeSession\x12\x1d.todo.v1.RevokeSessionRequest\x1a\x16.google.protobuf.Empty\"&\x82\xd3\xe4\x93\x02 *\x1e/v1/auth/sessions/{session_id}B4Z2github.com/semmidev/go-todo-app/gen/todo/v1;todov1b\x06proto3"
 
 var (
 	file_todo_v1_auth_proto_rawDescOnce sync.Once
@@ -499,7 +689,7 @@ func file_todo_v1_auth_proto_rawDescGZIP() []byte {
 	return file_todo_v1_auth_proto_rawDescData
 }
 
-var file_todo_v1_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_todo_v1_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_todo_v1_auth_proto_goTypes = []any{
 	(*UserInfo)(nil),                 // 0: todo.v1.UserInfo
 	(*GetAuthURLRequest)(nil),        // 1: todo.v1.GetAuthURLRequest
@@ -509,30 +699,40 @@ var file_todo_v1_auth_proto_goTypes = []any{
 	(*GetMeResponse)(nil),            // 5: todo.v1.GetMeResponse
 	(*RenewAccessTokenRequest)(nil),  // 6: todo.v1.RenewAccessTokenRequest
 	(*RenewAccessTokenResponse)(nil), // 7: todo.v1.RenewAccessTokenResponse
-	(*timestamppb.Timestamp)(nil),    // 8: google.protobuf.Timestamp
-	(*emptypb.Empty)(nil),            // 9: google.protobuf.Empty
+	(*Session)(nil),                  // 8: todo.v1.Session
+	(*ListSessionsResponse)(nil),     // 9: todo.v1.ListSessionsResponse
+	(*RevokeSessionRequest)(nil),     // 10: todo.v1.RevokeSessionRequest
+	(*timestamppb.Timestamp)(nil),    // 11: google.protobuf.Timestamp
+	(*emptypb.Empty)(nil),            // 12: google.protobuf.Empty
 }
 var file_todo_v1_auth_proto_depIdxs = []int32{
 	0,  // 0: todo.v1.LoginResponse.user:type_name -> todo.v1.UserInfo
-	8,  // 1: todo.v1.LoginResponse.access_token_expires_at:type_name -> google.protobuf.Timestamp
-	8,  // 2: todo.v1.LoginResponse.refresh_token_expires_at:type_name -> google.protobuf.Timestamp
+	11, // 1: todo.v1.LoginResponse.access_token_expires_at:type_name -> google.protobuf.Timestamp
+	11, // 2: todo.v1.LoginResponse.refresh_token_expires_at:type_name -> google.protobuf.Timestamp
 	0,  // 3: todo.v1.GetMeResponse.user:type_name -> todo.v1.UserInfo
-	8,  // 4: todo.v1.RenewAccessTokenResponse.access_token_expires_at:type_name -> google.protobuf.Timestamp
-	1,  // 5: todo.v1.AuthService.GetAuthURL:input_type -> todo.v1.GetAuthURLRequest
-	3,  // 6: todo.v1.AuthService.ExchangeCode:input_type -> todo.v1.ExchangeCodeRequest
-	6,  // 7: todo.v1.AuthService.RenewAccessToken:input_type -> todo.v1.RenewAccessTokenRequest
-	9,  // 8: todo.v1.AuthService.Logout:input_type -> google.protobuf.Empty
-	9,  // 9: todo.v1.AuthService.GetMe:input_type -> google.protobuf.Empty
-	2,  // 10: todo.v1.AuthService.GetAuthURL:output_type -> todo.v1.GetAuthURLResponse
-	4,  // 11: todo.v1.AuthService.ExchangeCode:output_type -> todo.v1.LoginResponse
-	7,  // 12: todo.v1.AuthService.RenewAccessToken:output_type -> todo.v1.RenewAccessTokenResponse
-	9,  // 13: todo.v1.AuthService.Logout:output_type -> google.protobuf.Empty
-	5,  // 14: todo.v1.AuthService.GetMe:output_type -> todo.v1.GetMeResponse
-	10, // [10:15] is the sub-list for method output_type
-	5,  // [5:10] is the sub-list for method input_type
-	5,  // [5:5] is the sub-list for extension type_name
-	5,  // [5:5] is the sub-list for extension extendee
-	0,  // [0:5] is the sub-list for field type_name
+	11, // 4: todo.v1.RenewAccessTokenResponse.access_token_expires_at:type_name -> google.protobuf.Timestamp
+	11, // 5: todo.v1.Session.created_at:type_name -> google.protobuf.Timestamp
+	11, // 6: todo.v1.Session.expires_at:type_name -> google.protobuf.Timestamp
+	8,  // 7: todo.v1.ListSessionsResponse.sessions:type_name -> todo.v1.Session
+	1,  // 8: todo.v1.AuthService.GetAuthURL:input_type -> todo.v1.GetAuthURLRequest
+	3,  // 9: todo.v1.AuthService.ExchangeCode:input_type -> todo.v1.ExchangeCodeRequest
+	6,  // 10: todo.v1.AuthService.RenewAccessToken:input_type -> todo.v1.RenewAccessTokenRequest
+	12, // 11: todo.v1.AuthService.Logout:input_type -> google.protobuf.Empty
+	12, // 12: todo.v1.AuthService.GetMe:input_type -> google.protobuf.Empty
+	12, // 13: todo.v1.AuthService.ListSessions:input_type -> google.protobuf.Empty
+	10, // 14: todo.v1.AuthService.RevokeSession:input_type -> todo.v1.RevokeSessionRequest
+	2,  // 15: todo.v1.AuthService.GetAuthURL:output_type -> todo.v1.GetAuthURLResponse
+	4,  // 16: todo.v1.AuthService.ExchangeCode:output_type -> todo.v1.LoginResponse
+	7,  // 17: todo.v1.AuthService.RenewAccessToken:output_type -> todo.v1.RenewAccessTokenResponse
+	12, // 18: todo.v1.AuthService.Logout:output_type -> google.protobuf.Empty
+	5,  // 19: todo.v1.AuthService.GetMe:output_type -> todo.v1.GetMeResponse
+	9,  // 20: todo.v1.AuthService.ListSessions:output_type -> todo.v1.ListSessionsResponse
+	12, // 21: todo.v1.AuthService.RevokeSession:output_type -> google.protobuf.Empty
+	15, // [15:22] is the sub-list for method output_type
+	8,  // [8:15] is the sub-list for method input_type
+	8,  // [8:8] is the sub-list for extension type_name
+	8,  // [8:8] is the sub-list for extension extendee
+	0,  // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_todo_v1_auth_proto_init() }
@@ -546,7 +746,7 @@ func file_todo_v1_auth_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_todo_v1_auth_proto_rawDesc), len(file_todo_v1_auth_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   8,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

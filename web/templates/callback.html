@@ -1,0 +1,87 @@
+{{define "content"}}
+<div class="landing">
+    <div style="max-width: 480px; width: 100%;">
+        <div class="landing-card" style="text-align: center;">
+            <div id="callback-loading">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">
+                    <i class="ph-bold ph-circle-notch" style="animation: spin 1s linear infinite;"></i>
+                </div>
+                <h2 style="margin-bottom: 0.5rem;">Authenticating...</h2>
+                <p class="text-muted font-bold" style="font-size: 0.9rem;">Completing Google sign-in. Please wait.</p>
+            </div>
+            <div id="callback-error" class="hidden">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">
+                    <i class="ph-bold ph-warning-circle" style="color: var(--danger);"></i>
+                </div>
+                <h2 style="margin-bottom: 0.5rem;">Authentication Failed</h2>
+                <p id="callback-error-msg" class="text-muted font-bold" style="font-size: 0.9rem; margin-bottom: 1.5rem;"></p>
+                <a href="/" class="btn btn-primary">Back to Login</a>
+            </div>
+            <div id="callback-success" class="hidden">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">
+                    <i class="ph-bold ph-check-circle" style="color: var(--success);"></i>
+                </div>
+                <h2 style="margin-bottom: 0.5rem;">Welcome!</h2>
+                <p class="text-muted font-bold" style="font-size: 0.9rem;">Redirecting to your dashboard...</p>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}
+
+{{define "scripts"}}
+<script>
+    (async function handleCallback() {
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get('code');
+        const state = params.get('state');
+        const errorParam = params.get('error');
+
+        const loadingEl = document.getElementById('callback-loading');
+        const errorEl = document.getElementById('callback-error');
+        const errorMsg = document.getElementById('callback-error-msg');
+        const successEl = document.getElementById('callback-success');
+
+        function showError(msg) {
+            loadingEl.classList.add('hidden');
+            errorMsg.textContent = msg;
+            errorEl.classList.remove('hidden');
+        }
+
+        if (errorParam) {
+            showError('Google denied the request: ' + errorParam);
+            return;
+        }
+
+        if (!code) {
+            showError('No authorization code received from Google.');
+            return;
+        }
+
+        try {
+            const data = await Api.request('/auth/google/callback', 'POST', { code, state: state || '' });
+
+            if (data && data.access_token) {
+                Api.setTokens(data.access_token, data.refresh_token);
+                if (data.user) {
+                    localStorage.setItem('user_info', JSON.stringify(data.user));
+                }
+
+                loadingEl.classList.add('hidden');
+                successEl.classList.remove('hidden');
+
+                setTimeout(() => {
+                    window.location.href = '/dashboard';
+                }, 800);
+            } else {
+                showError('Invalid response from server.');
+            }
+        } catch (err) {
+            showError(err.message || 'Failed to exchange authorization code.');
+        }
+    })();
+</script>
+<style>
+    @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+{{end}}

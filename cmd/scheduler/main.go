@@ -74,11 +74,9 @@ func main() {
 		cron.WithLogger(cronLogger),
 		cron.WithChain(
 			cron.SkipIfStillRunning(cronLogger), // never overlap job runs
-			cron.Recover(cronLogger),             // catch panics in job funcs
+			cron.Recover(cronLogger),            // catch panics in job funcs
 		),
 	)
-
-
 
 	if _, err := c.AddFunc(cfg.ReminderCron, func() {
 		logger.Info("reminder job: starting")

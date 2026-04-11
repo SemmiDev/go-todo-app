@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	gomail "github.com/wneessen/go-mail"
 	"github.com/semmidev/go-todo-app/internal/port/output"
+	gomail "github.com/wneessen/go-mail"
 )
 
 // Config holds SMTP connection parameters loaded from AppConfig.

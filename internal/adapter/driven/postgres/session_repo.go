@@ -57,6 +57,29 @@ func (r *SessionRepo) GetByID(ctx context.Context, id uuid.UUID) (*session.Sessi
 	}, nil
 }
 
+func (r *SessionRepo) ListByUserID(ctx context.Context, userID uuid.UUID) ([]*session.Session, error) {
+	var models []sessionModel
+	err := r.db.GetQuerier(ctx).SelectContext(ctx, &models, `SELECT * FROM sessions WHERE user_id = $1 ORDER BY created_at DESC`, userID)
+	if err != nil {
+		return nil, wrapErr(err, "list sessions by user")
+	}
+
+	sessions := make([]*session.Session, 0, len(models))
+	for _, m := range models {
+		sessions = append(sessions, &session.Session{
+			ID:           m.ID,
+			UserID:       m.UserID,
+			RefreshToken: m.RefreshToken,
+			UserAgent:    m.UserAgent,
+			ClientIP:     m.ClientIP,
+			IsBlocked:    m.IsBlocked,
+			ExpiresAt:    m.ExpiresAt,
+			CreatedAt:    m.CreatedAt,
+		})
+	}
+	return sessions, nil
+}
+
 func (r *SessionRepo) Delete(ctx context.Context, id uuid.UUID) error {
 	_, err := r.db.GetQuerier(ctx).ExecContext(ctx, `DELETE FROM sessions WHERE id = $1`, id)
 	return wrapErr(err, "delete session")

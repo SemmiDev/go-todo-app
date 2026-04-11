@@ -205,3 +205,18 @@ func (s *Service) RenewAccessToken(ctx context.Context, p input.RenewAccessToken
 func (s *Service) Logout(ctx context.Context, p input.LogoutParams) error {
 	return s.sessionRepo.Delete(ctx, p.SessionID)
 }
+
+func (s *Service) ListSessions(ctx context.Context, p input.ListSessionsParams) ([]*session.Session, error) {
+	return s.sessionRepo.ListByUserID(ctx, p.UserID)
+}
+
+func (s *Service) RevokeSession(ctx context.Context, p input.RevokeSessionParams) error {
+	sess, err := s.sessionRepo.GetByID(ctx, p.SessionID)
+	if err != nil {
+		return apperr.ErrNotFound
+	}
+	if sess.UserID != p.UserID {
+		return apperr.ErrUnauthorized
+	}
+	return s.sessionRepo.Delete(ctx, p.SessionID)
+}

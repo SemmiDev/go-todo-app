@@ -325,7 +325,7 @@ func (s *TodoServer) ListTodos(ctx context.Context, req *pb.ListTodosRequest) (*
 	}
 	wideevent.Add(ctx, slog.Int("result_count", len(pbTodos)))
 	return &pb.ListTodosResponse{
-		Todos: pbTodos,
+		Todos:  pbTodos,
 		Paging: pagingToProto(result.Paging),
 	}, nil
 }

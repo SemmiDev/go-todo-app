@@ -1,0 +1,801 @@
+{{define "content"}}
+<div class="container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="page-header-left">
+            <h1>Your <span style="background: var(--accent); color: white; padding: 0.05em 0.25em; border: var(--border-w) solid var(--border); box-shadow: var(--shadow-sm); display: inline-block; transform: rotate(-1deg);">Tasks</span></h1>
+            <p id="welcome-msg">Loading...</p>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+            <button onclick="openCreateTodoModal()" class="btn btn-primary">
+                <i class="ph-bold ph-plus-circle"></i> New Task
+            </button>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- Main Area: Filters + Todo List -->
+        <div>
+            <!-- Filter Bar -->
+            <div class="filter-bar">
+                <select id="filter-status" class="form-select" onchange="applyFilters()">
+                    <option value="">All Status</option>
+                    <option value="1">Pending</option>
+                    <option value="2">In Progress</option>
+                    <option value="3">Done</option>
+                </select>
+                <select id="filter-priority-sort" class="form-select" onchange="applyFilters()">
+                    <option value="">Sort: Newest</option>
+                    <option value="created_at:asc">Oldest First</option>
+                    <option value="priority:desc">Priority ↓</option>
+                    <option value="priority:asc">Priority ↑</option>
+                    <option value="due_date:asc">Due Date ↑</option>
+                </select>
+                <input type="text" id="filter-keyword" class="form-input" placeholder="Search tasks..." oninput="debouncedSearch()">
+            </div>
+
+            <!-- Todo List -->
+            <div id="todo-list" class="todo-list">
+                <div class="skeleton skeleton-card"></div>
+                <div class="skeleton skeleton-card"></div>
+                <div class="skeleton skeleton-card"></div>
+            </div>
+
+            <!-- Pagination -->
+            <div id="pagination" class="pagination hidden"></div>
+        </div>
+
+        <!-- Sidebar -->
+        <div>
+            <!-- Stats -->
+            <div class="card-static" style="margin-bottom: 1.5rem;">
+                <div class="sidebar-title">Overview</div>
+                <div class="stats-grid" id="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="stat-total">—</div>
+                        <div class="stat-label">Total</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="stat-pending">—</div>
+                        <div class="stat-label">Pending</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="stat-progress">—</div>
+                        <div class="stat-label">In Progress</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="stat-done">—</div>
+                        <div class="stat-label">Done</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tags -->
+            <div class="card-static">
+                <div class="sidebar-title">Tags</div>
+                <div id="tags-list" class="tag-list" style="margin-bottom: 1rem;">
+                    <div class="skeleton skeleton-line short"></div>
+                </div>
+                <form id="create-tag-form" onsubmit="handleCreateTag(event)" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="text" id="new-tag-name" required placeholder="Tag name..." class="form-input" style="font-size: 0.8rem; padding: 0.45rem 0.65rem;">
+                        <input type="color" id="new-tag-color" value="#06B6D4" class="form-color" title="Tag color">
+                    </div>
+                    <button type="submit" class="btn btn-secondary btn-sm w-full">
+                        <i class="ph-bold ph-plus"></i> Add Tag
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ Create/Edit Todo Modal ═══ -->
+<div id="todo-modal" class="modal-overlay" onclick="if(event.target===this)closeModal('todo-modal')">
+    <div class="modal">
+        <button class="modal-close" onclick="closeModal('todo-modal')">×</button>
+        <div class="modal-inner">
+            <div class="modal-header">
+                <h2 id="todo-modal-title">New Task</h2>
+            </div>
+            <form id="todo-form" onsubmit="handleTodoSubmit(event)">
+                <input type="hidden" id="todo-edit-id">
+                <div class="form-group">
+                    <label class="form-label">Title</label>
+                    <input type="text" id="todo-title" required class="form-input" placeholder="What needs to be done?" maxlength="200">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea id="todo-desc" class="form-textarea" placeholder="Add details..." maxlength="1000" rows="3"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Priority</label>
+                        <select id="todo-priority" class="form-select">
+                            <option value="0">Unspecified</option>
+                            <option value="1">Low</option>
+                            <option value="2" selected>Medium</option>
+                            <option value="3">High</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Due Date</label>
+                        <input type="datetime-local" id="todo-due-date" class="form-input">
+                    </div>
+                </div>
+                <div class="form-group" id="todo-status-group" style="display: none;">
+                    <label class="form-label">Status</label>
+                    <select id="todo-status" class="form-select">
+                        <option value="1">Pending</option>
+                        <option value="2">In Progress</option>
+                        <option value="3">Done</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Tags</label>
+                    <div id="todo-tags-selector" class="tag-list" style="min-height: 30px;"></div>
+                </div>
+                <button type="submit" id="todo-submit-btn" class="btn btn-primary w-full btn-lg" style="margin-top: 0.5rem;">
+                    <i class="ph-bold ph-check-circle"></i> Create Task
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ Edit Tag Modal ═══ -->
+<div id="tag-modal" class="modal-overlay" onclick="if(event.target===this)closeModal('tag-modal')">
+    <div class="modal" style="max-width: 380px;">
+        <button class="modal-close" onclick="closeModal('tag-modal')">×</button>
+        <div class="modal-inner">
+            <div class="modal-header">
+                <h2>Edit Tag</h2>
+            </div>
+            <form id="tag-edit-form" onsubmit="handleUpdateTag(event)">
+                <input type="hidden" id="tag-edit-id">
+                <div class="form-group">
+                    <label class="form-label">Name</label>
+                    <input type="text" id="tag-edit-name" required class="form-input" maxlength="50">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Color</label>
+                    <div class="form-color-wrapper">
+                        <input type="color" id="tag-edit-color" class="form-color">
+                        <input type="text" id="tag-edit-color-hex" class="form-input" style="flex:1" readonly>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                    <button type="submit" class="btn btn-primary" style="flex:1;">
+                        <i class="ph-bold ph-check"></i> Update
+                    </button>
+                    <button type="button" onclick="handleDeleteTagFromModal()" class="btn btn-danger">
+                        <i class="ph-bold ph-trash"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ Todo Detail Modal ═══ -->
+<div id="detail-modal" class="modal-overlay" onclick="if(event.target===this)closeModal('detail-modal')">
+    <div class="modal" style="max-width: 560px;">
+        <button class="modal-close" onclick="closeModal('detail-modal')">×</button>
+        <div class="modal-inner" id="detail-content"></div>
+    </div>
+</div>
+
+<!-- ═══ Profile & Sessions Modal ═══ -->
+<div id="profile-modal" class="modal-overlay" onclick="if(event.target===this)closeModal('profile-modal')">
+    <div class="modal" style="max-width: 600px;">
+        <button class="modal-close" onclick="closeModal('profile-modal')">×</button>
+        <div class="modal-inner">
+            <div class="modal-header">
+                <h2>Profile & Sessions</h2>
+            </div>
+            
+            <div style="margin-bottom: 2rem;">
+                <div style="font-weight: 800; font-size: 0.75rem; text-transform: uppercase; margin-bottom: 0.5rem; color: var(--text-muted);">Account Details</div>
+                <div class="card-static" style="display: flex; align-items: center; gap: 1rem; padding: 1rem;">
+                    <div id="profile-avatar" class="nav-avatar" style="width: 3rem; height: 3rem; font-size: 1.5rem;">?</div>
+                    <div>
+                        <div id="profile-name" style="font-weight: 800; font-size: 1.1rem;">User Name</div>
+                        <div id="profile-email" style="color: var(--text-muted); font-size: 0.85rem; font-weight: 600;">user@example.com</div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div style="font-weight: 800; font-size: 0.75rem; text-transform: uppercase; margin-bottom: 0.5rem; color: var(--text-muted);">Active Sessions</div>
+                <div id="sessions-list" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    <div class="skeleton skeleton-card"></div>
+                    <div class="skeleton skeleton-card"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}
+
+{{define "scripts"}}
+<script>
+    // ═══════════════════════════════════════════════════════════════════════
+    // STATE
+    // ═══════════════════════════════════════════════════════════════════════
+    let allTags = [];
+    let currentPaging = null;
+    let currentPage = 1;
+    let searchTimeout = null;
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // INIT
+    // ═══════════════════════════════════════════════════════════════════════
+    document.addEventListener('DOMContentLoaded', () => {
+        if (!Api.isAuthenticated()) {
+            window.location.href = '/';
+            return;
+        }
+        loadUserInfo();
+        loadDashboard();
+    });
+
+    async function loadUserInfo() {
+        try {
+            const data = await Api.request('/auth/me');
+            if (data && data.user) {
+                localStorage.setItem('user_info', JSON.stringify(data.user));
+                const el = document.getElementById('welcome-msg');
+                if (el) el.textContent = `Welcome back, ${data.user.full_name || data.user.email}`;
+            }
+        } catch (e) {
+            console.warn('Could not load user info', e);
+        }
+    }
+
+    async function loadDashboard() {
+        await Promise.all([loadTodos(), loadTags()]);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // TODOS
+    // ═══════════════════════════════════════════════════════════════════════
+    async function loadTodos() {
+        const list = document.getElementById('todo-list');
+        list.innerHTML = '<div class="skeleton skeleton-card"></div><div class="skeleton skeleton-card"></div>';
+
+        try {
+            const params = buildFilterParams();
+            const data = await Api.request(`/todos?${params}`);
+            const todos = data.todos || [];
+            currentPaging = data.paging || null;
+            renderTodos(todos);
+            renderPagination();
+            updateStats(todos);
+        } catch (err) {
+            list.innerHTML = `<div class="empty-state animate-shake"><div class="empty-state-icon">⚠️</div><h3>Error</h3><p>${escapeHtml(err.message)}</p></div>`;
+        }
+    }
+
+    function buildFilterParams() {
+        const p = new URLSearchParams();
+        p.set('page', currentPage);
+        p.set('page_size', '10');
+
+        const status = document.getElementById('filter-status').value;
+        if (status) p.set('status', status);
+
+        const sortVal = document.getElementById('filter-priority-sort').value;
+        if (sortVal) {
+            const [sortBy, sortDir] = sortVal.split(':');
+            p.set('sort_by', sortBy);
+            p.set('sort_direction', sortDir);
+        }
+
+        const keyword = document.getElementById('filter-keyword').value.trim();
+        if (keyword) p.set('keyword', keyword);
+
+        return p.toString();
+    }
+
+    function applyFilters() {
+        currentPage = 1;
+        loadTodos();
+    }
+
+    function debouncedSearch() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            currentPage = 1;
+            loadTodos();
+        }, 400);
+    }
+
+    function renderTodos(todos) {
+        const list = document.getElementById('todo-list');
+        if (todos.length === 0) {
+            list.innerHTML = `
+                <div class="empty-state animate-pop">
+                    <div class="empty-state-icon"><i class="ph-bold ph-clipboard-text"></i></div>
+                    <h3>No tasks found</h3>
+                    <p>Create your first task to get started!</p>
+                    <button onclick="openCreateTodoModal()" class="btn btn-primary btn-sm"><i class="ph-bold ph-plus"></i> New Task</button>
+                </div>`;
+            return;
+        }
+
+        list.innerHTML = todos.map((t, i) => {
+            const isDone = t.status === 'TODO_STATUS_DONE';
+            const statusLabel = formatStatus(t.status);
+            const statusClass = statusLabel.toLowerCase().replace(' ', '_');
+            const priorityLabel = formatPriority(t.priority);
+            const priorityClass = priorityLabel.toLowerCase();
+            const tags = (t.tags || []).map(tag =>
+                `<span class="tag-chip" style="background: ${tag.color}22; border-color: ${tag.color};"><span class="tag-dot" style="background: ${tag.color};"></span>${escapeHtml(tag.name)}</span>`
+            ).join('');
+            const dueStr = t.due_date ? formatDate(t.due_date) : '';
+
+            return `
+            <div class="todo-card ${isDone ? 'done' : ''}" style="animation-delay: ${i * 0.05}s">
+                <button class="todo-checkbox ${isDone ? 'checked' : ''}" onclick="toggleTodoStatus('${t.id}', '${t.status}')" title="${isDone ? 'Mark as pending' : 'Mark as done'}">
+                    ${isDone ? '<i class="ph-bold ph-check" style="font-size: 1rem;"></i>' : ''}
+                </button>
+                <div class="todo-body" onclick="showTodoDetail('${t.id}')" style="cursor:pointer;">
+                    <div class="todo-title">${escapeHtml(t.title)}</div>
+                    ${t.description ? `<div class="todo-desc">${escapeHtml(t.description)}</div>` : ''}
+                    <div class="todo-meta">
+                        <span class="badge badge-${statusClass}">${statusLabel}</span>
+                        <span class="badge badge-${priorityClass}">${priorityLabel}</span>
+                        ${dueStr ? `<span class="todo-meta-item"><i class="ph-bold ph-calendar"></i> ${dueStr}</span>` : ''}
+                        ${tags}
+                    </div>
+                </div>
+                <div class="todo-actions">
+                    <button onclick="openEditTodoModal('${t.id}')" class="btn btn-ghost btn-icon btn-sm" title="Edit"><i class="ph-bold ph-pencil-simple"></i></button>
+                    <button onclick="confirmDeleteTodo('${t.id}')" class="btn btn-ghost btn-icon btn-sm" title="Delete"><i class="ph-bold ph-trash"></i></button>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function renderPagination() {
+        const el = document.getElementById('pagination');
+        if (!currentPaging || currentPaging.last_page <= 1) {
+            el.classList.add('hidden');
+            return;
+        }
+        el.classList.remove('hidden');
+        const p = currentPaging;
+        el.innerHTML = `
+            <button class="btn btn-secondary btn-sm" ${!p.has_previous_page ? 'disabled style="opacity:0.4;pointer-events:none;"' : ''} onclick="goToPage(${p.current_page - 1})">
+                <i class="ph-bold ph-caret-left"></i> Prev
+            </button>
+            <span class="pagination-info">Page ${p.current_page} of ${p.last_page} (${p.total_data} tasks)</span>
+            <button class="btn btn-secondary btn-sm" ${!p.has_next_page ? 'disabled style="opacity:0.4;pointer-events:none;"' : ''} onclick="goToPage(${p.current_page + 1})">
+                Next <i class="ph-bold ph-caret-right"></i>
+            </button>`;
+    }
+
+    function goToPage(page) {
+        currentPage = page;
+        loadTodos();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function updateStats(todos) {
+        // These are stats for the current page; ideally we'd have global counts.
+        // For now, use paging total if available.
+        const total = (currentPaging && currentPaging.total_data !== undefined) ? currentPaging.total_data : todos.length;
+        document.getElementById('stat-total').textContent = total || '0';
+
+        const pending = todos.filter(t => t.status === 'TODO_STATUS_PENDING').length;
+        const progress = todos.filter(t => t.status === 'TODO_STATUS_IN_PROGRESS').length;
+        const done = todos.filter(t => t.status === 'TODO_STATUS_DONE').length;
+        document.getElementById('stat-pending').textContent = pending || '0';
+        document.getElementById('stat-progress').textContent = progress || '0';
+        document.getElementById('stat-done').textContent = done || '0';
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // TODO CRUD
+    // ═══════════════════════════════════════════════════════════════════════
+    function openCreateTodoModal() {
+        document.getElementById('todo-edit-id').value = '';
+        document.getElementById('todo-modal-title').textContent = 'New Task';
+        document.getElementById('todo-submit-btn').innerHTML = '<i class="ph-bold ph-check-circle"></i> Create Task';
+        document.getElementById('todo-form').reset();
+        document.getElementById('todo-priority').value = '2';
+        document.getElementById('todo-status-group').style.display = 'none';
+        renderTagSelector([]);
+        openModal('todo-modal');
+    }
+
+    async function openEditTodoModal(id) {
+        try {
+            const todo = await Api.request(`/todos/${id}`);
+            document.getElementById('todo-edit-id').value = todo.id;
+            document.getElementById('todo-modal-title').textContent = 'Edit Task';
+            document.getElementById('todo-submit-btn').innerHTML = '<i class="ph-bold ph-check-circle"></i> Update Task';
+            document.getElementById('todo-title').value = todo.title || '';
+            document.getElementById('todo-desc').value = todo.description || '';
+            document.getElementById('todo-priority').value = protoEnumValue(todo.priority, 'TODO_PRIORITY_', 2);
+            document.getElementById('todo-status').value = protoEnumValue(todo.status, 'TODO_STATUS_', 1);
+            document.getElementById('todo-status-group').style.display = '';
+
+            if (todo.due_date) {
+                const d = new Date(todo.due_date);
+                document.getElementById('todo-due-date').value = d.toISOString().slice(0, 16);
+            } else {
+                document.getElementById('todo-due-date').value = '';
+            }
+
+            const selectedTagIds = (todo.tags || []).map(t => t.id);
+            renderTagSelector(selectedTagIds);
+            openModal('todo-modal');
+        } catch (err) {
+            showToast(err.message, 'error');
+        }
+    }
+
+    async function handleTodoSubmit(e) {
+        e.preventDefault();
+        const editId = document.getElementById('todo-edit-id').value;
+        const isEdit = !!editId;
+
+        const payload = {
+            title: document.getElementById('todo-title').value.trim(),
+            description: document.getElementById('todo-desc').value.trim(),
+            priority: parseInt(document.getElementById('todo-priority').value) || 0,
+            tag_ids: getSelectedTagIds(),
+        };
+
+        const dueDateVal = document.getElementById('todo-due-date').value;
+        if (dueDateVal) {
+            payload.due_date = new Date(dueDateVal).toISOString();
+        }
+
+        if (isEdit) {
+            payload.status = parseInt(document.getElementById('todo-status').value) || 1;
+        }
+
+        try {
+            if (isEdit) {
+                await Api.request(`/todos/${editId}`, 'PUT', payload);
+                showToast('Task updated successfully!', 'success');
+            } else {
+                await Api.request('/todos', 'POST', payload);
+                showToast('Task created!', 'success');
+            }
+            closeModal('todo-modal');
+            await loadTodos();
+        } catch (err) {
+            showToast(err.message, 'error');
+        }
+    }
+
+    async function toggleTodoStatus(id, currentStatus) {
+        let newStatus;
+        if (currentStatus === 'TODO_STATUS_DONE') {
+            newStatus = 1; // pending
+        } else {
+            newStatus = 3; // done
+        }
+
+        try {
+            // Fetch the full todo first so we can send all required fields
+            const todo = await Api.request(`/todos/${id}`);
+            await Api.request(`/todos/${id}`, 'PUT', {
+                title: todo.title,
+                description: todo.description || '',
+                status: newStatus,
+                priority: protoEnumValue(todo.priority, 'TODO_PRIORITY_', 2),
+                tag_ids: (todo.tags || []).map(t => t.id),
+            });
+            showToast(newStatus === 3 ? 'Task completed! 🎉' : 'Task reopened', 'success');
+            await loadTodos();
+        } catch (err) {
+            showToast(err.message, 'error');
+        }
+    }
+
+    async function confirmDeleteTodo(id) {
+        if (!confirm('Delete this task? This cannot be undone.')) return;
+        try {
+            await Api.request(`/todos/${id}`, 'DELETE');
+            showToast('Task deleted', 'info');
+            await loadTodos();
+        } catch (err) {
+            showToast(err.message, 'error');
+        }
+    }
+
+    async function showTodoDetail(id) {
+        try {
+            const todo = await Api.request(`/todos/${id}`);
+            const isDone = todo.status === 'TODO_STATUS_DONE';
+            const statusLabel = formatStatus(todo.status);
+            const priorityLabel = formatPriority(todo.priority);
+            const tags = (todo.tags || []).map(tag =>
+                `<span class="tag-chip" style="background: ${tag.color}22; border-color: ${tag.color};"><span class="tag-dot" style="background: ${tag.color};"></span>${escapeHtml(tag.name)}</span>`
+            ).join('');
+
+            document.getElementById('detail-content').innerHTML = `
+                <h2 style="margin-bottom: 1rem; ${isDone ? 'text-decoration: line-through; opacity: 0.6;' : ''}">${escapeHtml(todo.title)}</h2>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                    <span class="badge badge-${statusLabel.toLowerCase().replace(' ', '_')}">${statusLabel}</span>
+                    <span class="badge badge-${priorityLabel.toLowerCase()}">${priorityLabel} priority</span>
+                </div>
+                ${todo.description ? `<p style="color: var(--text-muted); font-weight: 500; margin-bottom: 1rem; white-space: pre-wrap; line-height: 1.7;">${escapeHtml(todo.description)}</p>` : ''}
+                ${todo.due_date ? `<div class="todo-meta-item" style="margin-bottom: 0.75rem; font-size: 0.85rem;"><i class="ph-bold ph-calendar"></i> Due: ${formatDate(todo.due_date)}</div>` : ''}
+                ${tags ? `<div style="margin-bottom: 1rem;"><div style="font-weight: 800; font-size: 0.75rem; text-transform: uppercase; margin-bottom: 0.4rem; color: var(--text-muted);">Tags</div><div class="tag-list">${tags}</div></div>` : ''}
+                <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600; margin-top: 1rem; border-top: 2px solid var(--border); padding-top: 0.75rem;">
+                    Created: ${formatDate(todo.created_at)} · Updated: ${formatDate(todo.updated_at)}
+                </div>
+                <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                    <button onclick="closeModal('detail-modal'); openEditTodoModal('${todo.id}')" class="btn btn-primary btn-sm" style="flex:1;"><i class="ph-bold ph-pencil-simple"></i> Edit</button>
+                    <button onclick="closeModal('detail-modal'); confirmDeleteTodo('${todo.id}')" class="btn btn-danger btn-sm"><i class="ph-bold ph-trash"></i></button>
+                </div>`;
+            openModal('detail-modal');
+        } catch (err) {
+            showToast(err.message, 'error');
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // TAGS
+    // ═══════════════════════════════════════════════════════════════════════
+    async function loadTags() {
+        try {
+            const data = await Api.request('/tags');
+            allTags = data.tags || [];
+            renderTagsList();
+        } catch (err) {
+            console.error('Failed to load tags', err);
+        }
+    }
+
+    function renderTagsList() {
+        const list = document.getElementById('tags-list');
+        if (allTags.length === 0) {
+            list.innerHTML = '<p style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">No tags yet</p>';
+            return;
+        }
+        list.innerHTML = allTags.map(t => `
+            <span class="tag-chip" style="background: ${t.color}22; border-color: ${t.color}; cursor: pointer;" onclick="openEditTagModal('${t.id}')">
+                <span class="tag-dot" style="background: ${t.color};"></span>
+                ${escapeHtml(t.name)}
+            </span>
+        `).join('');
+    }
+
+    async function handleCreateTag(e) {
+        e.preventDefault();
+        const name = document.getElementById('new-tag-name').value.trim();
+        const color = document.getElementById('new-tag-color').value;
+        try {
+            await Api.request('/tags', 'POST', { name, color });
+            document.getElementById('new-tag-name').value = '';
+            showToast('Tag created!', 'success');
+            await loadTags();
+        } catch (err) {
+            showToast(err.message, 'error');
+        }
+    }
+
+    function openEditTagModal(tagId) {
+        const tag = allTags.find(t => t.id === tagId);
+        if (!tag) return;
+        document.getElementById('tag-edit-id').value = tag.id;
+        document.getElementById('tag-edit-name').value = tag.name;
+        document.getElementById('tag-edit-color').value = tag.color || '#06B6D4';
+        document.getElementById('tag-edit-color-hex').value = tag.color || '#06B6D4';
+        document.getElementById('tag-edit-color').oninput = function() {
+            document.getElementById('tag-edit-color-hex').value = this.value;
+        };
+        openModal('tag-modal');
+    }
+
+    async function handleUpdateTag(e) {
+        e.preventDefault();
+        const id = document.getElementById('tag-edit-id').value;
+        const name = document.getElementById('tag-edit-name').value.trim();
+        const color = document.getElementById('tag-edit-color').value;
+        try {
+            await Api.request(`/tags/${id}`, 'PUT', { name, color });
+            showToast('Tag updated!', 'success');
+            closeModal('tag-modal');
+            await Promise.all([loadTags(), loadTodos()]);
+        } catch (err) {
+            showToast(err.message, 'error');
+        }
+    }
+
+    async function handleDeleteTagFromModal() {
+        const id = document.getElementById('tag-edit-id').value;
+        if (!confirm('Delete this tag? It will be removed from all tasks.')) return;
+        try {
+            await Api.request(`/tags/${id}`, 'DELETE');
+            showToast('Tag deleted', 'info');
+            closeModal('tag-modal');
+            await Promise.all([loadTags(), loadTodos()]);
+        } catch (err) {
+            showToast(err.message, 'error');
+        }
+    }
+
+    // Tag selector for todo modal
+    function renderTagSelector(selectedIds) {
+        const container = document.getElementById('todo-tags-selector');
+        if (allTags.length === 0) {
+            container.innerHTML = '<p style="font-size: 0.75rem; color: var(--text-muted);">No tags available</p>';
+            return;
+        }
+        container.innerHTML = allTags.map(t => {
+            const selected = selectedIds.includes(t.id);
+            return `<span class="tag-chip" data-tag-id="${t.id}"
+                style="background: ${selected ? t.color + '44' : 'transparent'}; border-color: ${t.color}; cursor: pointer; opacity: ${selected ? '1' : '0.5'};"
+                onclick="toggleTagSelection(this, '${t.id}', '${t.color}')">
+                <span class="tag-dot" style="background: ${t.color};"></span>
+                ${escapeHtml(t.name)}
+                ${selected ? '<i class="ph-bold ph-check" style="font-size:0.7rem;"></i>' : ''}
+            </span>`;
+        }).join('');
+    }
+
+    function toggleTagSelection(el, tagId, color) {
+        const isSelected = el.style.opacity === '1';
+        el.style.opacity = isSelected ? '0.5' : '1';
+        el.style.background = isSelected ? 'transparent' : color + '44';
+        if (isSelected) {
+            el.querySelector('.ph-check')?.remove();
+        } else {
+            const icon = document.createElement('i');
+            icon.className = 'ph-bold ph-check';
+            icon.style.fontSize = '0.7rem';
+            el.appendChild(icon);
+        }
+    }
+
+    function getSelectedTagIds() {
+        const chips = document.querySelectorAll('#todo-tags-selector .tag-chip');
+        const ids = [];
+        chips.forEach(chip => {
+            if (chip.style.opacity === '1') {
+                ids.push(chip.dataset.tagId);
+            }
+        });
+        return ids;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // MODAL HELPERS
+    // ═══════════════════════════════════════════════════════════════════════
+    function openModal(id) {
+        document.getElementById(id).classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    // Close modals with Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            ['todo-modal', 'tag-modal', 'detail-modal', 'profile-modal'].forEach(id => {
+                if (document.getElementById(id).classList.contains('active')) {
+                    closeModal(id);
+                }
+            });
+        }
+    });
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // FORMATTING HELPERS
+    // ═══════════════════════════════════════════════════════════════════════
+    function formatStatus(s) {
+        switch (s) {
+            case 'TODO_STATUS_PENDING': return 'Pending';
+            case 'TODO_STATUS_IN_PROGRESS': return 'In Progress';
+            case 'TODO_STATUS_DONE': return 'Done';
+            default: return 'Pending';
+        }
+    }
+
+    function formatPriority(p) {
+        switch (p) {
+            case 'TODO_PRIORITY_LOW': return 'Low';
+            case 'TODO_PRIORITY_MEDIUM': return 'Medium';
+            case 'TODO_PRIORITY_HIGH': return 'High';
+            default: return 'Medium';
+        }
+    }
+
+    function protoEnumValue(enumStr, prefix, defaultVal) {
+        // Convert e.g. 'TODO_STATUS_DONE' -> 3
+        const map = {
+            'TODO_STATUS_PENDING': 1, 'TODO_STATUS_IN_PROGRESS': 2, 'TODO_STATUS_DONE': 3,
+            'TODO_PRIORITY_LOW': 1, 'TODO_PRIORITY_MEDIUM': 2, 'TODO_PRIORITY_HIGH': 3,
+        };
+        return map[enumStr] || defaultVal;
+    }
+
+    function formatDate(isoStr) {
+        if (!isoStr) return '';
+        const d = new Date(isoStr);
+        // Check for zero/epoch timestamps from protobuf
+        if (d.getFullYear() < 2000) return '';
+        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // PROFILE & SESSIONS
+    // ═══════════════════════════════════════════════════════════════════════
+    window.openProfileModal = async function() {
+        // Populate user details
+        const user = Api.getUserInfo();
+        if (user) {
+            const initial = user.full_name?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || '?';
+            document.getElementById('profile-avatar').textContent = initial;
+            document.getElementById('profile-name').textContent = user.full_name || 'User';
+            document.getElementById('profile-email').textContent = user.email || '';
+        }
+        
+        openModal('profile-modal');
+        await loadSessions();
+    };
+
+    async function loadSessions() {
+        const list = document.getElementById('sessions-list');
+        list.innerHTML = '<div class="skeleton skeleton-card"></div>';
+        try {
+            const data = await Api.request('/auth/sessions');
+            const sessions = data.sessions || [];
+            
+            if (sessions.length === 0) {
+                list.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85rem; font-weight: 600;">No active sessions found.</p>';
+                return;
+            }
+
+            // Current session isn't directly identifiable by ID yet, but we'll list them
+            list.innerHTML = sessions.map(s => {
+                const isCurrent = s.is_current; // False for now based on backend
+                const createdDate = new Date(s.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                
+                return `
+                <div class="card-static" style="padding: 0.75rem; display: flex; justify-content: space-between; align-items: center; background: ${isCurrent ? 'var(--warning-light)' : 'var(--bg)'}">
+                    <div style="overflow: hidden; text-overflow: ellipsis;">
+                        <div style="font-weight: 700; font-size: 0.85rem; margin-bottom: 0.2rem; display:flex; align-items: center; gap: 0.5rem;">
+                            <i class="ph-bold ph-monitor"></i> 
+                            ${escapeHtml(s.user_agent || 'Unknown Device')}
+                            ${isCurrent ? '<span class="badge badge-low" style="font-size: 0.6rem; padding: 0.1rem 0.3rem;">Current</span>' : ''}
+                        </div>
+                        <div style="color: var(--text-muted); font-size: 0.75rem; font-weight: 600;">
+                            IP: ${escapeHtml(s.client_ip || 'Unknown')} • Login: ${createdDate}
+                        </div>
+                    </div>
+                    ${!isCurrent ? `
+                        <button onclick="revokeSession('${s.id}')" class="btn btn-danger btn-sm" style="padding: 0.3rem 0.5rem; flex-shrink: 0;" title="Sign out of this device">
+                            <i class="ph-bold ph-x"></i>
+                        </button>
+                    ` : ''}
+                </div>`;
+            }).join('');
+        } catch (err) {
+            list.innerHTML = `<div class="text-danger font-bold" style="font-size: 0.85rem;">Failed to load sessions: ${escapeHtml(err.message)}</div>`;
+        }
+    }
+
+    async function revokeSession(sessionId) {
+        if (!confirm('Are you sure you want to sign out of that device?')) return;
+        try {
+            await Api.request(`/auth/sessions/${sessionId}`, 'DELETE');
+            showToast('Session revoked successfully', 'success');
+            await loadSessions();
+        } catch (err) {
+            showToast(err.message, 'error');
+        }
+    }
+
+</script>
+{{end}}

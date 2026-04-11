@@ -82,12 +82,12 @@ func extractBearerToken(md metadata.MD) string {
 	if len(authHeaders) == 0 {
 		return ""
 	}
-	
+
 	authHeader := authHeaders[0]
 	const prefix = "Bearer "
 	if !strings.HasPrefix(authHeader, prefix) {
 		return ""
 	}
-	
+
 	return authHeader[len(prefix):]
 }

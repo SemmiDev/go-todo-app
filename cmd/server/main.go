@@ -20,19 +20,23 @@ import (
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/protobuf/encoding/protojson"
 
+	"html/template"
+
 	"github.com/semmidev/go-todo-app/docs"
 	pb "github.com/semmidev/go-todo-app/gen/todo/v1"
+	"github.com/semmidev/go-todo-app/internal/adapter/driven/memcached"
+	"github.com/semmidev/go-todo-app/internal/adapter/driven/postgres"
 	grpchandler "github.com/semmidev/go-todo-app/internal/adapter/driving/grpc"
 	"github.com/semmidev/go-todo-app/internal/adapter/driving/grpc/httperr"
 	"github.com/semmidev/go-todo-app/internal/adapter/driving/grpc/interceptor"
-	"github.com/semmidev/go-todo-app/internal/adapter/driven/postgres"
-	"github.com/semmidev/go-todo-app/internal/adapter/driven/memcached"
 	authapp "github.com/semmidev/go-todo-app/internal/application/auth"
 	todoapp "github.com/semmidev/go-todo-app/internal/application/todo"
 	"github.com/semmidev/go-todo-app/internal/common/logging"
 	"github.com/semmidev/go-todo-app/internal/common/token"
+
 	"github.com/semmidev/go-todo-app/internal/common/validation"
 	"github.com/semmidev/go-todo-app/internal/config"
+	"github.com/semmidev/go-todo-app/web"
 )
 
 func main() {
@@ -65,10 +69,10 @@ func run(ctx context.Context, cfg *config.AppConfig, logger *slog.Logger) error 
 	logger.Info("postgres connected")
 
 	// ─── Driven adapters (repositories) ──────────────────────────────────
-	userRepo    := postgres.NewUserRepo(db)
+	userRepo := postgres.NewUserRepo(db)
 	sessionRepo := postgres.NewSessionRepo(db)
-	tagRepo     := postgres.NewTagRepo(db)
-	todoRepo    := postgres.NewTodoRepo(db)
+	tagRepo := postgres.NewTagRepo(db)
+	todoRepo := postgres.NewTodoRepo(db)
 	todoTagRepo := postgres.NewTodoTagRepo(db)
 
 	tokenMaker, err := token.NewPasetoMaker(cfg.TokenSymmetricKey)
@@ -182,12 +186,56 @@ func runGatewayServer(
 		return
 	}
 
+	tmplBase, err := template.ParseFS(web.TemplateFS, "layout.html")
+	if err != nil {
+		logger.Error("parse base template", slog.Any("error", err))
+		return
+	}
+	tmplIndex, err := template.Must(tmplBase.Clone()).ParseFS(web.TemplateFS, "index.html")
+	if err != nil {
+		logger.Error("parse index template", slog.Any("error", err))
+		return
+	}
+	tmplDashboard, err := template.Must(tmplBase.Clone()).ParseFS(web.TemplateFS, "dashboard.html")
+	if err != nil {
+		logger.Error("parse dashboard template", slog.Any("error", err))
+		return
+	}
+	tmplCallback, err := template.Must(tmplBase.Clone()).ParseFS(web.TemplateFS, "callback.html")
+	if err != nil {
+		logger.Error("parse callback template", slog.Any("error", err))
+		return
+	}
+
 	mux := http.NewServeMux()
 	mux.Handle("/v1/", gwMux)
 	mux.Handle("/swagger/", http.StripPrefix("/swagger/", http.FileServer(http.FS(swaggerFS))))
+	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(web.StaticFS))))
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		_, _ = w.Write([]byte(`{"status":"ok"}`))
+	})
+
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/" {
+			http.NotFound(w, r)
+			return
+		}
+		if err := tmplIndex.ExecuteTemplate(w, "layout", nil); err != nil {
+			logger.Error("execute template index", slog.Any("error", err))
+		}
+	})
+
+	mux.HandleFunc("/dashboard", func(w http.ResponseWriter, r *http.Request) {
+		if err := tmplDashboard.ExecuteTemplate(w, "layout", nil); err != nil {
+			logger.Error("execute template dashboard", slog.Any("error", err))
+		}
+	})
+
+	mux.HandleFunc("/auth/google/callback", func(w http.ResponseWriter, r *http.Request) {
+		if err := tmplCallback.ExecuteTemplate(w, "layout", nil); err != nil {
+			logger.Error("execute template callback", slog.Any("error", err))
+		}
 	})
 
 	srv := &http.Server{
@@ -214,8 +262,6 @@ func runGatewayServer(
 		return nil
 	})
 }
-
-
 
 func withCORS(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

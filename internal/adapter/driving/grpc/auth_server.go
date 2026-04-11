@@ -9,14 +9,16 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
+	"errors"
+	"github.com/google/uuid"
+
 	pb "github.com/semmidev/go-todo-app/gen/todo/v1"
 	"github.com/semmidev/go-todo-app/internal/adapter/driving/grpc/grpcerr"
 	"github.com/semmidev/go-todo-app/internal/adapter/driving/grpc/interceptor"
+	"github.com/semmidev/go-todo-app/internal/common/apperr"
 	"github.com/semmidev/go-todo-app/internal/common/validation"
 	"github.com/semmidev/go-todo-app/internal/port/input"
 )
-
-
 
 // AuthServer implements the gRPC AuthService.
 // It depends on the input.AuthUseCase interface, NOT the concrete auth service.
@@ -105,6 +107,61 @@ func (s *AuthServer) GetMe(ctx context.Context, _ *emptypb.Empty) (*pb.GetMeResp
 			FullName: u.FullName(),
 		},
 	}, nil
+}
+
+func (s *AuthServer) ListSessions(ctx context.Context, _ *emptypb.Empty) (*pb.ListSessionsResponse, error) {
+	u, ok := interceptor.UserFromContext(ctx)
+	if !ok {
+		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
+	}
+
+	sessions, err := s.svc.ListSessions(ctx, input.ListSessionsParams{
+		UserID: u.ID(),
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to list sessions: %v", err)
+	}
+
+	var pbSessions []*pb.Session
+	for _, sess := range sessions {
+		pbSessions = append(pbSessions, &pb.Session{
+			Id:         sess.ID.String(),
+			UserAgent:  sess.UserAgent,
+			ClientIp:   sess.ClientIP,
+			IsCurrent:  false, // Keep it false for now, or match it if we extract session ID later
+			CreatedAt:  timestamppb.New(sess.CreatedAt),
+			ExpiresAt:  timestamppb.New(sess.ExpiresAt),
+		})
+	}
+
+	return &pb.ListSessionsResponse{
+		Sessions: pbSessions,
+	}, nil
+}
+
+func (s *AuthServer) RevokeSession(ctx context.Context, req *pb.RevokeSessionRequest) (*emptypb.Empty, error) {
+	u, ok := interceptor.UserFromContext(ctx)
+	if !ok {
+		return nil, status.Errorf(codes.Unauthenticated, "unauthenticated")
+	}
+
+	sessionID, err := uuid.Parse(req.SessionId)
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid session ID format")
+	}
+
+	err = s.svc.RevokeSession(ctx, input.RevokeSessionParams{
+		SessionID: sessionID,
+		UserID:    u.ID(),
+	})
+	if err != nil {
+		if errors.Is(err, apperr.ErrNotFound) || errors.Is(err, apperr.ErrUnauthorized) {
+			return nil, status.Errorf(codes.NotFound, "session not found")
+		}
+		return nil, status.Errorf(codes.Internal, "failed to revoke session: %v", err)
+	}
+
+	return &emptypb.Empty{}, nil
 }
 
 func extractClientMetadata(ctx context.Context) (userAgent, clientIP string) {

@@ -1,0 +1,31 @@
+{{define "layout"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Go Todo App — Get Stuff Done</title>
+    <meta name="description" content="A powerful, neo-brutalist task manager built with Go. Organize, tag, and conquer your todos with style.">
+    <!-- Google Fonts: Space Grotesk -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Design System -->
+    <link rel="stylesheet" href="/static/css/brutalist.css">
+</head>
+<body>
+    <nav class="nav">
+        <a href="/" class="nav-logo">TODO<span>APP</span></a>
+        <div id="nav-actions"></div>
+    </nav>
+    <main>
+        {{template "content" .}}
+    </main>
+    <div id="toast-container" class="toast-container"></div>
+    <script src="/static/js/api.js"></script>
+    {{block "scripts" .}}{{end}}
+</body>
+</html>
+{{end}}

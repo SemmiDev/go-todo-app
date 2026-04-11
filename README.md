@@ -24,14 +24,24 @@ The application is heavily decoupled into three highly-optimized discrete runtim
 Everything operates smoothly inside Docker. No local dependencies required except Docker and make.
 
 ```bash
-# 1. Start the entire infrastructure (Postgres, Redis, Memcached, Mailpit, + 3 Binaries)
+# 1. Clone the repository
+git clone https://github.com/SemmiDev/go-todo-app.git
+cd go-todo-app
+
+# 2. Set up your environment variables
+# Note: You MUST update .env with your own Google OAuth client credentials for login to work!
+cp .env.example .env
+
+# 3. Start the entire infrastructure (Postgres, Redis, Memcached, Mailpit, + 3 Binaries)
 make docker-up
 
-# 2. View streaming logs
-docker compose logs -f
+# 4. Access the different services
+# Frontend Application:   http://localhost:8080
+# Backend API Gateway:    http://localhost:8080/v1/...
+# Mailpit (Email Logs):   http://localhost:8025
 
-# 3. Access local Mailpit to view sent email Reminders
-# Open your browser to http://localhost:8025
+# 5. View streaming logs
+docker compose logs -f
 ```
 
 ## Feature Addition Workflow

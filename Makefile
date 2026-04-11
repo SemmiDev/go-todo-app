@@ -1,13 +1,16 @@
 # Database URL for local development migrations if not set by env
 DB_URL ?= postgres://postgres:postgres@localhost:5432/todo_app?sslmode=disable
 
-.PHONY: all generate proto build build-server build-scheduler build-worker run run-server run-scheduler run-worker docker-up docker-down docker-logs migrate-new migrate-up migrate-down lint test tidy clean
+.PHONY: all generate format proto build build-server build-scheduler build-worker run run-server run-scheduler run-worker docker-up docker-build docker-down docker-logs migrate-new migrate-up migrate-down lint test tidy clean
 
 all: tidy proto build
 
 # ─── Dependencies & Code Generation ──────────────────────────────────────────
 
 generate: proto
+
+format:
+	goimports -w .
 
 proto:
 	buf generate
@@ -48,6 +51,9 @@ run-worker:
 
 docker-up:
 	docker compose up -d
+
+docker-build:
+	docker compose up -d --build
 
 docker-down:
 	docker compose down
