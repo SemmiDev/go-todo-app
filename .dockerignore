@@ -1,0 +1,30 @@
+.git
+.gitignore
+.dockerignore
+.github/
+
+# Development environments
+.env
+.env.example
+compose.yml
+Makefile
+
+# Build directories
+bin/
+tmp/
+dist/
+vendor/
+
+# Test and IDE footprint
+.vscode/
+.idea/
+.DS_Store
+*.swp
+*~
+coverage.out
+
+# Reference material and documentation that doesn't need to be compiled
+REFERENCES/
+docs/
+README.md
+*.md

@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+package todo.v1;
+
+option go_package = "github.com/semmidev/go-todo-app/gen/todo/v1;todov1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+message UserInfo {
+  string user_id   = 1;
+  string email     = 2;
+  string full_name = 3;
+}
+
+message GetAuthURLRequest {
+  string state = 1;
+}
+
+message GetAuthURLResponse {
+  string url = 1;
+}
+
+message ExchangeCodeRequest {
+  string code  = 1;
+  string state = 2;
+}
+
+message LoginResponse {
+  UserInfo                   user                     = 1;
+  string                     session_id               = 2;
+  string                     access_token             = 3;
+  string                     refresh_token            = 4;
+  google.protobuf.Timestamp  access_token_expires_at  = 5;
+  google.protobuf.Timestamp  refresh_token_expires_at = 6;
+}
+
+message GetMeResponse {
+  UserInfo user = 1;
+}
+
+message RenewAccessTokenRequest {
+  string refresh_token = 1;
+}
+
+message RenewAccessTokenResponse {
+  string                     access_token            = 1;
+  google.protobuf.Timestamp  access_token_expires_at = 2;
+}
+
+service AuthService {
+  rpc GetAuthURL(GetAuthURLRequest) returns (GetAuthURLResponse) {
+    option (google.api.http) = {
+      get: "/v1/auth/url"
+    };
+  }
+  rpc ExchangeCode(ExchangeCodeRequest) returns (LoginResponse) {
+    option (google.api.http) = {
+      post: "/v1/auth/callback"
+      body: "*"
+    };
+  }
+  rpc RenewAccessToken(RenewAccessTokenRequest) returns (RenewAccessTokenResponse) {
+    option (google.api.http) = {
+      post: "/v1/auth/renew"
+      body: "*"
+    };
+  }
+  rpc Logout(google.protobuf.Empty) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/v1/auth/logout"
+      body: "*"
+    };
+  }
+  rpc GetMe(google.protobuf.Empty) returns (GetMeResponse) {
+    option (google.api.http) = {
+      get: "/v1/auth/me"
+    };
+  }
+}

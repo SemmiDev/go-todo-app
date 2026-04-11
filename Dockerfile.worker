@@ -1,0 +1,41 @@
+# ─── Stage 1: Build ───────────────────────────────────────────────────────────
+FROM golang:1.26-alpine AS builder
+
+ARG VERSION=dev
+ARG COMMIT=unknown
+ARG BUILD_TIME
+
+WORKDIR /app
+
+# Install build dependencies
+RUN apk add --no-cache git ca-certificates tzdata
+
+# Cache dependencies
+COPY go.mod go.sum ./
+RUN --mount=type=cache,target=/go/pkg/mod \
+    go mod download
+
+# Copy source and build
+COPY . .
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
+    -tags=viper_bind_struct \
+    -ldflags="-w -s \
+    -X main.version=${VERSION} \
+    -X main.commit=${COMMIT} \
+    -X main.buildTime=${BUILD_TIME}" \
+    -o bin/worker ./cmd/worker
+
+# ─── Stage 2: Runtime ─────────────────────────────────────────────────────────
+FROM gcr.io/distroless/static-debian12:nonroot
+
+# Copy timezone data
+COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
+
+WORKDIR /app
+
+# Copy the binary
+COPY --from=builder /app/bin/worker /app/worker
+
+ENTRYPOINT ["/app/worker"]

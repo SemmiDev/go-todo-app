@@ -1,0 +1,213 @@
+syntax = "proto3";
+
+package todo.v1;
+
+option go_package = "github.com/semmidev/go-todo-app/gen/todo/v1;todov1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum TodoStatus {
+  TODO_STATUS_UNSPECIFIED = 0;
+  TODO_STATUS_PENDING     = 1;
+  TODO_STATUS_IN_PROGRESS = 2;
+  TODO_STATUS_DONE        = 3;
+}
+
+enum TodoPriority {
+  TODO_PRIORITY_UNSPECIFIED = 0;
+  TODO_PRIORITY_LOW         = 1;
+  TODO_PRIORITY_MEDIUM      = 2;
+  TODO_PRIORITY_HIGH        = 3;
+}
+
+// ─── Messages ─────────────────────────────────────────────────────────────────
+
+message Tag {
+  string id         = 1;
+  string user_id    = 2;
+  string name       = 3;
+  string color      = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+}
+
+message Todo {
+  string id          = 1;
+  string user_id     = 2;
+  string title       = 3;
+  string description = 4;
+  TodoStatus   status   = 5;
+  TodoPriority priority = 6;
+  google.protobuf.Timestamp due_date   = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+  repeated Tag tags = 10;
+}
+
+// ─── Tag Requests ─────────────────────────────────────────────────────────────
+
+message CreateTagRequest {
+  string name  = 1;
+  string color = 2;
+}
+
+message UpdateTagRequest {
+  string tag_id = 1;
+  string name   = 2;
+  string color  = 3;
+}
+
+message DeleteTagRequest {
+  string tag_id = 1;
+}
+
+message GetTagRequest {
+  string tag_id = 1;
+}
+
+message ListTagsResponse {
+  repeated Tag tags  = 1;
+  int32        total = 2;
+}
+
+// ─── Todo Requests ────────────────────────────────────────────────────────────
+
+message CreateTodoRequest {
+  string       title       = 1;
+  string       description = 2;
+  TodoPriority priority    = 3;
+  google.protobuf.Timestamp due_date = 4;
+  repeated string tag_ids  = 5;
+}
+
+message GetTodoRequest {
+  string todo_id = 1;
+}
+
+message UpdateTodoRequest {
+  string       todo_id     = 1;
+  string       title       = 2;
+  string       description = 3;
+  TodoStatus   status      = 4;
+  TodoPriority priority    = 5;
+  google.protobuf.Timestamp due_date = 6;
+  repeated string tag_ids  = 7;
+}
+
+message DeleteTodoRequest {
+  string todo_id = 1;
+}
+
+// Paging carries full pagination metadata matching filter.Paging.
+message Paging {
+  bool  has_previous_page          = 1;
+  bool  has_next_page              = 2;
+  int32 current_page               = 3;
+  int32 per_page                   = 4;
+  int32 total_data                 = 5;
+  int32 total_data_in_current_page = 6;
+  int32 last_page                  = 7;
+  int32 from                       = 8;
+  int32 to                         = 9;
+}
+
+message ListTodosRequest {
+  TodoStatus status         = 1;
+  string     tag_id         = 2;
+  int32      page           = 3;
+  int32      page_size      = 4;
+  string     keyword        = 5;
+  string     sort_by        = 6;
+  string     sort_direction = 7;
+}
+
+message ListTodosResponse {
+  repeated Todo todos  = 1;
+  Paging        paging = 2;
+}
+
+message AddTagToTodoRequest {
+  string todo_id = 1;
+  string tag_id  = 2;
+}
+
+message RemoveTagFromTodoRequest {
+  string todo_id = 1;
+  string tag_id  = 2;
+}
+
+// ─── Services ─────────────────────────────────────────────────────────────────
+
+service TagService {
+  rpc CreateTag(CreateTagRequest) returns (Tag) {
+    option (google.api.http) = {
+      post: "/v1/tags"
+      body: "*"
+    };
+  }
+  rpc GetTag(GetTagRequest) returns (Tag) {
+    option (google.api.http) = {
+      get: "/v1/tags/{tag_id}"
+    };
+  }
+  rpc UpdateTag(UpdateTagRequest) returns (Tag) {
+    option (google.api.http) = {
+      put: "/v1/tags/{tag_id}"
+      body: "*"
+    };
+  }
+  rpc DeleteTag(DeleteTagRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/v1/tags/{tag_id}"
+    };
+  }
+  rpc ListTags(google.protobuf.Empty) returns (ListTagsResponse) {
+    option (google.api.http) = {
+      get: "/v1/tags"
+    };
+  }
+}
+
+service TodoService {
+  rpc CreateTodo(CreateTodoRequest) returns (Todo) {
+    option (google.api.http) = {
+      post: "/v1/todos"
+      body: "*"
+    };
+  }
+  rpc GetTodo(GetTodoRequest) returns (Todo) {
+    option (google.api.http) = {
+      get: "/v1/todos/{todo_id}"
+    };
+  }
+  rpc UpdateTodo(UpdateTodoRequest) returns (Todo) {
+    option (google.api.http) = {
+      put: "/v1/todos/{todo_id}"
+      body: "*"
+    };
+  }
+  rpc DeleteTodo(DeleteTodoRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/v1/todos/{todo_id}"
+    };
+  }
+  rpc ListTodos(ListTodosRequest) returns (ListTodosResponse) {
+    option (google.api.http) = {
+      get: "/v1/todos"
+    };
+  }
+  rpc AddTagToTodo(AddTagToTodoRequest) returns (Todo) {
+    option (google.api.http) = {
+      post: "/v1/todos/{todo_id}/tags/{tag_id}"
+    };
+  }
+  rpc RemoveTagFromTodo(RemoveTagFromTodoRequest) returns (Todo) {
+    option (google.api.http) = {
+      delete: "/v1/todos/{todo_id}/tags/{tag_id}"
+    };
+  }
+}

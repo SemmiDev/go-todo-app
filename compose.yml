@@ -1,0 +1,78 @@
+x-app-config: &app-config
+  environment:
+    DATABASE_URL: postgres://postgres:postgres@postgres:5432/todo_app?sslmode=disable
+    MEMCACHED_URL: memcached:11211
+    REDIS_URL: redis:6379
+    SMTP_HOST: mailpit
+    SMTP_PORT: "1025"
+    TOKEN_SYMMETRIC_KEY: "12345678901234567890123456789012"
+    REMINDER_CRON: "0 * * * * *"
+    GRPC_PORT: "9090"
+    HTTP_PORT: "8080"
+  depends_on:
+    postgres:
+      condition: service_healthy
+    memcached:
+      condition: service_started
+    redis:
+      condition: service_started
+  restart: unless-stopped
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: todo_app
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  memcached:
+    image: memcached:1.6.41
+    ports:
+      - "11211:11211"
+
+  mailpit:
+    image: axllent/mailpit:v1.29
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  # ─── Core Application Servers ───────────────────────────────────────────────
+
+  server:
+    <<: *app-config
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+      - "9090:9090"
+
+  scheduler:
+    <<: *app-config
+    build:
+      context: .
+      dockerfile: Dockerfile.scheduler
+
+  worker:
+    <<: *app-config
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+
+volumes:
+  pgdata:

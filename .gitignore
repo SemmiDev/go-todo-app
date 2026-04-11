@@ -1,0 +1,57 @@
+# ─── Go binaries / build output ───────────────────────────────────────────────
+/bin/
+/dist/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# ─── Go module cache & vendor ─────────────────────────────────────────────────
+vendor/
+
+# ─── Environment & secrets ────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ─── IDE & editor artifacts ───────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+*.DS_Store
+Thumbs.db
+
+# ─── Build artifacts & generated code ────────────────────────────────────────
+# Uncomment if you don't want to commit generated proto files
+# gen/
+
+# ─── Test coverage & profiling ────────────────────────────────────────────────
+coverage.out
+coverage.html
+*.prof
+*.pprof
+cpu.out
+mem.out
+
+# ─── Swagger / OpenAPI generated files (if generated to a local dir) ─────────
+# docs/swagger/ (keep if committed intentionally)
+
+# ─── Database migration state ─────────────────────────────────────────────────
+*.db
+*.sqlite
+*.sqlite3
+
+# ─── Docker volumes ───────────────────────────────────────────────────────────
+.docker-data/
+
+# ─── OS-specific ──────────────────────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+desktop.ini
+
+REFERENCES/
