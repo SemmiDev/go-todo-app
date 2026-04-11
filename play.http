@@ -1,0 +1,150 @@
+@host = http://localhost:8080
+@token = REPLACE_ME_WITH_ACCESS_TOKEN
+@refresh_token = REPLACE_ME_WITH_REFRESH_TOKEN
+@todo_id = REPLACE_ME_WITH_TODO_ID
+@tag_id = REPLACE_ME_WITH_TAG_ID
+
+### ========================================
+### AUTHENTICATION
+### ========================================
+
+### 1. Get Google OAuth URL
+GET {{host}}/v1/auth/url
+Accept: application/json
+
+###
+
+### 2. OAuth Callback (Normally handled by browser)
+POST {{host}}/v1/auth/callback
+Content-Type: application/json
+
+{
+    "state": "...",
+    "code": "..."
+}
+
+###
+
+### 3. Get Current User Profile (Requires Token)
+GET {{host}}/v1/auth/me
+Authorization: Bearer {{token}}
+
+###
+
+### 4. Renew Access Token
+POST {{host}}/v1/auth/renew
+Content-Type: application/json
+
+{
+    "refresh_token": "{{refresh_token}}"
+}
+
+###
+
+### 5. Logout
+POST {{host}}/v1/auth/logout
+Authorization: Bearer {{token}}
+
+### ========================================
+### TAGS
+### ========================================
+
+### 1. Create a Tag
+POST {{host}}/v1/tags
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "name": "High Priority",
+    "color": "#FF0000"
+}
+
+###
+
+### 2. List all Tags
+GET {{host}}/v1/tags
+Authorization: Bearer {{token}}
+# Query params example: ?page=1&page_size=10
+
+###
+
+### 3. Get Tag by ID
+GET {{host}}/v1/tags/{{tag_id}}
+Authorization: Bearer {{token}}
+
+###
+
+### 4. Update Tag
+PUT {{host}}/v1/tags/{{tag_id}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "name": "Urgent Priority",
+    "color": "#FF4500"
+}
+
+###
+
+### 5. Delete Tag
+DELETE {{host}}/v1/tags/{{tag_id}}
+Authorization: Bearer {{token}}
+
+### ========================================
+### TODOS
+### ========================================
+
+### 1. Create Todo
+POST {{host}}/v1/todos
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "title": "Complete Backend Architecture",
+    "description": "Finish the hexagonal setup and async queues.",
+    "status": "pending",
+    "due_date": "2026-12-31T23:59:59Z"
+}
+
+###
+
+### 2. List Todos
+GET {{host}}/v1/todos
+Authorization: Bearer {{token}}
+# Optional: ?page=1&page_size=10&status=pending
+
+###
+
+### 3. Get Todo by ID
+GET {{host}}/v1/todos/{{todo_id}}
+Authorization: Bearer {{token}}
+
+###
+
+### 4. Update Todo
+PUT {{host}}/v1/todos/{{todo_id}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "title": "Complete Backend Architecture (Done!)",
+    "status": "in_progress"
+}
+
+###
+
+### 5. Add Tag to Todo
+POST {{host}}/v1/todos/{{todo_id}}/tags/{{tag_id}}
+Authorization: Bearer {{token}}
+
+###
+
+### 6. Remove Tag from Todo
+DELETE {{host}}/v1/todos/{{todo_id}}/tags/{{tag_id}}
+Authorization: Bearer {{token}}
+
+###
+
+### 7. Delete Todo
+DELETE {{host}}/v1/todos/{{todo_id}}
+Authorization: Bearer {{token}}
