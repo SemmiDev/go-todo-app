@@ -353,6 +353,7 @@
                 `<span class="tag-chip" style="background: ${tag.color}22; border-color: ${tag.color};"><span class="tag-dot" style="background: ${tag.color};"></span>${escapeHtml(tag.name)}</span>`
             ).join('');
             const dueStr = t.due_date ? formatDate(t.due_date) : '';
+            const isOverdue = t.due_date && new Date(t.due_date) < new Date() && t.status !== 'TODO_STATUS_DONE';
 
             return `
             <div class="todo-card ${isDone ? 'done' : ''}" style="animation-delay: ${i * 0.05}s">
@@ -365,7 +366,9 @@
                     <div class="todo-meta">
                         <span class="badge badge-${statusClass}">${statusLabel}</span>
                         <span class="badge badge-${priorityClass}">${priorityLabel}</span>
-                        ${dueStr ? `<span class="todo-meta-item"><i class="ph-bold ph-calendar"></i> ${dueStr}</span>` : ''}
+                        ${dueStr ? `<span class="badge ${isOverdue ? 'badge-high' : ''}" style="background: var(--bg); border-style: dashed;">
+                            <i class="ph-bold ph-calendar" style="margin-right: 2px;"></i> ${dueStr}
+                        </span>` : ''}
                         ${tags}
                     </div>
                 </div>
@@ -585,12 +588,17 @@
                     <span class="badge badge-${priorityLabel.toLowerCase()}">${priorityLabel} priority</span>
                 </div>
                 ${todo.description ? `<p style="color: var(--text-muted); font-weight: 500; margin-bottom: 1rem; white-space: pre-wrap; line-height: 1.7;">${escapeHtml(todo.description)}</p>` : ''}
-                ${todo.due_date ? `<div class="todo-meta-item" style="margin-bottom: 0.75rem; font-size: 0.85rem;"><i class="ph-bold ph-calendar"></i> Due: ${formatDate(todo.due_date)}</div>` : ''}
+                <div style="background: var(--bg); border: 2px solid var(--border); padding: 1rem; margin-bottom: 1rem;">
+                    ${todo.due_date ? `<div class="todo-meta-item" style="margin-bottom: 0.5rem; font-size: 0.85rem;"><i class="ph-bold ph-calendar"></i> <strong>DUE DATE:</strong> ${formatDateTime(todo.due_date)}</div>` : ''}
+                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">
+                        <i class="ph-bold ph-clock-counter-clockwise"></i> <strong>CREATED:</strong> ${formatDateTime(todo.created_at)}
+                    </div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600; margin-top: 0.25rem;">
+                        <i class="ph-bold ph-arrows-clockwise"></i> <strong>LAST UPDATED:</strong> ${formatDateTime(todo.updated_at)}
+                    </div>
+                </div>
                 ${reminders ? `<div style="margin-bottom: 1rem;"><div style="font-weight: 800; font-size: 0.75rem; text-transform: uppercase; margin-bottom: 0.4rem; color: var(--text-muted);">Reminders</div><div class="tag-list">${reminders}</div></div>` : ''}
                 ${tags ? `<div style="margin-bottom: 1rem;"><div style="font-weight: 800; font-size: 0.75rem; text-transform: uppercase; margin-bottom: 0.4rem; color: var(--text-muted);">Tags</div><div class="tag-list">${tags}</div></div>` : ''}
-                <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600; margin-top: 1rem; border-top: 2px solid var(--border); padding-top: 0.75rem;">
-                    Created: ${formatDate(todo.created_at)} · Updated: ${formatDate(todo.updated_at)}
-                </div>
                 <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
                     <button onclick="closeModal('detail-modal'); openEditTodoModal('${todo.id}')" class="btn btn-primary btn-sm" style="flex:1;"><i class="ph-bold ph-pencil-simple"></i> Edit</button>
                     <button onclick="closeModal('detail-modal'); confirmDeleteTodo('${todo.id}')" class="btn btn-danger btn-sm"><i class="ph-bold ph-trash"></i></button>
@@ -784,9 +792,18 @@
     function formatDate(isoStr) {
         if (!isoStr) return '';
         const d = new Date(isoStr);
-        // Check for zero/epoch timestamps from protobuf
         if (d.getFullYear() < 2000) return '';
         return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    function formatDateTime(isoStr) {
+        if (!isoStr) return '';
+        const d = new Date(isoStr);
+        if (d.getFullYear() < 2000) return '';
+        return d.toLocaleString('en-US', { 
+            month: 'short', day: 'numeric', year: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+        });
     }
 
     // ═══════════════════════════════════════════════════════════════════════
