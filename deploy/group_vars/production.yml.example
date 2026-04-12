@@ -41,7 +41,6 @@ smtp_from: "Go Todo App <noreply@example.com>"
 
 # ── Scheduler ───────────────────────────────────────────────
 reminder_cron: "0 * * * *"
-reminder_window: "24h"
 app_url: "https://example.com"
 
 # ── Docker Resources ────────────────────────────────────────

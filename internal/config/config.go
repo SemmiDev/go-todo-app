@@ -35,9 +35,8 @@ type AppConfig struct {
 	SMTPFrom     string `mapstructure:"SMTP_FROM"`
 
 	// Scheduler
-	ReminderCron   string        `mapstructure:"REMINDER_CRON"`
-	ReminderWindow time.Duration `mapstructure:"REMINDER_WINDOW"`
-	AppURL         string        `mapstructure:"APP_URL"`
+	ReminderCron string `mapstructure:"REMINDER_CRON"`
+	AppURL       string `mapstructure:"APP_URL"`
 }
 
 func Load() *AppConfig {
@@ -61,7 +60,6 @@ func Load() *AppConfig {
 
 	// Scheduler defaults
 	viper.SetDefault("REMINDER_CRON", "0 * * * * *") // every minute
-	viper.SetDefault("REMINDER_WINDOW", "1m")
 	viper.SetDefault("APP_URL", "http://localhost:8080")
 
 	_ = viper.ReadInConfig()

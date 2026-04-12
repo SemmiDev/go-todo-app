@@ -15,13 +15,11 @@ type Service struct {
 	todoRepo        output.TodoRepository
 	taskDistributor output.TaskDistributor
 	logger          *slog.Logger
-	window          time.Duration // how far ahead to look (default 24h)
 }
 
 // Config holds optional configuration overrides for the reminder service.
 type Config struct {
-	Window time.Duration // default 24h
-	AppURL string        // default "http://localhost:8080"
+	AppURL string // default "http://localhost:8080"
 }
 
 // NewService creates a new reminder service with the provided dependencies and configuration.
@@ -31,14 +29,10 @@ func NewService(
 	logger *slog.Logger,
 	cfg Config,
 ) *Service {
-	if cfg.Window == 0 {
-		cfg.Window = 24 * time.Hour
-	}
 	return &Service{
 		todoRepo:        todoRepo,
 		taskDistributor: taskDistributor,
 		logger:          logger,
-		window:          cfg.Window,
 	}
 }
 
@@ -46,7 +40,7 @@ func NewService(
 func (s *Service) SendDueSoonReminders(ctx context.Context) error {
 	start := time.Now()
 
-	todos, err := s.todoRepo.FindDueSoon(ctx, s.window)
+	todos, err := s.todoRepo.FindDueSoon(ctx)
 	if err != nil {
 		s.logger.ErrorContext(ctx, "reminder: query failed", slog.Any("error", err))
 		return err

@@ -37,7 +37,6 @@ func main() {
 	slog.SetDefault(logger)
 	logger.Info("scheduler starting",
 		slog.String("cron", cfg.ReminderCron),
-		slog.Duration("window", cfg.ReminderWindow),
 	)
 
 	ctx := context.Background()
@@ -60,9 +59,7 @@ func main() {
 		todoRepo,
 		taskDistributor,
 		logger,
-		reminderapp.Config{
-			Window: cfg.ReminderWindow,
-		},
+		reminderapp.Config{},
 	)
 
 	// ── Cron scheduler ────────────────────────────────────────────────────────

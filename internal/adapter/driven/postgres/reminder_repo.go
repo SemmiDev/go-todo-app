@@ -3,7 +3,6 @@ package postgres
 
 import (
 	"context"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/semmidev/go-todo-app/internal/domain/todo"
@@ -11,15 +10,15 @@ import (
 
 // FindDueSoon returns todos that have configured reminders that are now due
 // but have not yet been triggered.
-func (r *TodoRepo) FindDueSoon(ctx context.Context, _ time.Duration) ([]*todo.Todo, error) {
+func (r *TodoRepo) FindDueSoon(ctx context.Context) ([]*todo.Todo, error) {
 	const q = `
 		WITH reminder_offsets AS (
-			SELECT 
+			SELECT
 				id, user_id, title, description, status, priority, due_date, created_at, updated_at, reminders, triggered_reminders,
 				jsonb_array_elements_text(COALESCE(reminders, '[]'::jsonb)) AS offset_text
 			FROM todos
-			WHERE status != 'done' 
-			  AND due_date IS NOT NULL 
+			WHERE status != 'done'
+			  AND due_date IS NOT NULL
 			  AND jsonb_array_length(COALESCE(reminders, '[]'::jsonb)) > 0
 		)
 		SELECT id, user_id, title, description, status, priority, due_date, created_at, updated_at, reminders, triggered_reminders
@@ -43,7 +42,7 @@ func (r *TodoRepo) FindDueSoon(ctx context.Context, _ time.Duration) ([]*todo.To
 // MarkReminderTriggered records that a specific reminder offset has been sent for a todo.
 func (r *TodoRepo) MarkReminderTriggered(ctx context.Context, todoID uuid.UUID, offset string) error {
 	const q = `
-		UPDATE todos 
+		UPDATE todos
 		SET triggered_reminders = triggered_reminders || jsonb_build_array($1::text)
 		WHERE id = $2 AND NOT (triggered_reminders ? $1)`
 	_, err := r.db.GetQuerier(ctx).ExecContext(ctx, q, offset, todoID)

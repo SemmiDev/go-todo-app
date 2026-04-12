@@ -4,7 +4,6 @@ package output
 
 import (
 	"context"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/semmidev/go-todo-app/internal/common/filter"
@@ -37,7 +36,7 @@ type TodoRepository interface {
 	List(ctx context.Context, f TodoFilter) ([]*todo.Todo, int, error)
 
 	// FindDueSoon retrieves todos with deadlines approaching based on their configured reminders.
-	FindDueSoon(ctx context.Context, within time.Duration) ([]*todo.Todo, error)
+	FindDueSoon(ctx context.Context) ([]*todo.Todo, error)
 	// MarkReminderTriggered records that a specific reminder offset for the given todo has been dispatched.
 	MarkReminderTriggered(ctx context.Context, todoID uuid.UUID, offset string) error
 }
