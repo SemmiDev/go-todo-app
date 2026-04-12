@@ -36,10 +36,10 @@ type TodoRepository interface {
 	// List retrieves a paginated and filtered list of todos, including total count.
 	List(ctx context.Context, f TodoFilter) ([]*todo.Todo, int, error)
 
-	// FindDueSoon retrieves todos with deadlines approaching within the given duration.
+	// FindDueSoon retrieves todos with deadlines approaching based on their configured reminders.
 	FindDueSoon(ctx context.Context, within time.Duration) ([]*todo.Todo, error)
-	// MarkReminderSent records that a reminder for the given todo has been dispatched.
-	MarkReminderSent(ctx context.Context, todoID uuid.UUID) error
+	// MarkReminderTriggered records that a specific reminder offset for the given todo has been dispatched.
+	MarkReminderTriggered(ctx context.Context, todoID uuid.UUID, offset string) error
 }
 
 // TodoTagRepository is the driven port for managing the relationship between todos and tags.

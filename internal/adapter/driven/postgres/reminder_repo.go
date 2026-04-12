@@ -9,29 +9,25 @@ import (
 	"github.com/semmidev/go-todo-app/internal/domain/todo"
 )
 
-// FindDueSoon returns todos that:
-//   - have a due_date within the next `within` duration from now
-//   - are not yet done
-//   - have not yet received a reminder email
-//
-// The partial index on todos (due_date, user_id WHERE status != 'done' AND reminder_sent = FALSE)
-// makes this query O(1) in practice.
-func (r *TodoRepo) FindDueSoon(ctx context.Context, within time.Duration) ([]*todo.Todo, error) {
-	now := time.Now().UTC()
-	cutoff := now.Add(within)
-
+// FindDueSoon returns todos that have configured reminders that are now due
+// but have not yet been triggered.
+func (r *TodoRepo) FindDueSoon(ctx context.Context, _ time.Duration) ([]*todo.Todo, error) {
 	const q = `
+		WITH reminder_offsets AS (
+			SELECT t.*, jsonb_array_elements_text(COALESCE(t.reminders, '[]'::jsonb)) AS offset_text
+			FROM todos t
+			WHERE t.status != 'done' 
+			  AND t.due_date IS NOT NULL 
+			  AND jsonb_array_length(COALESCE(t.reminders, '[]'::jsonb)) > 0
+		)
 		SELECT *
-		FROM todos
-		WHERE due_date IS NOT NULL
-		  AND due_date > $1
-		  AND due_date <= $2
-		  AND status != 'done'
-		  AND reminder_sent = FALSE
+		FROM reminder_offsets
+		WHERE (due_date - (offset_text::interval)) <= NOW()
+		  AND NOT (COALESCE(triggered_reminders, '[]'::jsonb) ? offset_text)
 		ORDER BY due_date ASC`
 
 	var rows []todoModel
-	if err := r.db.GetQuerier(ctx).SelectContext(ctx, &rows, q, now, cutoff); err != nil {
+	if err := r.db.GetQuerier(ctx).SelectContext(ctx, &rows, q); err != nil {
 		return nil, wrapErr(err, "find due soon todos")
 	}
 
@@ -42,9 +38,12 @@ func (r *TodoRepo) FindDueSoon(ctx context.Context, within time.Duration) ([]*to
 	return todos, nil
 }
 
-// MarkReminderSent atomically sets reminder_sent = TRUE for a single todo.
-func (r *TodoRepo) MarkReminderSent(ctx context.Context, todoID uuid.UUID) error {
-	const q = `UPDATE todos SET reminder_sent = TRUE WHERE id = $1`
-	_, err := r.db.GetQuerier(ctx).ExecContext(ctx, q, todoID)
-	return wrapErr(err, "mark reminder sent")
+// MarkReminderTriggered records that a specific reminder offset has been sent for a todo.
+func (r *TodoRepo) MarkReminderTriggered(ctx context.Context, todoID uuid.UUID, offset string) error {
+	const q = `
+		UPDATE todos 
+		SET triggered_reminders = triggered_reminders || jsonb_build_array($1::text)
+		WHERE id = $2 AND NOT (triggered_reminders ? $1)`
+	_, err := r.db.GetQuerier(ctx).ExecContext(ctx, q, offset, todoID)
+	return wrapErr(err, "mark reminder triggered")
 }

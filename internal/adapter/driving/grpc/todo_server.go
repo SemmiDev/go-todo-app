@@ -175,6 +175,7 @@ func (s *TodoServer) CreateTodo(ctx context.Context, req *pb.CreateTodoRequest) 
 	params := input.CreateTodoParams{
 		UserID: u.ID(), Title: req.GetTitle(), Description: req.GetDescription(),
 		Priority: protoPriorityToDomain(req.GetPriority()), DueDate: dueDate, TagIDs: tagIDs,
+		Reminders: req.GetReminders(),
 	}
 	if err := s.validator.Struct(params); err != nil {
 		return nil, grpcerr.FromAppError(ctx, err)
@@ -238,6 +239,7 @@ func (s *TodoServer) UpdateTodo(ctx context.Context, req *pb.UpdateTodoRequest) 
 		TodoID: todoID, UserID: u.ID(), Title: req.GetTitle(), Description: req.GetDescription(),
 		Status: protoStatusToDomain(req.GetStatus()), Priority: protoPriorityToDomain(req.GetPriority()),
 		DueDate: dueDate, TagIDs: tagIDs,
+		Reminders: req.GetReminders(),
 	}
 	if err := s.validator.Struct(params); err != nil {
 		return nil, grpcerr.FromAppError(ctx, err)

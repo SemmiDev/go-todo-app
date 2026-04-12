@@ -73,6 +73,8 @@ type CreateTodoParams struct {
 	DueDate *time.Time `json:"due_date" validate:"omitempty"`
 	// TagIDs is a list of tag identifiers to associate with the todo.
 	TagIDs []uuid.UUID `json:"tag_ids" validate:"omitempty,dive,uuid"`
+	// Reminders is a list of durations before the due date to send reminders (e.g., "1h", "15m").
+	Reminders []string `json:"reminders" validate:"omitempty,dive,duration"`
 }
 
 // GetTodoParams holds parameters for retrieving a todo.
@@ -101,6 +103,8 @@ type UpdateTodoParams struct {
 	DueDate *time.Time `json:"due_date" validate:"omitempty"`
 	// TagIDs is the new list of tag identifiers for the todo.
 	TagIDs []uuid.UUID `json:"tag_ids" validate:"omitempty,dive,uuid"`
+	// Reminders is the new list of durations before the due date to send reminders.
+	Reminders []string `json:"reminders" validate:"omitempty,dive,duration"`
 }
 
 // DeleteTodoParams holds parameters for deleting a todo.

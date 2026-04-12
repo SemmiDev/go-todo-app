@@ -116,21 +116,22 @@ func (t *Tag) Update(name, color string) error {
 
 // Todo is the central aggregate root representing a task.
 type Todo struct {
-	id           uuid.UUID
-	userID       uuid.UUID
-	title        string
-	description  string
-	status       Status
-	priority     Priority
-	dueDate      *time.Time
-	createdAt    time.Time
-	updatedAt    time.Time
-	tags         []*Tag
-	reminderSent bool
+	id                 uuid.UUID
+	userID             uuid.UUID
+	title              string
+	description        string
+	status             Status
+	priority           Priority
+	dueDate            *time.Time
+	createdAt          time.Time
+	updatedAt          time.Time
+	tags               []*Tag
+	reminders          []string // e.g., ["1h", "15m"]
+	triggeredReminders []string // e.g., ["1h"]
 }
 
 // New creates a new Todo with default status (Pending) and validated fields.
-func New(userID uuid.UUID, title, description string, priority Priority, dueDate *time.Time) (*Todo, error) {
+func New(userID uuid.UUID, title, description string, priority Priority, dueDate *time.Time, reminders []string) (*Todo, error) {
 	if userID == uuid.Nil {
 		return nil, errors.New("user_id is required")
 	}
@@ -150,7 +151,7 @@ func New(userID uuid.UUID, title, description string, priority Priority, dueDate
 		title: title, description: strings.TrimSpace(description),
 		status: StatusPending, priority: priority,
 		dueDate: dueDate, createdAt: now, updatedAt: now,
-		tags: []*Tag{},
+		tags: []*Tag{}, reminders: reminders, triggeredReminders: []string{},
 	}, nil
 }
 
@@ -162,17 +163,23 @@ func Reconstitute(
 	dueDate *time.Time,
 	createdAt, updatedAt time.Time,
 	tags []*Tag,
-	reminderSent bool,
+	reminders, triggeredReminders []string,
 ) *Todo {
 	if tags == nil {
 		tags = []*Tag{}
+	}
+	if reminders == nil {
+		reminders = []string{}
+	}
+	if triggeredReminders == nil {
+		triggeredReminders = []string{}
 	}
 	return &Todo{
 		id: id, userID: userID,
 		title: title, description: description,
 		status: status, priority: priority,
 		dueDate: dueDate, createdAt: createdAt, updatedAt: updatedAt,
-		tags: tags, reminderSent: reminderSent,
+		tags: tags, reminders: reminders, triggeredReminders: triggeredReminders,
 	}
 }
 
@@ -204,21 +211,29 @@ func (t *Todo) CreatedAt() time.Time         { return t.createdAt }
 func (t *Todo) UpdatedAt() time.Time         { return t.updatedAt }
 
 // Tags returns the list of associated tags.
-func (t *Todo) Tags() []*Tag                 { return t.tags }
+func (t *Todo) Tags() []*Tag { return t.tags }
 
-// ReminderSent returns true if a reminder notification has already been triggered.
-func (t *Todo) ReminderSent() bool           { return t.reminderSent }
+// Reminders returns the list of configured reminder offsets (e.g., "1h").
+func (t *Todo) Reminders() []string { return t.reminders }
+
+// TriggeredReminders returns the list of offsets that have already been sent.
+func (t *Todo) TriggeredReminders() []string { return t.triggeredReminders }
 
 // IsOwnedBy returns true if the provided user ID matches the owner.
 func (t *Todo) IsOwnedBy(uid uuid.UUID) bool { return t.userID == uid }
 
-// MarkReminderSent records that a reminder email has been sent for this todo.
-func (t *Todo) MarkReminderSent() {
-	t.reminderSent = true
+// MarkReminderTriggered records that a specific reminder offset has been sent.
+func (t *Todo) MarkReminderTriggered(offset string) {
+	for _, tr := range t.triggeredReminders {
+		if tr == offset {
+			return
+		}
+	}
+	t.triggeredReminders = append(t.triggeredReminders, offset)
 }
 
 // Update modifies core fields of the Todo with validation.
-func (t *Todo) Update(title, description string, status Status, priority Priority, dueDate *time.Time) error {
+func (t *Todo) Update(title, description string, status Status, priority Priority, dueDate *time.Time, reminders []string) error {
 	title = strings.TrimSpace(title)
 	if title == "" {
 		return errors.New("title is required")
@@ -237,6 +252,10 @@ func (t *Todo) Update(title, description string, status Status, priority Priorit
 	t.status = status
 	t.priority = priority
 	t.dueDate = dueDate
+	t.reminders = reminders
+	// Reset triggered reminders if due date or reminders changed significantly?
+	// For simplicity, we just update them. 
+	// If the user adds a new one, it will be sent.
 	t.updatedAt = time.Now().UTC()
 	return nil
 }

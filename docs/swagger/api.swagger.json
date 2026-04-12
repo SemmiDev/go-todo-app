@@ -679,6 +679,12 @@
           "items": {
             "type": "string"
           }
+        },
+        "reminders": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },
@@ -738,6 +744,12 @@
           "format": "date-time"
         },
         "tagIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "reminders": {
           "type": "array",
           "items": {
             "type": "string"
@@ -988,6 +1000,18 @@
           "items": {
             "type": "object",
             "$ref": "#/definitions/v1Tag"
+          }
+        },
+        "reminders": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "triggeredReminders": {
+          "type": "array",
+          "items": {
+            "type": "string"
           }
         }
       }

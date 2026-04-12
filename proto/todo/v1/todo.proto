@@ -46,6 +46,8 @@ message Todo {
   google.protobuf.Timestamp created_at = 8;
   google.protobuf.Timestamp updated_at = 9;
   repeated Tag tags = 10;
+  repeated string reminders = 11;
+  repeated string triggered_reminders = 12;
 }
 
 // ─── Tag Requests ─────────────────────────────────────────────────────────────
@@ -82,6 +84,7 @@ message CreateTodoRequest {
   TodoPriority priority    = 3;
   google.protobuf.Timestamp due_date = 4;
   repeated string tag_ids  = 5;
+  repeated string reminders = 6;
 }
 
 message GetTodoRequest {
@@ -96,6 +99,7 @@ message UpdateTodoRequest {
   TodoPriority priority    = 5;
   google.protobuf.Timestamp due_date = 6;
   repeated string tag_ids  = 7;
+  repeated string reminders = 8;
 }
 
 message DeleteTodoRequest {

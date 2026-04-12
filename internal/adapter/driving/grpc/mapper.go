@@ -27,15 +27,17 @@ func todoToProto(t *todo.Todo) *pb.Todo {
 		pbTags[i] = tagToProto(tag)
 	}
 	out := &pb.Todo{
-		Id:          t.ID().String(),
-		UserId:      t.UserID().String(),
-		Title:       t.Title(),
-		Description: t.Description(),
-		Status:      domainStatusToProto(t.Status()),
-		Priority:    domainPriorityToProto(t.Priority()),
-		CreatedAt:   timestamppb.New(t.CreatedAt()),
-		UpdatedAt:   timestamppb.New(t.UpdatedAt()),
-		Tags:        pbTags,
+		Id:                 t.ID().String(),
+		UserId:             t.UserID().String(),
+		Title:              t.Title(),
+		Description:        t.Description(),
+		Status:             domainStatusToProto(t.Status()),
+		Priority:           domainPriorityToProto(t.Priority()),
+		CreatedAt:          timestamppb.New(t.CreatedAt()),
+		UpdatedAt:          timestamppb.New(t.UpdatedAt()),
+		Tags:               pbTags,
+		Reminders:          t.Reminders(),
+		TriggeredReminders: t.TriggeredReminders(),
 	}
 	if t.DueDate() != nil {
 		out.DueDate = timestamppb.New(*t.DueDate())

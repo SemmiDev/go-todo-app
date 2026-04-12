@@ -132,6 +132,25 @@
                     </select>
                 </div>
                 <div class="form-group">
+                    <label class="form-label">Reminders</label>
+                    <div id="todo-reminders-list" class="tag-list" style="margin-bottom: 0.5rem;"></div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <select id="reminder-offset-select" class="form-select" style="flex: 1; font-size: 0.8rem; padding: 0.45rem 0.75rem;">
+                            <option value="5m">5 minutes before</option>
+                            <option value="15m">15 minutes before</option>
+                            <option value="30m">30 minutes before</option>
+                            <option value="1h">1 hour before</option>
+                            <option value="2h">2 hours before</option>
+                            <option value="6h">6 hours before</option>
+                            <option value="12h">12 hours before</option>
+                            <option value="24h">1 day before</option>
+                        </select>
+                        <button type="button" onclick="addReminderOffset()" class="btn btn-secondary btn-sm">
+                            <i class="ph-bold ph-plus"></i> Add
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
                     <label class="form-label">Tags</label>
                     <div id="todo-tags-selector" class="tag-list" style="min-height: 30px;"></div>
                 </div>
@@ -223,6 +242,7 @@
     // STATE
     // ═══════════════════════════════════════════════════════════════════════
     let allTags = [];
+    let selectedReminders = [];
     let currentPaging = null;
     let currentPage = 1;
     let searchTimeout = null;
@@ -395,6 +415,36 @@
         document.getElementById('stat-done').textContent = done || '0';
     }
 
+    // ─── Reminder Helpers ───────────────────────────────────────────────────
+    function addReminderOffset() {
+        const select = document.getElementById('reminder-offset-select');
+        const offset = select.value;
+        if (!selectedReminders.includes(offset)) {
+            selectedReminders.push(offset);
+            renderRemindersList();
+        }
+    }
+
+    function removeReminderOffset(offset) {
+        selectedReminders = selectedReminders.filter(r => r !== offset);
+        renderRemindersList();
+    }
+
+    function renderRemindersList() {
+        const list = document.getElementById('todo-reminders-list');
+        if (selectedReminders.length === 0) {
+            list.innerHTML = '<p style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">No reminders set</p>';
+            return;
+        }
+        list.innerHTML = selectedReminders.map(r => `
+            <span class="tag-chip" style="background: var(--accent-light); border-color: var(--accent);">
+                <i class="ph-bold ph-bell" style="font-size: 0.7rem; color: var(--accent-dark);"></i>
+                ${escapeHtml(r)}
+                <button type="button" onclick="removeReminderOffset('${r}')" class="tag-chip-remove">×</button>
+            </span>
+        `).join('');
+    }
+
     // ═══════════════════════════════════════════════════════════════════════
     // TODO CRUD
     // ═══════════════════════════════════════════════════════════════════════
@@ -405,6 +455,8 @@
         document.getElementById('todo-form').reset();
         document.getElementById('todo-priority').value = '2';
         document.getElementById('todo-status-group').style.display = 'none';
+        selectedReminders = [];
+        renderRemindersList();
         renderTagSelector([]);
         openModal('todo-modal');
     }
@@ -428,6 +480,9 @@
                 document.getElementById('todo-due-date').value = '';
             }
 
+            selectedReminders = todo.reminders || [];
+            renderRemindersList();
+
             const selectedTagIds = (todo.tags || []).map(t => t.id);
             renderTagSelector(selectedTagIds);
             openModal('todo-modal');
@@ -446,6 +501,7 @@
             description: document.getElementById('todo-desc').value.trim(),
             priority: parseInt(document.getElementById('todo-priority').value) || 0,
             tag_ids: getSelectedTagIds(),
+            reminders: selectedReminders,
         };
 
         const dueDateVal = document.getElementById('todo-due-date').value;
@@ -489,6 +545,7 @@
                 status: newStatus,
                 priority: protoEnumValue(todo.priority, 'TODO_PRIORITY_', 2),
                 tag_ids: (todo.tags || []).map(t => t.id),
+                reminders: todo.reminders || [],
             });
             showToast(newStatus === 3 ? 'Task completed! 🎉' : 'Task reopened', 'success');
             await loadTodos();
@@ -517,6 +574,9 @@
             const tags = (todo.tags || []).map(tag =>
                 `<span class="tag-chip" style="background: ${tag.color}22; border-color: ${tag.color};"><span class="tag-dot" style="background: ${tag.color};"></span>${escapeHtml(tag.name)}</span>`
             ).join('');
+            const reminders = (todo.reminders || []).map(r =>
+                `<span class="tag-chip" style="background: var(--accent-light); border-color: var(--accent); font-size: 0.7rem;"><i class="ph-bold ph-bell" style="color: var(--accent-dark);"></i> ${escapeHtml(r)}</span>`
+            ).join('');
 
             document.getElementById('detail-content').innerHTML = `
                 <h2 style="margin-bottom: 1rem; ${isDone ? 'text-decoration: line-through; opacity: 0.6;' : ''}">${escapeHtml(todo.title)}</h2>
@@ -526,6 +586,7 @@
                 </div>
                 ${todo.description ? `<p style="color: var(--text-muted); font-weight: 500; margin-bottom: 1rem; white-space: pre-wrap; line-height: 1.7;">${escapeHtml(todo.description)}</p>` : ''}
                 ${todo.due_date ? `<div class="todo-meta-item" style="margin-bottom: 0.75rem; font-size: 0.85rem;"><i class="ph-bold ph-calendar"></i> Due: ${formatDate(todo.due_date)}</div>` : ''}
+                ${reminders ? `<div style="margin-bottom: 1rem;"><div style="font-weight: 800; font-size: 0.75rem; text-transform: uppercase; margin-bottom: 0.4rem; color: var(--text-muted);">Reminders</div><div class="tag-list">${reminders}</div></div>` : ''}
                 ${tags ? `<div style="margin-bottom: 1rem;"><div style="font-weight: 800; font-size: 0.75rem; text-transform: uppercase; margin-bottom: 0.4rem; color: var(--text-muted);">Tags</div><div class="tag-list">${tags}</div></div>` : ''}
                 <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600; margin-top: 1rem; border-top: 2px solid var(--border); padding-top: 0.75rem;">
                     Created: ${formatDate(todo.created_at)} · Updated: ${formatDate(todo.updated_at)}

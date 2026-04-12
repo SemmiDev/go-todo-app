@@ -4,6 +4,8 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"database/sql/driver"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -15,18 +17,46 @@ import (
 	"github.com/semmidev/go-todo-app/internal/port/output"
 )
 
+// JSONBStringArray is a wrapper for []string to support PostgreSQL JSONB scanning/valuing.
+type JSONBStringArray []string
+
+func (a *JSONBStringArray) Scan(value interface{}) error {
+	if value == nil {
+		*a = []string{}
+		return nil
+	}
+	var bytes []byte
+	switch v := value.(type) {
+	case []byte:
+		bytes = v
+	case string:
+		bytes = []byte(v)
+	default:
+		return fmt.Errorf("type assertion to []byte or string failed: %T", value)
+	}
+	return json.Unmarshal(bytes, a)
+}
+
+func (a JSONBStringArray) Value() (driver.Value, error) {
+	if a == nil {
+		return "[]", nil
+	}
+	return json.Marshal(a)
+}
+
 // todoModel represents the database schema for a todo.
 type todoModel struct {
-	ID           uuid.UUID  `db:"id"`
-	UserID       uuid.UUID  `db:"user_id"`
-	Title        string     `db:"title"`
-	Description  string     `db:"description"`
-	Status       string     `db:"status"`
-	Priority     string     `db:"priority"`
-	DueDate      *time.Time `db:"due_date"`
-	CreatedAt    time.Time  `db:"created_at"`
-	UpdatedAt    time.Time  `db:"updated_at"`
-	ReminderSent bool       `db:"reminder_sent"`
+	ID                 uuid.UUID        `db:"id"`
+	UserID             uuid.UUID        `db:"user_id"`
+	Title              string           `db:"title"`
+	Description        string           `db:"description"`
+	Status             string           `db:"status"`
+	Priority           string           `db:"priority"`
+	DueDate            *time.Time       `db:"due_date"`
+	CreatedAt          time.Time        `db:"created_at"`
+	UpdatedAt          time.Time        `db:"updated_at"`
+	Reminders          JSONBStringArray `db:"reminders"`
+	TriggeredReminders JSONBStringArray `db:"triggered_reminders"`
 }
 
 func (m *todoModel) toDomain() *todo.Todo {
@@ -34,7 +64,7 @@ func (m *todoModel) toDomain() *todo.Todo {
 		m.ID, m.UserID, m.Title, m.Description,
 		todo.Status(m.Status), todo.Priority(m.Priority),
 		m.DueDate, m.CreatedAt, m.UpdatedAt, nil,
-		m.ReminderSent,
+		[]string(m.Reminders), []string(m.TriggeredReminders),
 	)
 }
 
@@ -57,19 +87,22 @@ var allowedSortColumns = map[string]bool{
 // Create inserts a new todo into the database.
 func (r *TodoRepo) Create(ctx context.Context, t *todo.Todo) error {
 	const q = `
-		INSERT INTO todos (id, user_id, title, description, status, priority, due_date, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
+		INSERT INTO todos (id, user_id, title, description, status, priority, due_date, created_at, updated_at, reminders, triggered_reminders)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`
 	_, err := r.db.GetQuerier(ctx).ExecContext(ctx, q,
 		t.ID(), t.UserID(), t.Title(), t.Description(),
 		string(t.Status()), string(t.Priority()), t.DueDate(),
-		t.CreatedAt(), t.UpdatedAt())
+		t.CreatedAt(), t.UpdatedAt(), JSONBStringArray(t.Reminders()), JSONBStringArray(t.TriggeredReminders()))
 	return wrapErr(err, "create todo")
 }
 
 // GetByID retrieves a todo by its ID.
 func (r *TodoRepo) GetByID(ctx context.Context, id uuid.UUID) (*todo.Todo, error) {
 	var m todoModel
-	err := r.db.GetQuerier(ctx).GetContext(ctx, &m, `SELECT * FROM todos WHERE id = $1`, id)
+	const q = `
+		SELECT id, user_id, title, description, status, priority, due_date, created_at, updated_at, reminders, triggered_reminders
+		FROM todos WHERE id = $1`
+	err := r.db.GetQuerier(ctx).GetContext(ctx, &m, q, id)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, apperr.ErrNotFound
 	}
@@ -79,11 +112,11 @@ func (r *TodoRepo) GetByID(ctx context.Context, id uuid.UUID) (*todo.Todo, error
 // Update modifies an existing todo.
 func (r *TodoRepo) Update(ctx context.Context, t *todo.Todo) error {
 	const q = `
-		UPDATE todos SET title=$1, description=$2, status=$3, priority=$4, due_date=$5, updated_at=$6
-		WHERE id=$7`
+		UPDATE todos SET title=$1, description=$2, status=$3, priority=$4, due_date=$5, updated_at=$6, reminders=$7, triggered_reminders=$8
+		WHERE id=$9`
 	_, err := r.db.GetQuerier(ctx).ExecContext(ctx, q,
 		t.Title(), t.Description(), string(t.Status()), string(t.Priority()),
-		t.DueDate(), t.UpdatedAt(), t.ID())
+		t.DueDate(), t.UpdatedAt(), JSONBStringArray(t.Reminders()), JSONBStringArray(t.TriggeredReminders()), t.ID())
 	return wrapErr(err, "update todo")
 }
 
@@ -144,8 +177,11 @@ func (r *TodoRepo) List(ctx context.Context, f output.TodoFilter) ([]*todo.Todo,
 
 	// ── Data query ────────────────────────────────────────────────────────────
 	var rows []todoModel
+	const dataQ = `
+		SELECT id, user_id, title, description, status, priority, due_date, created_at, updated_at, reminders, triggered_reminders
+		FROM todos `
 	if err := r.db.GetQuerier(ctx).SelectContext(ctx, &rows,
-		`SELECT * FROM todos `+where+orderClause+limitClause, args...); err != nil {
+		dataQ+where+orderClause+limitClause, args...); err != nil {
 		return nil, 0, wrapErr(err, "list todos")
 	}
 

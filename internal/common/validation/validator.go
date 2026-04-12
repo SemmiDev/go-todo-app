@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/semmidev/go-todo-app/internal/common/apperr"
+	"time"
 )
 
 // Validator wraps the go-playground/validator instance to provide application-specific validation logic.
@@ -35,6 +36,13 @@ func New() *Validator {
 	_ = validate.RegisterValidation("iscolor", func(fl validator.FieldLevel) bool {
 		val := fl.Field().String()
 		return hexColorRegex.MatchString(val)
+	})
+
+	// 3. Register custom validation tag: "duration" for time.ParseDuration valid strings
+	_ = validate.RegisterValidation("duration", func(fl validator.FieldLevel) bool {
+		val := fl.Field().String()
+		_, err := time.ParseDuration(val)
+		return err == nil
 	})
 
 	return &Validator{
@@ -84,6 +92,8 @@ func buildErrorMessage(e validator.FieldError) string {
 		return "must be a valid HEX color code (e.g. #FFFFFF)"
 	case "uuid":
 		return "must be a valid UUID"
+	case "duration":
+		return "must be a valid duration (e.g. 1h, 15m)"
 	default:
 		return "violates constraint '" + e.Tag() + "'"
 	}

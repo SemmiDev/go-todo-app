@@ -213,19 +213,21 @@ func (x *Tag) GetUpdatedAt() *timestamppb.Timestamp {
 }
 
 type Todo struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Title         string                 `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
-	Description   string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
-	Status        TodoStatus             `protobuf:"varint,5,opt,name=status,proto3,enum=todo.v1.TodoStatus" json:"status,omitempty"`
-	Priority      TodoPriority           `protobuf:"varint,6,opt,name=priority,proto3,enum=todo.v1.TodoPriority" json:"priority,omitempty"`
-	DueDate       *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=due_date,json=dueDate,proto3" json:"due_date,omitempty"`
-	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	Tags          []*Tag                 `protobuf:"bytes,10,rep,name=tags,proto3" json:"tags,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	Id                 string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	UserId             string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Title              string                 `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
+	Description        string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	Status             TodoStatus             `protobuf:"varint,5,opt,name=status,proto3,enum=todo.v1.TodoStatus" json:"status,omitempty"`
+	Priority           TodoPriority           `protobuf:"varint,6,opt,name=priority,proto3,enum=todo.v1.TodoPriority" json:"priority,omitempty"`
+	DueDate            *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=due_date,json=dueDate,proto3" json:"due_date,omitempty"`
+	CreatedAt          *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt          *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	Tags               []*Tag                 `protobuf:"bytes,10,rep,name=tags,proto3" json:"tags,omitempty"`
+	Reminders          []string               `protobuf:"bytes,11,rep,name=reminders,proto3" json:"reminders,omitempty"`
+	TriggeredReminders []string               `protobuf:"bytes,12,rep,name=triggered_reminders,json=triggeredReminders,proto3" json:"triggered_reminders,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
 }
 
 func (x *Todo) Reset() {
@@ -324,6 +326,20 @@ func (x *Todo) GetUpdatedAt() *timestamppb.Timestamp {
 func (x *Todo) GetTags() []*Tag {
 	if x != nil {
 		return x.Tags
+	}
+	return nil
+}
+
+func (x *Todo) GetReminders() []string {
+	if x != nil {
+		return x.Reminders
+	}
+	return nil
+}
+
+func (x *Todo) GetTriggeredReminders() []string {
+	if x != nil {
+		return x.TriggeredReminders
 	}
 	return nil
 }
@@ -587,6 +603,7 @@ type CreateTodoRequest struct {
 	Priority      TodoPriority           `protobuf:"varint,3,opt,name=priority,proto3,enum=todo.v1.TodoPriority" json:"priority,omitempty"`
 	DueDate       *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=due_date,json=dueDate,proto3" json:"due_date,omitempty"`
 	TagIds        []string               `protobuf:"bytes,5,rep,name=tag_ids,json=tagIds,proto3" json:"tag_ids,omitempty"`
+	Reminders     []string               `protobuf:"bytes,6,rep,name=reminders,proto3" json:"reminders,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -656,6 +673,13 @@ func (x *CreateTodoRequest) GetTagIds() []string {
 	return nil
 }
 
+func (x *CreateTodoRequest) GetReminders() []string {
+	if x != nil {
+		return x.Reminders
+	}
+	return nil
+}
+
 type GetTodoRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	TodoId        string                 `protobuf:"bytes,1,opt,name=todo_id,json=todoId,proto3" json:"todo_id,omitempty"`
@@ -709,6 +733,7 @@ type UpdateTodoRequest struct {
 	Priority      TodoPriority           `protobuf:"varint,5,opt,name=priority,proto3,enum=todo.v1.TodoPriority" json:"priority,omitempty"`
 	DueDate       *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=due_date,json=dueDate,proto3" json:"due_date,omitempty"`
 	TagIds        []string               `protobuf:"bytes,7,rep,name=tag_ids,json=tagIds,proto3" json:"tag_ids,omitempty"`
+	Reminders     []string               `protobuf:"bytes,8,rep,name=reminders,proto3" json:"reminders,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -788,6 +813,13 @@ func (x *UpdateTodoRequest) GetDueDate() *timestamppb.Timestamp {
 func (x *UpdateTodoRequest) GetTagIds() []string {
 	if x != nil {
 		return x.TagIds
+	}
+	return nil
+}
+
+func (x *UpdateTodoRequest) GetReminders() []string {
+	if x != nil {
+		return x.Reminders
 	}
 	return nil
 }
@@ -1206,7 +1238,7 @@ const file_todo_v1_todo_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\x96\x03\n" +
+	"updated_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\xe5\x03\n" +
 	"\x04Todo\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x14\n" +
@@ -1220,7 +1252,9 @@ const file_todo_v1_todo_proto_rawDesc = "" +
 	"\n" +
 	"updated_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12 \n" +
 	"\x04tags\x18\n" +
-	" \x03(\v2\f.todo.v1.TagR\x04tags\"<\n" +
+	" \x03(\v2\f.todo.v1.TagR\x04tags\x12\x1c\n" +
+	"\treminders\x18\v \x03(\tR\treminders\x12/\n" +
+	"\x13triggered_reminders\x18\f \x03(\tR\x12triggeredReminders\"<\n" +
 	"\x10CreateTagRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
 	"\x05color\x18\x02 \x01(\tR\x05color\"S\n" +
@@ -1234,15 +1268,16 @@ const file_todo_v1_todo_proto_rawDesc = "" +
 	"\x06tag_id\x18\x01 \x01(\tR\x05tagId\"J\n" +
 	"\x10ListTagsResponse\x12 \n" +
 	"\x04tags\x18\x01 \x03(\v2\f.todo.v1.TagR\x04tags\x12\x14\n" +
-	"\x05total\x18\x02 \x01(\x05R\x05total\"\xce\x01\n" +
+	"\x05total\x18\x02 \x01(\x05R\x05total\"\xec\x01\n" +
 	"\x11CreateTodoRequest\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x121\n" +
 	"\bpriority\x18\x03 \x01(\x0e2\x15.todo.v1.TodoPriorityR\bpriority\x125\n" +
 	"\bdue_date\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\adueDate\x12\x17\n" +
-	"\atag_ids\x18\x05 \x03(\tR\x06tagIds\")\n" +
+	"\atag_ids\x18\x05 \x03(\tR\x06tagIds\x12\x1c\n" +
+	"\treminders\x18\x06 \x03(\tR\treminders\")\n" +
 	"\x0eGetTodoRequest\x12\x17\n" +
-	"\atodo_id\x18\x01 \x01(\tR\x06todoId\"\x94\x02\n" +
+	"\atodo_id\x18\x01 \x01(\tR\x06todoId\"\xb2\x02\n" +
 	"\x11UpdateTodoRequest\x12\x17\n" +
 	"\atodo_id\x18\x01 \x01(\tR\x06todoId\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
@@ -1250,7 +1285,8 @@ const file_todo_v1_todo_proto_rawDesc = "" +
 	"\x06status\x18\x04 \x01(\x0e2\x13.todo.v1.TodoStatusR\x06status\x121\n" +
 	"\bpriority\x18\x05 \x01(\x0e2\x15.todo.v1.TodoPriorityR\bpriority\x125\n" +
 	"\bdue_date\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\adueDate\x12\x17\n" +
-	"\atag_ids\x18\a \x03(\tR\x06tagIds\",\n" +
+	"\atag_ids\x18\a \x03(\tR\x06tagIds\x12\x1c\n" +
+	"\treminders\x18\b \x03(\tR\treminders\",\n" +
 	"\x11DeleteTodoRequest\x12\x17\n" +
 	"\atodo_id\x18\x01 \x01(\tR\x06todoId\"\xb2\x02\n" +
 	"\x06Paging\x12*\n" +

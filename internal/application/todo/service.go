@@ -134,7 +134,7 @@ func (s *Service) ListTags(ctx context.Context, p input.ListTagsParams) ([]*todo
 
 // CreateTodo handles the creation of a new todo and associates it with tags within a transaction.
 func (s *Service) CreateTodo(ctx context.Context, p input.CreateTodoParams) (*todo.Todo, error) {
-	t, err := todo.New(p.UserID, p.Title, p.Description, p.Priority, p.DueDate)
+	t, err := todo.New(p.UserID, p.Title, p.Description, p.Priority, p.DueDate, p.Reminders)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %s", apperr.ErrValidation, err)
 	}
@@ -198,7 +198,7 @@ func (s *Service) UpdateTodo(ctx context.Context, p input.UpdateTodoParams) (*to
 	if !t.IsOwnedBy(p.UserID) {
 		return nil, apperr.ErrForbidden
 	}
-	if err := t.Update(p.Title, p.Description, p.Status, p.Priority, p.DueDate); err != nil {
+	if err := t.Update(p.Title, p.Description, p.Status, p.Priority, p.DueDate, p.Reminders); err != nil {
 		return nil, fmt.Errorf("%w: %s", apperr.ErrValidation, err)
 	}
 
@@ -330,17 +330,18 @@ type cachedTag struct {
 }
 
 type cachedTodo struct {
-	ID           uuid.UUID     `json:"id"`
-	UserID       uuid.UUID     `json:"user_id"`
-	Title        string        `json:"title"`
-	Description  string        `json:"description"`
-	Status       todo.Status   `json:"status"`
-	Priority     todo.Priority `json:"priority"`
-	DueDate      *time.Time    `json:"due_date"`
-	CreatedAt    time.Time     `json:"created_at"`
-	UpdatedAt    time.Time     `json:"updated_at"`
-	Tags         []*cachedTag  `json:"tags"`
-	ReminderSent bool          `json:"reminder_sent"`
+	ID                 uuid.UUID     `json:"id"`
+	UserID             uuid.UUID     `json:"user_id"`
+	Title              string        `json:"title"`
+	Description        string        `json:"description"`
+	Status             todo.Status   `json:"status"`
+	Priority           todo.Priority `json:"priority"`
+	DueDate            *time.Time    `json:"due_date"`
+	CreatedAt          time.Time     `json:"created_at"`
+	UpdatedAt          time.Time     `json:"updated_at"`
+	Tags               []*cachedTag  `json:"tags"`
+	Reminders          []string      `json:"reminders"`
+	TriggeredReminders []string      `json:"triggered_reminders"`
 }
 
 func mapTagToCache(t *todo.Tag) *cachedTag {
@@ -372,7 +373,7 @@ func mapTodoToCache(t *todo.Todo) *cachedTodo {
 		ID: t.ID(), UserID: t.UserID(), Title: t.Title(), Description: t.Description(),
 		Status: t.Status(), Priority: t.Priority(), DueDate: t.DueDate(),
 		CreatedAt: t.CreatedAt(), UpdatedAt: t.UpdatedAt(), Tags: cTags,
-		ReminderSent: t.ReminderSent(),
+		Reminders: t.Reminders(), TriggeredReminders: t.TriggeredReminders(),
 	}
 }
 
@@ -384,5 +385,5 @@ func mapCacheToTodo(c *cachedTodo) *todo.Todo {
 	for _, ct := range c.Tags {
 		tags = append(tags, mapCacheToTag(ct))
 	}
-	return todo.Reconstitute(c.ID, c.UserID, c.Title, c.Description, c.Status, c.Priority, c.DueDate, c.CreatedAt, c.UpdatedAt, tags, c.ReminderSent)
+	return todo.Reconstitute(c.ID, c.UserID, c.Title, c.Description, c.Status, c.Priority, c.DueDate, c.CreatedAt, c.UpdatedAt, tags, c.Reminders, c.TriggeredReminders)
 }
