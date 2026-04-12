@@ -30,12 +30,13 @@ type Config struct {
 
 // Service implements input.AuthUseCase and manages the authentication lifecycle.
 type Service struct {
-	userRepo    output.UserRepository
-	sessionRepo output.SessionRepository
-	tokenMaker  token.Maker
-	oauthCfg    *oauth2.Config
-	cfg         Config
-	transactor  output.Transactor
+	userRepo        output.UserRepository
+	sessionRepo     output.SessionRepository
+	tokenMaker      token.Maker
+	taskDistributor output.TaskDistributor
+	oauthCfg        *oauth2.Config
+	cfg             Config
+	transactor      output.Transactor
 }
 
 // Compile-time interface conformance check.
@@ -46,13 +47,15 @@ func NewService(
 	userRepo output.UserRepository,
 	sessionRepo output.SessionRepository,
 	tokenMaker token.Maker,
+	taskDistributor output.TaskDistributor,
 	cfg Config,
 	transactor output.Transactor,
 ) *Service {
 	return &Service{
-		userRepo:    userRepo,
-		sessionRepo: sessionRepo,
-		tokenMaker:  tokenMaker,
+		userRepo:        userRepo,
+		sessionRepo:     sessionRepo,
+		tokenMaker:      tokenMaker,
+		taskDistributor: taskDistributor,
 		oauthCfg: &oauth2.Config{
 			ClientID:     cfg.GoogleClientID,
 			ClientSecret: cfg.GoogleClientSecret,
@@ -160,6 +163,13 @@ func (s *Service) ExchangeAndLogin(ctx context.Context, p input.ExchangeAndLogin
 
 	if err != nil {
 		return nil, err
+	}
+
+	// Trigger welcome email if the user was just registered (within the last 10 seconds)
+	if time.Since(u.CreatedAt()) < 10*time.Second {
+		_ = s.taskDistributor.DistributeTaskSendWelcomeEmail(ctx, &output.TaskPayloadSendWelcomeEmail{
+			UserID: u.ID(),
+		})
 	}
 
 	return &input.LoginResult{

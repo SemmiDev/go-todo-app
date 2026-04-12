@@ -24,6 +24,7 @@ import (
 
 	"github.com/semmidev/go-todo-app/docs"
 	pb "github.com/semmidev/go-todo-app/gen/todo/v1"
+	"github.com/semmidev/go-todo-app/internal/adapter/driven/asynqtask"
 	"github.com/semmidev/go-todo-app/internal/adapter/driven/memcached"
 	"github.com/semmidev/go-todo-app/internal/adapter/driven/postgres"
 	grpchandler "github.com/semmidev/go-todo-app/internal/adapter/driving/grpc"
@@ -34,6 +35,7 @@ import (
 	"github.com/semmidev/go-todo-app/internal/common/logging"
 	"github.com/semmidev/go-todo-app/internal/common/token"
 
+	"github.com/hibiken/asynq"
 	"github.com/semmidev/go-todo-app/internal/common/validation"
 	"github.com/semmidev/go-todo-app/internal/config"
 	"github.com/semmidev/go-todo-app/web"
@@ -80,8 +82,11 @@ func run(ctx context.Context, cfg *config.AppConfig, logger *slog.Logger) error 
 		return fmt.Errorf("create token maker: %w", err)
 	}
 
+	redisOpt := asynq.RedisClientOpt{Addr: cfg.RedisURL}
+	taskDistributor := asynqtask.NewDistributor(redisOpt)
+
 	// ─── Application services (use-cases) ────────────────────────────────
-	authSvc := authapp.NewService(userRepo, sessionRepo, tokenMaker, authapp.Config{
+	authSvc := authapp.NewService(userRepo, sessionRepo, tokenMaker, taskDistributor, authapp.Config{
 		AccessTokenDuration:  cfg.AccessTokenDuration,
 		RefreshTokenDuration: cfg.RefreshTokenDuration,
 		GoogleClientID:       cfg.GoogleClientID,

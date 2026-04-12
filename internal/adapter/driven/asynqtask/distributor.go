@@ -16,6 +16,9 @@ const (
 	// TaskSendReminderEmail is the unique identifier for the reminder email task.
 	TaskSendReminderEmail = "task:send_reminder_email"
 
+	// TaskSendWelcomeEmail is the unique identifier for the welcome email task.
+	TaskSendWelcomeEmail = "task:send_welcome_email"
+
 	// QueueCritical handles high-priority tasks.
 	QueueCritical = "critical"
 	// QueueDefault handles standard-priority tasks.
@@ -42,15 +45,34 @@ func (d *Distributor) DistributeTaskSendReminderEmail(
 	ctx context.Context,
 	payload *output.TaskPayloadSendReminderEmail,
 ) error {
+	return d.enqueueTask(ctx, TaskSendReminderEmail, payload, QueueDefault)
+}
+
+// DistributeTaskSendWelcomeEmail serializes the payload and enqueues a SendWelcomeEmail task 
+// into the critical queue with a maximum of 5 retries.
+func (d *Distributor) DistributeTaskSendWelcomeEmail(
+	ctx context.Context,
+	payload *output.TaskPayloadSendWelcomeEmail,
+) error {
+	return d.enqueueTask(ctx, TaskSendWelcomeEmail, payload, QueueCritical)
+}
+
+// enqueueTask is a helper method to serialize the payload and enqueue an Asynq task.
+func (d *Distributor) enqueueTask(
+	ctx context.Context,
+	taskType string,
+	payload any,
+	queue string,
+) error {
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return fmt.Errorf("marshal payload: %w", err)
 	}
 
-	task := asynq.NewTask(TaskSendReminderEmail, jsonPayload,
+	task := asynq.NewTask(taskType, jsonPayload,
 		asynq.MaxRetry(5),
 		asynq.Timeout(10*time.Second),
-		asynq.Queue(QueueDefault),
+		asynq.Queue(queue),
 	)
 
 	_, err = d.client.EnqueueContext(ctx, task)

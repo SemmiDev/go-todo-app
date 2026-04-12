@@ -19,6 +19,8 @@ type TaskProcessor interface {
 	Shutdown()
 	// ProcessTaskSendReminderEmail decodes the payload and sends the notification email.
 	ProcessTaskSendReminderEmail(ctx context.Context, task *asynq.Task) error
+	// ProcessTaskSendWelcomeEmail decodes the payload and sends the welcome email.
+	ProcessTaskSendWelcomeEmail(ctx context.Context, task *asynq.Task) error
 }
 
 // RedisTaskProcessor implements TaskProcessor using an Asynq server.
@@ -79,6 +81,7 @@ func (processor *RedisTaskProcessor) Start() error {
 
 	// Register specific string queue keys to Go functions
 	mux.HandleFunc("task:send_reminder_email", processor.ProcessTaskSendReminderEmail)
+	mux.HandleFunc("task:send_welcome_email", processor.ProcessTaskSendWelcomeEmail)
 
 	return processor.server.Start(mux)
 }
