@@ -85,6 +85,8 @@ func run(ctx context.Context, cfg *config.AppConfig, logger *slog.Logger) error 
 	redisOpt := asynq.RedisClientOpt{Addr: cfg.RedisURL}
 	taskDistributor := asynqtask.NewDistributor(redisOpt)
 
+	uow := postgres.NewUnitOfWork(db)
+
 	// ─── Application services (use-cases) ────────────────────────────────
 	authSvc := authapp.NewService(userRepo, sessionRepo, tokenMaker, taskDistributor, authapp.Config{
 		AccessTokenDuration:  cfg.AccessTokenDuration,
@@ -94,7 +96,7 @@ func run(ctx context.Context, cfg *config.AppConfig, logger *slog.Logger) error 
 		GoogleCallbackURL:    cfg.GoogleCallbackURL,
 	}, db)
 	memcachedRepo := memcached.NewCacheRepo(cfg.MemcachedURL)
-	todoSvc := todoapp.NewService(todoRepo, tagRepo, todoTagRepo, memcachedRepo, db)
+	todoSvc := todoapp.NewService(todoRepo, tagRepo, todoTagRepo, memcachedRepo, uow)
 
 	// ─── Validator ───────────────────────────────────────────────────────────
 	val := validation.New()

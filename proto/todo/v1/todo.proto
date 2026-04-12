@@ -132,6 +132,8 @@ message ListTodosRequest {
   string     keyword        = 5;
   string     sort_by        = 6;
   string     sort_direction = 7;
+  google.protobuf.Timestamp start_date = 8;
+  google.protobuf.Timestamp end_date   = 9;
 }
 
 message ListTodosResponse {

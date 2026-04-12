@@ -343,6 +343,14 @@ func (s *TodoServer) ListTodos(ctx context.Context, req *pb.ListTodosRequest) (*
 	if sd := req.GetSortDirection(); sd != "" {
 		f.SortDirection = sd
 	}
+	if req.GetStartDate() != nil {
+		t := req.GetStartDate().AsTime()
+		f.StartDate = &t
+	}
+	if req.GetEndDate() != nil {
+		t := req.GetEndDate().AsTime()
+		f.EndDate = &t
+	}
 
 	params := input.ListTodosParams{
 		Filter: f,

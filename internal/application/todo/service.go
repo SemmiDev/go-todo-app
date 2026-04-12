@@ -22,7 +22,7 @@ type Service struct {
 	tagRepo     output.TagRepository
 	todoTagRepo output.TodoTagRepository
 	cacheRepo   output.CacheRepository
-	transactor  output.Transactor
+	uow         output.UnitOfWork
 }
 
 // Compile-time interface conformance checks.
@@ -37,14 +37,14 @@ func NewService(
 	tagRepo output.TagRepository,
 	todoTagRepo output.TodoTagRepository,
 	cacheRepo output.CacheRepository,
-	transactor output.Transactor,
+	uow output.UnitOfWork,
 ) *Service {
 	return &Service{
 		todoRepo:    todoRepo,
 		tagRepo:     tagRepo,
 		todoTagRepo: todoTagRepo,
 		cacheRepo:   cacheRepo,
-		transactor:  transactor,
+		uow:         uow,
 	}
 }
 
@@ -139,15 +139,15 @@ func (s *Service) CreateTodo(ctx context.Context, p input.CreateTodoParams) (*to
 		return nil, fmt.Errorf("%w: %s", apperr.ErrValidation, err)
 	}
 
-	err = s.transactor.RunInTx(ctx, func(txCtx context.Context) error {
-		if err := s.todoRepo.Create(txCtx, t); err != nil {
+	err = s.uow.Do(ctx, func(store output.UnitOfWorkStore) error {
+		if err := store.Todos().Create(ctx, t); err != nil {
 			return err
 		}
 		if len(p.TagIDs) > 0 {
-			if err := s.todoTagRepo.SetTags(txCtx, t.ID(), p.TagIDs); err != nil {
+			if err := store.TodoTags().SetTags(ctx, t.ID(), p.TagIDs); err != nil {
 				return err
 			}
-			tags, _ := s.todoTagRepo.GetTagsForTodo(txCtx, t.ID())
+			tags, _ := store.TodoTags().GetTagsForTodo(ctx, t.ID())
 			t.SetTags(tags)
 		}
 		return nil
@@ -202,16 +202,16 @@ func (s *Service) UpdateTodo(ctx context.Context, p input.UpdateTodoParams) (*to
 		return nil, fmt.Errorf("%w: %s", apperr.ErrValidation, err)
 	}
 
-	err = s.transactor.RunInTx(ctx, func(txCtx context.Context) error {
-		if err := s.todoRepo.Update(txCtx, t); err != nil {
+	err = s.uow.Do(ctx, func(store output.UnitOfWorkStore) error {
+		if err := store.Todos().Update(ctx, t); err != nil {
 			return err
 		}
 		if p.TagIDs != nil {
-			if err := s.todoTagRepo.SetTags(txCtx, t.ID(), p.TagIDs); err != nil {
+			if err := store.TodoTags().SetTags(ctx, t.ID(), p.TagIDs); err != nil {
 				return err
 			}
 		}
-		tags, _ := s.todoTagRepo.GetTagsForTodo(txCtx, t.ID())
+		tags, _ := store.TodoTags().GetTagsForTodo(ctx, t.ID())
 		t.SetTags(tags)
 		return nil
 	})
@@ -237,12 +237,17 @@ func (s *Service) UpdateTodoStatus(ctx context.Context, p input.UpdateTodoStatus
 		return nil, fmt.Errorf("%w: %s", apperr.ErrValidation, err)
 	}
 
-	if err := s.todoRepo.Update(ctx, t); err != nil {
+	err = s.uow.Do(ctx, func(store output.UnitOfWorkStore) error {
+		if err := store.Todos().Update(ctx, t); err != nil {
+			return err
+		}
+		tags, _ := store.TodoTags().GetTagsForTodo(ctx, t.ID())
+		t.SetTags(tags)
+		return nil
+	})
+	if err != nil {
 		return nil, err
 	}
-
-	tags, _ := s.todoTagRepo.GetTagsForTodo(ctx, t.ID())
-	t.SetTags(tags)
 
 	_ = s.cacheRepo.Delete(ctx, fmt.Sprintf("todo:%s", t.ID().String()))
 	return t, nil

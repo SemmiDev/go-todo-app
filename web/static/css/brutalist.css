@@ -602,6 +602,35 @@ h3 { font-size: clamp(1.1rem, 2vw, 1.5rem); }
   min-width: 200px;
 }
 
+.filter-date-range {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: white;
+  border: var(--border-w) solid var(--border);
+  padding: 0 0.75rem;
+  box-shadow: var(--shadow-sm);
+  height: 38px;
+}
+
+.filter-date-range label {
+  margin: 0;
+  font-size: 0.7rem;
+  white-space: nowrap;
+}
+
+.filter-date-range input[type="date"] {
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: inherit;
+  outline: none;
+  background: transparent;
+  cursor: pointer;
+}
+
 .todo-list {
   display: flex;
   flex-direction: column;

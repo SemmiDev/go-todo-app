@@ -6,6 +6,7 @@ package filter
 import (
 	"errors"
 	"strings"
+	"time"
 )
 
 const (
@@ -33,6 +34,10 @@ type Filter struct {
 	// Sorting
 	SortBy        string `json:"sort_by"`
 	SortDirection string `json:"sort_direction"`
+
+	// Date Range Filtering
+	StartDate *time.Time `json:"start_date"`
+	EndDate   *time.Time `json:"end_date"`
 }
 
 // NewFilter returns a Filter with safe defaults applied.
@@ -59,6 +64,11 @@ func (f *Filter) Validate() {
 		f.SortDirection = AscDirection
 	}
 	f.Keyword = strings.TrimSpace(f.Keyword)
+
+	// Ensure StartDate is before EndDate if both are provided
+	if f.StartDate != nil && f.EndDate != nil && f.StartDate.After(*f.EndDate) {
+		f.StartDate, f.EndDate = f.EndDate, f.StartDate
+	}
 }
 
 // GetLimit returns the SQL LIMIT value (-1 = no limit).

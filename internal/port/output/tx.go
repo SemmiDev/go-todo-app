@@ -11,3 +11,16 @@ type Transactor interface {
 	// propagates the transactional context.
 	RunInTx(ctx context.Context, fn func(ctx context.Context) error) error
 }
+
+// UnitOfWork defines an atomic unit of business logic that manages its own
+// repository access and transaction lifecycle.
+type UnitOfWork interface {
+	Do(ctx context.Context, fn func(uow UnitOfWorkStore) error) error
+}
+
+// UnitOfWorkStore provides access to repositories within a UnitOfWork.
+type UnitOfWorkStore interface {
+	Todos() TodoRepository
+	Tags() TagRepository
+	TodoTags() TodoTagRepository
+}

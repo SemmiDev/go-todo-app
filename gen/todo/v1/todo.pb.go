@@ -1038,6 +1038,8 @@ type ListTodosRequest struct {
 	Keyword       string                 `protobuf:"bytes,5,opt,name=keyword,proto3" json:"keyword,omitempty"`
 	SortBy        string                 `protobuf:"bytes,6,opt,name=sort_by,json=sortBy,proto3" json:"sort_by,omitempty"`
 	SortDirection string                 `protobuf:"bytes,7,opt,name=sort_direction,json=sortDirection,proto3" json:"sort_direction,omitempty"`
+	StartDate     *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=start_date,json=startDate,proto3" json:"start_date,omitempty"`
+	EndDate       *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=end_date,json=endDate,proto3" json:"end_date,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1119,6 +1121,20 @@ func (x *ListTodosRequest) GetSortDirection() string {
 		return x.SortDirection
 	}
 	return ""
+}
+
+func (x *ListTodosRequest) GetStartDate() *timestamppb.Timestamp {
+	if x != nil {
+		return x.StartDate
+	}
+	return nil
+}
+
+func (x *ListTodosRequest) GetEndDate() *timestamppb.Timestamp {
+	if x != nil {
+		return x.EndDate
+	}
+	return nil
 }
 
 type ListTodosResponse struct {
@@ -1354,7 +1370,7 @@ const file_todo_v1_todo_proto_rawDesc = "" +
 	"\x1atotal_data_in_current_page\x18\x06 \x01(\x05R\x16totalDataInCurrentPage\x12\x1b\n" +
 	"\tlast_page\x18\a \x01(\x05R\blastPage\x12\x12\n" +
 	"\x04from\x18\b \x01(\x05R\x04from\x12\x0e\n" +
-	"\x02to\x18\t \x01(\x05R\x02to\"\xe1\x01\n" +
+	"\x02to\x18\t \x01(\x05R\x02to\"\xd3\x02\n" +
 	"\x10ListTodosRequest\x12+\n" +
 	"\x06status\x18\x01 \x01(\x0e2\x13.todo.v1.TodoStatusR\x06status\x12\x15\n" +
 	"\x06tag_id\x18\x02 \x01(\tR\x05tagId\x12\x12\n" +
@@ -1362,7 +1378,10 @@ const file_todo_v1_todo_proto_rawDesc = "" +
 	"\tpage_size\x18\x04 \x01(\x05R\bpageSize\x12\x18\n" +
 	"\akeyword\x18\x05 \x01(\tR\akeyword\x12\x17\n" +
 	"\asort_by\x18\x06 \x01(\tR\x06sortBy\x12%\n" +
-	"\x0esort_direction\x18\a \x01(\tR\rsortDirection\"a\n" +
+	"\x0esort_direction\x18\a \x01(\tR\rsortDirection\x129\n" +
+	"\n" +
+	"start_date\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tstartDate\x125\n" +
+	"\bend_date\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\aendDate\"a\n" +
 	"\x11ListTodosResponse\x12#\n" +
 	"\x05todos\x18\x01 \x03(\v2\r.todo.v1.TodoR\x05todos\x12'\n" +
 	"\x06paging\x18\x02 \x01(\v2\x0f.todo.v1.PagingR\x06paging\"E\n" +
@@ -1458,39 +1477,41 @@ var file_todo_v1_todo_proto_depIdxs = []int32{
 	19, // 13: todo.v1.UpdateTodoRequest.due_date:type_name -> google.protobuf.Timestamp
 	0,  // 14: todo.v1.UpdateTodoStatusRequest.status:type_name -> todo.v1.TodoStatus
 	0,  // 15: todo.v1.ListTodosRequest.status:type_name -> todo.v1.TodoStatus
-	3,  // 16: todo.v1.ListTodosResponse.todos:type_name -> todo.v1.Todo
-	14, // 17: todo.v1.ListTodosResponse.paging:type_name -> todo.v1.Paging
-	4,  // 18: todo.v1.TagService.CreateTag:input_type -> todo.v1.CreateTagRequest
-	7,  // 19: todo.v1.TagService.GetTag:input_type -> todo.v1.GetTagRequest
-	5,  // 20: todo.v1.TagService.UpdateTag:input_type -> todo.v1.UpdateTagRequest
-	6,  // 21: todo.v1.TagService.DeleteTag:input_type -> todo.v1.DeleteTagRequest
-	20, // 22: todo.v1.TagService.ListTags:input_type -> google.protobuf.Empty
-	9,  // 23: todo.v1.TodoService.CreateTodo:input_type -> todo.v1.CreateTodoRequest
-	10, // 24: todo.v1.TodoService.GetTodo:input_type -> todo.v1.GetTodoRequest
-	11, // 25: todo.v1.TodoService.UpdateTodo:input_type -> todo.v1.UpdateTodoRequest
-	12, // 26: todo.v1.TodoService.UpdateTodoStatus:input_type -> todo.v1.UpdateTodoStatusRequest
-	13, // 27: todo.v1.TodoService.DeleteTodo:input_type -> todo.v1.DeleteTodoRequest
-	15, // 28: todo.v1.TodoService.ListTodos:input_type -> todo.v1.ListTodosRequest
-	17, // 29: todo.v1.TodoService.AddTagToTodo:input_type -> todo.v1.AddTagToTodoRequest
-	18, // 30: todo.v1.TodoService.RemoveTagFromTodo:input_type -> todo.v1.RemoveTagFromTodoRequest
-	2,  // 31: todo.v1.TagService.CreateTag:output_type -> todo.v1.Tag
-	2,  // 32: todo.v1.TagService.GetTag:output_type -> todo.v1.Tag
-	2,  // 33: todo.v1.TagService.UpdateTag:output_type -> todo.v1.Tag
-	20, // 34: todo.v1.TagService.DeleteTag:output_type -> google.protobuf.Empty
-	8,  // 35: todo.v1.TagService.ListTags:output_type -> todo.v1.ListTagsResponse
-	3,  // 36: todo.v1.TodoService.CreateTodo:output_type -> todo.v1.Todo
-	3,  // 37: todo.v1.TodoService.GetTodo:output_type -> todo.v1.Todo
-	3,  // 38: todo.v1.TodoService.UpdateTodo:output_type -> todo.v1.Todo
-	3,  // 39: todo.v1.TodoService.UpdateTodoStatus:output_type -> todo.v1.Todo
-	20, // 40: todo.v1.TodoService.DeleteTodo:output_type -> google.protobuf.Empty
-	16, // 41: todo.v1.TodoService.ListTodos:output_type -> todo.v1.ListTodosResponse
-	3,  // 42: todo.v1.TodoService.AddTagToTodo:output_type -> todo.v1.Todo
-	3,  // 43: todo.v1.TodoService.RemoveTagFromTodo:output_type -> todo.v1.Todo
-	31, // [31:44] is the sub-list for method output_type
-	18, // [18:31] is the sub-list for method input_type
-	18, // [18:18] is the sub-list for extension type_name
-	18, // [18:18] is the sub-list for extension extendee
-	0,  // [0:18] is the sub-list for field type_name
+	19, // 16: todo.v1.ListTodosRequest.start_date:type_name -> google.protobuf.Timestamp
+	19, // 17: todo.v1.ListTodosRequest.end_date:type_name -> google.protobuf.Timestamp
+	3,  // 18: todo.v1.ListTodosResponse.todos:type_name -> todo.v1.Todo
+	14, // 19: todo.v1.ListTodosResponse.paging:type_name -> todo.v1.Paging
+	4,  // 20: todo.v1.TagService.CreateTag:input_type -> todo.v1.CreateTagRequest
+	7,  // 21: todo.v1.TagService.GetTag:input_type -> todo.v1.GetTagRequest
+	5,  // 22: todo.v1.TagService.UpdateTag:input_type -> todo.v1.UpdateTagRequest
+	6,  // 23: todo.v1.TagService.DeleteTag:input_type -> todo.v1.DeleteTagRequest
+	20, // 24: todo.v1.TagService.ListTags:input_type -> google.protobuf.Empty
+	9,  // 25: todo.v1.TodoService.CreateTodo:input_type -> todo.v1.CreateTodoRequest
+	10, // 26: todo.v1.TodoService.GetTodo:input_type -> todo.v1.GetTodoRequest
+	11, // 27: todo.v1.TodoService.UpdateTodo:input_type -> todo.v1.UpdateTodoRequest
+	12, // 28: todo.v1.TodoService.UpdateTodoStatus:input_type -> todo.v1.UpdateTodoStatusRequest
+	13, // 29: todo.v1.TodoService.DeleteTodo:input_type -> todo.v1.DeleteTodoRequest
+	15, // 30: todo.v1.TodoService.ListTodos:input_type -> todo.v1.ListTodosRequest
+	17, // 31: todo.v1.TodoService.AddTagToTodo:input_type -> todo.v1.AddTagToTodoRequest
+	18, // 32: todo.v1.TodoService.RemoveTagFromTodo:input_type -> todo.v1.RemoveTagFromTodoRequest
+	2,  // 33: todo.v1.TagService.CreateTag:output_type -> todo.v1.Tag
+	2,  // 34: todo.v1.TagService.GetTag:output_type -> todo.v1.Tag
+	2,  // 35: todo.v1.TagService.UpdateTag:output_type -> todo.v1.Tag
+	20, // 36: todo.v1.TagService.DeleteTag:output_type -> google.protobuf.Empty
+	8,  // 37: todo.v1.TagService.ListTags:output_type -> todo.v1.ListTagsResponse
+	3,  // 38: todo.v1.TodoService.CreateTodo:output_type -> todo.v1.Todo
+	3,  // 39: todo.v1.TodoService.GetTodo:output_type -> todo.v1.Todo
+	3,  // 40: todo.v1.TodoService.UpdateTodo:output_type -> todo.v1.Todo
+	3,  // 41: todo.v1.TodoService.UpdateTodoStatus:output_type -> todo.v1.Todo
+	20, // 42: todo.v1.TodoService.DeleteTodo:output_type -> google.protobuf.Empty
+	16, // 43: todo.v1.TodoService.ListTodos:output_type -> todo.v1.ListTodosResponse
+	3,  // 44: todo.v1.TodoService.AddTagToTodo:output_type -> todo.v1.Todo
+	3,  // 45: todo.v1.TodoService.RemoveTagFromTodo:output_type -> todo.v1.Todo
+	33, // [33:46] is the sub-list for method output_type
+	20, // [20:33] is the sub-list for method input_type
+	20, // [20:20] is the sub-list for extension type_name
+	20, // [20:20] is the sub-list for extension extendee
+	0,  // [0:20] is the sub-list for field type_name
 }
 
 func init() { file_todo_v1_todo_proto_init() }

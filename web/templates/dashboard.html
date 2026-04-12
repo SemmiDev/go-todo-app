@@ -31,6 +31,12 @@
                     <option value="priority:asc">Priority ↑</option>
                     <option value="due_date:asc">Due Date ↑</option>
                 </select>
+                <div class="filter-date-range">
+                    <label class="form-label">From:</label>
+                    <input type="date" id="filter-start-date" onchange="applyFilters()">
+                    <label class="form-label">To:</label>
+                    <input type="date" id="filter-end-date" onchange="applyFilters()">
+                </div>
                 <input type="text" id="filter-keyword" class="form-input" placeholder="Search tasks..." oninput="debouncedSearch()">
             </div>
 
@@ -313,6 +319,17 @@
 
         const keyword = document.getElementById('filter-keyword').value.trim();
         if (keyword) p.set('keyword', keyword);
+
+        const startDate = document.getElementById('filter-start-date').value;
+        if (startDate) p.set('start_date', new Date(startDate).toISOString());
+
+        const endDate = document.getElementById('filter-end-date').value;
+        if (endDate) {
+            // Set end date to end of day
+            const d = new Date(endDate);
+            d.setHours(23, 59, 59, 999);
+            p.set('end_date', d.toISOString());
+        }
 
         return p.toString();
     }
