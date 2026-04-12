@@ -2,6 +2,15 @@
 
 A todo application built with hexagonal architecture, gRPC, and grpc-gateway.
 
+## Table of Contents
+- [Preview](#preview)
+- [Key Technologies](#key-technologies)
+- [System Architecture](#system-architecture)
+- [Hexagonal Architecture](#hexagonal-architecture-ports--adapters)
+- [Quick Start](#quick-start)
+- [Feature Addition Workflow](#feature-addition-workflow)
+- [Dev Commands](#dev-commands)
+
 ## Preview
 
 ![Preview 1](docs/ss/1.png)
@@ -24,6 +33,21 @@ The application is heavily decoupled into three highly-optimized discrete runtim
 1. server: The primary gRPC & HTTP REST boundary. Handles User flows, Auth, and immediate Todo mutations.
 2. scheduler: A lightweight SQL poller. Identifies upcoming deadlines (e.g., Todos due in <24 hours) and instantly routes queue payloads to Redis.
 3. worker: The Asynq driving adapter. A background processor handling heavy tasks safely (e.g., bouncing SMTP requests using Mailpit, sending HTML email with exponential backoff).
+
+## Hexagonal Architecture (Ports & Adapters)
+
+This project strictly follows the **Hexagonal Architecture** pattern to decouple core business logic from external concerns like databases, transport layers, and third-party services.
+
+- **Domain Layer (`internal/domain`)**: The "heart" of the application. Contains pure business logic, entities (e.g., `Todo`), and value objects. It has zero dependencies on any other layer or external framework.
+- **Application Layer (`internal/application`)**: Implements specific use cases (e.g., `CreateTodo`, `Login`). It orchestrates domain objects and coordinates the flow of data.
+- **Ports (`internal/port`)**: Defines the boundaries via interfaces.
+    - **Input Ports**: Interfaces that the application exposes to the outside world (e.g., `AuthUseCase`).
+    - **Output Ports**: Interfaces that the application needs from the outside world (e.g., `UserRepository`, `EmailSender`).
+- **Adapters (`internal/adapter`)**:
+    - **Driving Adapters (Input)**: Handlers that "drive" the application, such as gRPC/REST servers (`internal/adapter/driving/grpc`) or background task processors.
+    - **Driven Adapters (Output)**: Implementations of the output ports that interact with external infrastructure like PostgreSQL, Redis, or SMTP.
+
+This decoupled structure ensures that core business rules remain testable, maintainable, and independent of infrastructure changes.
 
 ## Quick Start
 

@@ -1,3 +1,5 @@
+// Package postgres provides the PostgreSQL implementation of the driven adapters.
+// It handles database connections, transactions, and repository implementations.
 package postgres
 
 import (

@@ -1,3 +1,5 @@
+// Package input defines the input ports (use cases) of the application.
+// These interfaces are implemented by the application layer and called by the driving adapters.
 package input
 
 import (
@@ -13,33 +15,45 @@ import (
 
 // CreateTagParams holds parameters for creating a tag.
 type CreateTagParams struct {
+	// UserID is the unique identifier of the user who owns the tag.
 	UserID uuid.UUID `json:"user_id" validate:"required,uuid"`
-	Name   string    `json:"name" validate:"required,max=50"`
-	Color  string    `json:"color" validate:"omitempty,iscolor"`
+	// Name is the display name of the tag.
+	Name string `json:"name" validate:"required,max=50"`
+	// Color is the hex color code or name for the tag.
+	Color string `json:"color" validate:"omitempty,iscolor"`
 }
 
 // GetTagParams holds parameters for retrieving a tag.
 type GetTagParams struct {
-	TagID  uuid.UUID `json:"tag_id" validate:"required,uuid"`
+	// TagID is the unique identifier of the tag to retrieve.
+	TagID uuid.UUID `json:"tag_id" validate:"required,uuid"`
+	// UserID is the unique identifier of the user who owns the tag.
 	UserID uuid.UUID `json:"user_id" validate:"required,uuid"`
 }
 
 // UpdateTagParams holds parameters for updating a tag.
 type UpdateTagParams struct {
-	TagID  uuid.UUID `json:"tag_id" validate:"required,uuid"`
+	// TagID is the unique identifier of the tag to update.
+	TagID uuid.UUID `json:"tag_id" validate:"required,uuid"`
+	// UserID is the unique identifier of the user who owns the tag.
 	UserID uuid.UUID `json:"user_id" validate:"required,uuid"`
-	Name   string    `json:"name" validate:"required,max=50"`
-	Color  string    `json:"color" validate:"omitempty,iscolor"`
+	// Name is the new display name of the tag.
+	Name string `json:"name" validate:"required,max=50"`
+	// Color is the new hex color code or name for the tag.
+	Color string `json:"color" validate:"omitempty,iscolor"`
 }
 
 // DeleteTagParams holds parameters for deleting a tag.
 type DeleteTagParams struct {
-	TagID  uuid.UUID `json:"tag_id" validate:"required,uuid"`
+	// TagID is the unique identifier of the tag to delete.
+	TagID uuid.UUID `json:"tag_id" validate:"required,uuid"`
+	// UserID is the unique identifier of the user who owns the tag.
 	UserID uuid.UUID `json:"user_id" validate:"required,uuid"`
 }
 
 // ListTagsParams holds parameters for listing tags.
 type ListTagsParams struct {
+	// UserID is the unique identifier of the user whose tags are being listed.
 	UserID uuid.UUID `json:"user_id" validate:"required,uuid"`
 }
 
@@ -47,35 +61,53 @@ type ListTagsParams struct {
 
 // CreateTodoParams holds parameters for creating a todo.
 type CreateTodoParams struct {
-	UserID      uuid.UUID     `json:"user_id" validate:"required,uuid"`
-	Title       string        `json:"title" validate:"required,max=200"`
-	Description string        `json:"description" validate:"max=1000"`
-	Priority    todo.Priority `json:"priority" validate:"omitempty,oneof=low medium high"`
-	DueDate     *time.Time    `json:"due_date" validate:"omitempty"`
-	TagIDs      []uuid.UUID   `json:"tag_ids" validate:"omitempty,dive,uuid"`
+	// UserID is the unique identifier of the user who owns the todo.
+	UserID uuid.UUID `json:"user_id" validate:"required,uuid"`
+	// Title is the brief summary of the todo item.
+	Title string `json:"title" validate:"required,max=200"`
+	// Description is the detailed explanation of the todo item.
+	Description string `json:"description" validate:"max=1000"`
+	// Priority is the importance level of the todo (low, medium, high).
+	Priority todo.Priority `json:"priority" validate:"omitempty,oneof=low medium high"`
+	// DueDate is the optional deadline for the todo item.
+	DueDate *time.Time `json:"due_date" validate:"omitempty"`
+	// TagIDs is a list of tag identifiers to associate with the todo.
+	TagIDs []uuid.UUID `json:"tag_ids" validate:"omitempty,dive,uuid"`
 }
 
 // GetTodoParams holds parameters for retrieving a todo.
 type GetTodoParams struct {
+	// TodoID is the unique identifier of the todo to retrieve.
 	TodoID uuid.UUID `json:"todo_id" validate:"required,uuid"`
+	// UserID is the unique identifier of the user who owns the todo.
 	UserID uuid.UUID `json:"user_id" validate:"required,uuid"`
 }
 
 // UpdateTodoParams holds parameters for updating a todo.
 type UpdateTodoParams struct {
-	TodoID      uuid.UUID     `json:"todo_id" validate:"required,uuid"`
-	UserID      uuid.UUID     `json:"user_id" validate:"required,uuid"`
-	Title       string        `json:"title" validate:"required,max=200"`
-	Description string        `json:"description" validate:"max=1000"`
-	Status      todo.Status   `json:"status" validate:"omitempty,oneof=pending in_progress done"`
-	Priority    todo.Priority `json:"priority" validate:"omitempty,oneof=low medium high"`
-	DueDate     *time.Time    `json:"due_date" validate:"omitempty"`
-	TagIDs      []uuid.UUID   `json:"tag_ids" validate:"omitempty,dive,uuid"`
+	// TodoID is the unique identifier of the todo to update.
+	TodoID uuid.UUID `json:"todo_id" validate:"required,uuid"`
+	// UserID is the unique identifier of the user who owns the todo.
+	UserID uuid.UUID `json:"user_id" validate:"required,uuid"`
+	// Title is the new brief summary of the todo item.
+	Title string `json:"title" validate:"required,max=200"`
+	// Description is the new detailed explanation of the todo item.
+	Description string `json:"description" validate:"max=1000"`
+	// Status is the current state of the todo (pending, in_progress, done).
+	Status todo.Status `json:"status" validate:"omitempty,oneof=pending in_progress done"`
+	// Priority is the new importance level of the todo.
+	Priority todo.Priority `json:"priority" validate:"omitempty,oneof=low medium high"`
+	// DueDate is the new optional deadline for the todo item.
+	DueDate *time.Time `json:"due_date" validate:"omitempty"`
+	// TagIDs is the new list of tag identifiers for the todo.
+	TagIDs []uuid.UUID `json:"tag_ids" validate:"omitempty,dive,uuid"`
 }
 
 // DeleteTodoParams holds parameters for deleting a todo.
 type DeleteTodoParams struct {
+	// TodoID is the unique identifier of the todo to delete.
 	TodoID uuid.UUID `json:"todo_id" validate:"required,uuid"`
+	// UserID is the unique identifier of the user who owns the todo.
 	UserID uuid.UUID `json:"user_id" validate:"required,uuid"`
 }
 
@@ -83,22 +115,31 @@ type DeleteTodoParams struct {
 type ListTodosParams struct {
 	filter.Filter
 
-	UserID uuid.UUID    `json:"user_id" validate:"required,uuid"`
+	// UserID is the unique identifier of the user whose todos are being listed.
+	UserID uuid.UUID `json:"user_id" validate:"required,uuid"`
+	// Status filters todos by their current state.
 	Status *todo.Status `json:"status" validate:"omitempty,oneof=pending in_progress done"`
-	TagID  *uuid.UUID   `json:"tag_id" validate:"omitempty,uuid"`
+	// TagID filters todos that have a specific tag.
+	TagID *uuid.UUID `json:"tag_id" validate:"omitempty,uuid"`
 }
 
 // AddTagToTodoParams holds parameters for adding a tag to a todo.
 type AddTagToTodoParams struct {
+	// TodoID is the unique identifier of the todo.
 	TodoID uuid.UUID `json:"todo_id" validate:"required,uuid"`
-	TagID  uuid.UUID `json:"tag_id" validate:"required,uuid"`
+	// TagID is the unique identifier of the tag to add.
+	TagID uuid.UUID `json:"tag_id" validate:"required,uuid"`
+	// UserID is the unique identifier of the user who owns both.
 	UserID uuid.UUID `json:"user_id" validate:"required,uuid"`
 }
 
 // RemoveTagFromTodoParams holds parameters for removing a tag from a todo.
 type RemoveTagFromTodoParams struct {
+	// TodoID is the unique identifier of the todo.
 	TodoID uuid.UUID `json:"todo_id" validate:"required,uuid"`
-	TagID  uuid.UUID `json:"tag_id" validate:"required,uuid"`
+	// TagID is the unique identifier of the tag to remove.
+	TagID uuid.UUID `json:"tag_id" validate:"required,uuid"`
+	// UserID is the unique identifier of the user who owns both.
 	UserID uuid.UUID `json:"user_id" validate:"required,uuid"`
 }
 
@@ -106,7 +147,9 @@ type RemoveTagFromTodoParams struct {
 
 // ListTodosResult holds paginated todos and their rich Paging metadata.
 type ListTodosResult struct {
-	Todos  []*todo.Todo
+	// Todos is the slice of todo items for the current page.
+	Todos []*todo.Todo
+	// Paging contains pagination metadata like total count and next/prev page info.
 	Paging *filter.Paging
 }
 
@@ -114,20 +157,32 @@ type ListTodosResult struct {
 
 // TagUseCase is the driving port for tag operations.
 type TagUseCase interface {
+	// CreateTag persists a new tag for a user.
 	CreateTag(ctx context.Context, p CreateTagParams) (*todo.Tag, error)
+	// GetTag retrieves a specific tag by its ID and user ID.
 	GetTag(ctx context.Context, p GetTagParams) (*todo.Tag, error)
+	// UpdateTag modifies an existing tag's details.
 	UpdateTag(ctx context.Context, p UpdateTagParams) (*todo.Tag, error)
+	// DeleteTag removes a tag from the system.
 	DeleteTag(ctx context.Context, p DeleteTagParams) error
+	// ListTags returns all tags belonging to a specific user.
 	ListTags(ctx context.Context, p ListTagsParams) ([]*todo.Tag, error)
 }
 
 // TodoUseCase is the driving port for todo operations.
 type TodoUseCase interface {
+	// CreateTodo persists a new todo item for a user.
 	CreateTodo(ctx context.Context, p CreateTodoParams) (*todo.Todo, error)
+	// GetTodo retrieves a specific todo by its ID and user ID.
 	GetTodo(ctx context.Context, p GetTodoParams) (*todo.Todo, error)
+	// UpdateTodo modifies an existing todo's details.
 	UpdateTodo(ctx context.Context, p UpdateTodoParams) (*todo.Todo, error)
+	// DeleteTodo removes a todo item from the system.
 	DeleteTodo(ctx context.Context, p DeleteTodoParams) error
+	// ListTodos returns a paginated list of todos based on filters.
 	ListTodos(ctx context.Context, p ListTodosParams) (*ListTodosResult, error)
+	// AddTagToTodo associates a tag with a todo item.
 	AddTagToTodo(ctx context.Context, p AddTagToTodoParams) (*todo.Todo, error)
+	// RemoveTagFromTodo disassociates a tag from a todo item.
 	RemoveTagFromTodo(ctx context.Context, p RemoveTagFromTodoParams) (*todo.Todo, error)
 }

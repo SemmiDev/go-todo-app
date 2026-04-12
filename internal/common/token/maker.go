@@ -1,3 +1,4 @@
+// Package token provides the common interface and primitives for token management.
 package token
 
 import (
@@ -6,11 +7,11 @@ import (
 	"github.com/google/uuid"
 )
 
-// Maker is an interface for managing tokens.
+// Maker is the core interface for creating and verifying tokens.
 type Maker interface {
-	// CreateToken creates a new token for a specific user and duration.
+	// CreateToken generates a signed token for a specific user.
 	CreateToken(userID uuid.UUID, email string, duration time.Duration, tokenType TokenType) (string, *Payload, error)
 
-	// VerifyToken checks if the token is valid or not.
+	// VerifyToken parses and validates a signed token.
 	VerifyToken(token string, tokenType TokenType) (*Payload, error)
 }

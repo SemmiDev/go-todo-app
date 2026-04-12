@@ -1,3 +1,5 @@
+// Package asynqtask provides the Asynq-based implementation for distributing 
+// background tasks to Redis-backed queues.
 package asynqtask
 
 import (
@@ -11,17 +13,22 @@ import (
 )
 
 const (
+	// TaskSendReminderEmail is the unique identifier for the reminder email task.
 	TaskSendReminderEmail = "task:send_reminder_email"
-	QueueCritical         = "critical"
-	QueueDefault          = "default"
+
+	// QueueCritical handles high-priority tasks.
+	QueueCritical = "critical"
+	// QueueDefault handles standard-priority tasks.
+	QueueDefault = "default"
 )
 
-// Distributor implements output.TaskDistributor using Asynq (Redis).
+// Distributor implements output.TaskDistributor using Asynq and Redis.
+// It is responsible for serializing task payloads and enqueuing them.
 type Distributor struct {
 	client *asynq.Client
 }
 
-// NewDistributor constructs a new Asynq task distributor.
+// NewDistributor constructs a new Asynq task distributor with the given Redis options.
 func NewDistributor(redisOpt asynq.RedisClientOpt) *Distributor {
 	client := asynq.NewClient(redisOpt)
 	return &Distributor{
@@ -29,7 +36,8 @@ func NewDistributor(redisOpt asynq.RedisClientOpt) *Distributor {
 	}
 }
 
-// DistributeTaskSendReminderEmail enqueues a SendReminderEmail task.
+// DistributeTaskSendReminderEmail serializes the payload and enqueues a SendReminderEmail task 
+// into the default queue with a maximum of 5 retries.
 func (d *Distributor) DistributeTaskSendReminderEmail(
 	ctx context.Context,
 	payload *output.TaskPayloadSendReminderEmail,

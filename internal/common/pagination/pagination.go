@@ -1,3 +1,4 @@
+// Package pagination provides helpers to normalize and validate pagination parameters.
 package pagination
 
 const (

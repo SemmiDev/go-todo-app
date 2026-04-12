@@ -1,3 +1,5 @@
+// Package todo provides the application logic for managing todos and tags.
+// It coordinates interactions between repositories, cache, and transactor.
 package todo
 
 import (
@@ -14,7 +16,7 @@ import (
 	"github.com/semmidev/go-todo-app/internal/port/output"
 )
 
-// Service implements both input.TagUseCase and input.TodoUseCase.
+// Service implements both input.TagUseCase and input.TodoUseCase to handle todo-related workflows.
 type Service struct {
 	todoRepo    output.TodoRepository
 	tagRepo     output.TagRepository
@@ -29,6 +31,7 @@ var (
 	_ input.TodoUseCase = (*Service)(nil)
 )
 
+// NewService creates a new todo service with the necessary output ports.
 func NewService(
 	todoRepo output.TodoRepository,
 	tagRepo output.TagRepository,
@@ -47,6 +50,7 @@ func NewService(
 
 // ─── Tag operations ───────────────────────────────────────────────────────────
 
+// CreateTag persists a new tag for the specified user.
 func (s *Service) CreateTag(ctx context.Context, p input.CreateTagParams) (*todo.Tag, error) {
 	t, err := todo.NewTag(p.UserID, p.Name, p.Color)
 	if err != nil {
@@ -58,6 +62,7 @@ func (s *Service) CreateTag(ctx context.Context, p input.CreateTagParams) (*todo
 	return t, nil
 }
 
+// GetTag retrieves a tag by its ID, utilizing cache when available.
 func (s *Service) GetTag(ctx context.Context, p input.GetTagParams) (*todo.Tag, error) {
 	cacheKey := fmt.Sprintf("tag:%s", p.TagID.String())
 	if data, err := s.cacheRepo.Get(ctx, cacheKey); err == nil {
@@ -85,6 +90,7 @@ func (s *Service) GetTag(ctx context.Context, p input.GetTagParams) (*todo.Tag, 
 	return t, nil
 }
 
+// UpdateTag modifies an existing tag and invalidates its cache.
 func (s *Service) UpdateTag(ctx context.Context, p input.UpdateTagParams) (*todo.Tag, error) {
 	t, err := s.tagRepo.GetByID(ctx, p.TagID)
 	if err != nil {
@@ -103,6 +109,7 @@ func (s *Service) UpdateTag(ctx context.Context, p input.UpdateTagParams) (*todo
 	return t, nil
 }
 
+// DeleteTag removes a tag and cleans up related cache entries.
 func (s *Service) DeleteTag(ctx context.Context, p input.DeleteTagParams) error {
 	t, err := s.tagRepo.GetByID(ctx, p.TagID)
 	if err != nil {
@@ -118,12 +125,14 @@ func (s *Service) DeleteTag(ctx context.Context, p input.DeleteTagParams) error 
 	return nil
 }
 
+// ListTags returns all tags belonging to a specific user.
 func (s *Service) ListTags(ctx context.Context, p input.ListTagsParams) ([]*todo.Tag, error) {
 	return s.tagRepo.ListByUserID(ctx, p.UserID)
 }
 
 // ─── Todo operations ──────────────────────────────────────────────────────────
 
+// CreateTodo handles the creation of a new todo and associates it with tags within a transaction.
 func (s *Service) CreateTodo(ctx context.Context, p input.CreateTodoParams) (*todo.Todo, error) {
 	t, err := todo.New(p.UserID, p.Title, p.Description, p.Priority, p.DueDate)
 	if err != nil {
@@ -150,6 +159,7 @@ func (s *Service) CreateTodo(ctx context.Context, p input.CreateTodoParams) (*to
 	return t, nil
 }
 
+// GetTodo retrieves a todo by its ID, including its tags, utilizing cache when available.
 func (s *Service) GetTodo(ctx context.Context, p input.GetTodoParams) (*todo.Todo, error) {
 	cacheKey := fmt.Sprintf("todo:%s", p.TodoID.String())
 	if data, err := s.cacheRepo.Get(ctx, cacheKey); err == nil {
@@ -179,6 +189,7 @@ func (s *Service) GetTodo(ctx context.Context, p input.GetTodoParams) (*todo.Tod
 	return t, nil
 }
 
+// UpdateTodo modifies a todo's properties and its tag associations within a transaction.
 func (s *Service) UpdateTodo(ctx context.Context, p input.UpdateTodoParams) (*todo.Todo, error) {
 	t, err := s.todoRepo.GetByID(ctx, p.TodoID)
 	if err != nil {
@@ -212,6 +223,7 @@ func (s *Service) UpdateTodo(ctx context.Context, p input.UpdateTodoParams) (*to
 	return t, nil
 }
 
+// DeleteTodo removes a todo and cleans up related cache entries.
 func (s *Service) DeleteTodo(ctx context.Context, p input.DeleteTodoParams) error {
 	t, err := s.todoRepo.GetByID(ctx, p.TodoID)
 	if err != nil {
@@ -227,6 +239,7 @@ func (s *Service) DeleteTodo(ctx context.Context, p input.DeleteTodoParams) erro
 	return nil
 }
 
+// ListTodos returns a paginated list of todos based on the provided filters.
 func (s *Service) ListTodos(ctx context.Context, p input.ListTodosParams) (*input.ListTodosResult, error) {
 	// Enforce safe defaults (clamping, sorting direction, etc.)
 	p.Validate()
@@ -262,6 +275,7 @@ func (s *Service) ListTodos(ctx context.Context, p input.ListTodosParams) (*inpu
 	return &input.ListTodosResult{Todos: todos, Paging: paging}, nil
 }
 
+// AddTagToTodo associates a tag with a todo, ensuring proper ownership.
 func (s *Service) AddTagToTodo(ctx context.Context, p input.AddTagToTodoParams) (*todo.Todo, error) {
 	t, err := s.todoRepo.GetByID(ctx, p.TodoID)
 	if err != nil {
@@ -286,6 +300,7 @@ func (s *Service) AddTagToTodo(ctx context.Context, p input.AddTagToTodoParams) 
 	return t, nil
 }
 
+// RemoveTagFromTodo disassociates a tag from a todo.
 func (s *Service) RemoveTagFromTodo(ctx context.Context, p input.RemoveTagFromTodoParams) (*todo.Todo, error) {
 	t, err := s.todoRepo.GetByID(ctx, p.TodoID)
 	if err != nil {

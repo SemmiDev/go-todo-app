@@ -1,3 +1,4 @@
+// Package postgres provides the PostgreSQL implementation of the driven adapters.
 package postgres
 
 import (
@@ -10,11 +11,13 @@ import (
 	"github.com/semmidev/go-todo-app/internal/domain/todo"
 )
 
-// TodoTagRepo implements output.TodoTagRepository.
+// TodoTagRepo implements output.TodoTagRepository using PostgreSQL.
 type TodoTagRepo struct{ db *DB }
 
+// NewTodoTagRepo returns a new TodoTagRepo instance.
 func NewTodoTagRepo(db *DB) *TodoTagRepo { return &TodoTagRepo{db: db} }
 
+// SetTags replaces all tags associated with a todo with a new set of tags.
 func (r *TodoTagRepo) SetTags(ctx context.Context, todoID uuid.UUID, tagIDs []uuid.UUID) error {
 	if _, err := r.db.GetQuerier(ctx).ExecContext(ctx,
 		`DELETE FROM todo_tags WHERE todo_id = $1`, todoID); err != nil {
@@ -35,18 +38,21 @@ func (r *TodoTagRepo) SetTags(ctx context.Context, todoID uuid.UUID, tagIDs []uu
 	return wrapErr(err, "set todo tags")
 }
 
+// AddTag associates a tag with a todo.
 func (r *TodoTagRepo) AddTag(ctx context.Context, todoID, tagID uuid.UUID) error {
 	_, err := r.db.GetQuerier(ctx).ExecContext(ctx,
 		`INSERT INTO todo_tags (todo_id, tag_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`, todoID, tagID)
 	return wrapErr(err, "add tag to todo")
 }
 
+// RemoveTag disassociates a tag from a todo.
 func (r *TodoTagRepo) RemoveTag(ctx context.Context, todoID, tagID uuid.UUID) error {
 	_, err := r.db.GetQuerier(ctx).ExecContext(ctx,
 		`DELETE FROM todo_tags WHERE todo_id = $1 AND tag_id = $2`, todoID, tagID)
 	return wrapErr(err, "remove tag from todo")
 }
 
+// GetTagsForTodo retrieves all tags associated with a specific todo.
 func (r *TodoTagRepo) GetTagsForTodo(ctx context.Context, todoID uuid.UUID) ([]*todo.Tag, error) {
 	const q = `
 		SELECT t.* FROM tags t
@@ -64,6 +70,7 @@ func (r *TodoTagRepo) GetTagsForTodo(ctx context.Context, todoID uuid.UUID) ([]*
 	return tags, nil
 }
 
+// GetTagsForTodos retrieves all tags for multiple todos in a single query.
 func (r *TodoTagRepo) GetTagsForTodos(ctx context.Context, todoIDs []uuid.UUID) (map[uuid.UUID][]*todo.Tag, error) {
 	if len(todoIDs) == 0 {
 		return nil, nil

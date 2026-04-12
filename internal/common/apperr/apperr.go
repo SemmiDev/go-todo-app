@@ -25,6 +25,7 @@ type ValidationError struct {
 	Errors []FieldError
 }
 
+// Error returns the error message for validation failures.
 func (e *ValidationError) Error() string {
 	return "validation failed"
 }

@@ -1,3 +1,4 @@
+// Package postgres provides the PostgreSQL implementation of the driven adapters.
 package postgres
 
 import (

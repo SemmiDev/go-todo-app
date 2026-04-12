@@ -1,4 +1,5 @@
-// Package session models the user session domain entity.
+// Package session defines the User Session domain model.
+// Sessions are used to track authenticated users and manage refresh tokens.
 package session
 
 import (
@@ -7,7 +8,8 @@ import (
 	"github.com/google/uuid"
 )
 
-// Session represents an authenticated user session backed by a refresh token.
+// Session represents an active authentication session for a user.
+// It tracks the refresh token, client metadata, and expiration state.
 type Session struct {
 	ID           uuid.UUID
 	UserID       uuid.UUID

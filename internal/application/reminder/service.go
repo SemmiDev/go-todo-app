@@ -1,6 +1,5 @@
 // Package reminder implements the application service for sending todo reminder emails.
-// It is driven by a scheduled job (cmd/scheduler) and depends only on output ports —
-// keeping the core business logic free of infrastructure concerns.
+// It is driven by a scheduled job and depends on output ports to find and enqueue reminder tasks.
 package reminder
 
 import (
@@ -11,7 +10,7 @@ import (
 	"github.com/semmidev/go-todo-app/internal/port/output"
 )
 
-// Service orchestrates the "find due todos → enqueue reminder task" workflow.
+// Service orchestrates the workflow of finding due todos and enqueuing reminder tasks.
 type Service struct {
 	todoRepo        output.TodoRepository
 	taskDistributor output.TaskDistributor
@@ -19,12 +18,13 @@ type Service struct {
 	window          time.Duration // how far ahead to look (default 24h)
 }
 
-// Config holds optional overrides for the reminder service.
+// Config holds optional configuration overrides for the reminder service.
 type Config struct {
 	Window time.Duration // default 24h
 	AppURL string        // default "http://localhost:8080"
 }
 
+// NewService creates a new reminder service with the provided dependencies and configuration.
 func NewService(
 	todoRepo output.TodoRepository,
 	taskDistributor output.TaskDistributor,
@@ -42,8 +42,7 @@ func NewService(
 	}
 }
 
-// SendDueSoonReminders is the single job entry-point called by the cron scheduler.
-// It emits one wide-style structured log line per run summarising the outcome.
+// SendDueSoonReminders is the job entry-point called by the scheduler to process pending reminders.
 func (s *Service) SendDueSoonReminders(ctx context.Context) error {
 	start := time.Now()
 

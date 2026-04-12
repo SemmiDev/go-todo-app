@@ -1,3 +1,4 @@
+// Package validation provides a centralized struct validator with custom rules.
 package validation
 
 import (
@@ -10,14 +11,14 @@ import (
 	"github.com/semmidev/go-todo-app/internal/common/apperr"
 )
 
-// Validator wraps the go-playground/validator/v10 instance.
+// Validator wraps the go-playground/validator instance to provide application-specific validation logic.
 type Validator struct {
 	validate *validator.Validate
 }
 
 var hexColorRegex = regexp.MustCompile(`^#(?:[0-9a-fA-F]{3,4}){1,2}$`)
 
-// New creates and configures a new application validator.
+// New creates and configures a new application validator with custom tag functions and rules.
 func New() *Validator {
 	validate := validator.New()
 
@@ -41,7 +42,7 @@ func New() *Validator {
 	}
 }
 
-// Struct validates a struct and translates the error into an apperr.ValidationError if applicable.
+// Struct validates a struct and maps validator.ValidationErrors to apperr.ValidationError.
 func (v *Validator) Struct(s interface{}) error {
 	err := v.validate.Struct(s)
 	if err == nil {
@@ -68,6 +69,7 @@ func (v *Validator) Struct(s interface{}) error {
 	return err
 }
 
+// buildErrorMessage converts a validation tag into a human-readable message.
 func buildErrorMessage(e validator.FieldError) string {
 	switch e.Tag() {
 	case "required":

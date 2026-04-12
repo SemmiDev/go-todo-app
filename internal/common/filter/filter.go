@@ -1,7 +1,4 @@
 // Package filter provides the canonical Filter and Paging types for all list
-// endpoints in this application, following the SemmiDev data-table pattern:
-// https://github.com/SemmiDev/be-skills/blob/main/data-table-handling-with-filter-pagination/SKILL.md
-//
 // Every list operation must use Filter for input and Paging for output metadata.
 // Never parse query params or write raw LIMIT/OFFSET outside this package.
 package filter

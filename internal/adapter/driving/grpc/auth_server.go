@@ -1,3 +1,4 @@
+// Package grpchandler provides gRPC implementations of the application services.
 package grpchandler
 
 import (
@@ -20,7 +21,7 @@ import (
 	"github.com/semmidev/go-todo-app/internal/port/input"
 )
 
-// AuthServer implements the gRPC AuthService.
+// AuthServer handles authentication and session management via gRPC.
 // It depends on the input.AuthUseCase interface, NOT the concrete auth service.
 type AuthServer struct {
 	pb.UnimplementedAuthServiceServer
@@ -28,10 +29,12 @@ type AuthServer struct {
 	validator *validation.Validator
 }
 
+// NewAuthServer creates a new AuthServer with the given use case and validator.
 func NewAuthServer(svc input.AuthUseCase, validator *validation.Validator) *AuthServer {
 	return &AuthServer{svc: svc, validator: validator}
 }
 
+// GetAuthURL returns the OAuth2 authorization URL for the client to redirect the user.
 func (s *AuthServer) GetAuthURL(ctx context.Context, req *pb.GetAuthURLRequest) (*pb.GetAuthURLResponse, error) {
 	params := input.BuildAuthURLParams{State: req.GetState()}
 	if err := s.validator.Struct(params); err != nil {
@@ -41,6 +44,7 @@ func (s *AuthServer) GetAuthURL(ctx context.Context, req *pb.GetAuthURLRequest) 
 	return &pb.GetAuthURLResponse{Url: url}, nil
 }
 
+// ExchangeCode handles the OAuth2 callback by exchanging the code for tokens and creating a session.
 func (s *AuthServer) ExchangeCode(ctx context.Context, req *pb.ExchangeCodeRequest) (*pb.LoginResponse, error) {
 	userAgent, clientIP := extractClientMetadata(ctx)
 	params := input.ExchangeAndLoginParams{
@@ -70,6 +74,7 @@ func (s *AuthServer) ExchangeCode(ctx context.Context, req *pb.ExchangeCodeReque
 	}, nil
 }
 
+// RenewAccessToken issues a new access token using a valid refresh token.
 func (s *AuthServer) RenewAccessToken(ctx context.Context, req *pb.RenewAccessTokenRequest) (*pb.RenewAccessTokenResponse, error) {
 	params := input.RenewAccessTokenParams{
 		RefreshToken: req.GetRefreshToken(),
@@ -88,6 +93,7 @@ func (s *AuthServer) RenewAccessToken(ctx context.Context, req *pb.RenewAccessTo
 	}, nil
 }
 
+// Logout terminates the user session.
 func (s *AuthServer) Logout(ctx context.Context, _ *emptypb.Empty) (*emptypb.Empty, error) {
 	// With PASETO and Bearer tokens, we don't use cookies to logout.
 	// If the client wants to revoke a session, they could send a session_id.
@@ -95,6 +101,7 @@ func (s *AuthServer) Logout(ctx context.Context, _ *emptypb.Empty) (*emptypb.Emp
 	return &emptypb.Empty{}, nil
 }
 
+// GetMe returns the current authenticated user's information.
 func (s *AuthServer) GetMe(ctx context.Context, _ *emptypb.Empty) (*pb.GetMeResponse, error) {
 	u, ok := interceptor.UserFromContext(ctx)
 	if !ok {
@@ -109,6 +116,7 @@ func (s *AuthServer) GetMe(ctx context.Context, _ *emptypb.Empty) (*pb.GetMeResp
 	}, nil
 }
 
+// ListSessions returns all active sessions for the current user.
 func (s *AuthServer) ListSessions(ctx context.Context, _ *emptypb.Empty) (*pb.ListSessionsResponse, error) {
 	u, ok := interceptor.UserFromContext(ctx)
 	if !ok {
@@ -139,6 +147,7 @@ func (s *AuthServer) ListSessions(ctx context.Context, _ *emptypb.Empty) (*pb.Li
 	}, nil
 }
 
+// RevokeSession terminates a specific session by its ID.
 func (s *AuthServer) RevokeSession(ctx context.Context, req *pb.RevokeSessionRequest) (*emptypb.Empty, error) {
 	u, ok := interceptor.UserFromContext(ctx)
 	if !ok {
@@ -164,6 +173,7 @@ func (s *AuthServer) RevokeSession(ctx context.Context, req *pb.RevokeSessionReq
 	return &emptypb.Empty{}, nil
 }
 
+// extractClientMetadata retrieves the user agent and client IP from the gRPC context metadata.
 func extractClientMetadata(ctx context.Context) (userAgent, clientIP string) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {

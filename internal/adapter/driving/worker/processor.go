@@ -1,3 +1,5 @@
+// Package worker implements background task processing logic.
+// It acts as a driving adapter that consumes tasks from Redis-backed Asynq queues.
 package worker
 
 import (
@@ -8,14 +10,19 @@ import (
 	"github.com/semmidev/go-todo-app/internal/port/output"
 )
 
-// TaskProcessor defines the driving adapter interface for processing async queues.
+// TaskProcessor defines the interface for an async worker that manages
+// life-cycles and handler registrations for background jobs.
 type TaskProcessor interface {
+	// Start begins non-blocking consumption of tasks.
 	Start() error
+	// Shutdown gracefully halts task processing.
 	Shutdown()
+	// ProcessTaskSendReminderEmail decodes the payload and sends the notification email.
 	ProcessTaskSendReminderEmail(ctx context.Context, task *asynq.Task) error
 }
 
-// RedisTaskProcessor implements TaskProcessor using Asynq.
+// RedisTaskProcessor implements TaskProcessor using an Asynq server.
+// It coordinates data repository access and external service interactions.
 type RedisTaskProcessor struct {
 	server      *asynq.Server
 	todoRepo    output.TodoRepository
@@ -25,7 +32,8 @@ type RedisTaskProcessor struct {
 	appURL      string
 }
 
-// NewRedisTaskProcessor constructs the processor and configures concurrency & error handling.
+// NewRedisTaskProcessor initializes an Asynq server with standard and critical
+// priority levels and global concurrency settings.
 func NewRedisTaskProcessor(
 	redisOpt asynq.RedisClientOpt,
 	todoRepo output.TodoRepository,
@@ -65,7 +73,7 @@ func NewRedisTaskProcessor(
 	}
 }
 
-// Start registers the Mux and blocks consuming tasks.
+// Start registers task handlers and blocks while listening for new work.
 func (processor *RedisTaskProcessor) Start() error {
 	mux := asynq.NewServeMux()
 
@@ -75,7 +83,7 @@ func (processor *RedisTaskProcessor) Start() error {
 	return processor.server.Start(mux)
 }
 
-// Shutdown gracefully waits for running tasks to finish.
+// Shutdown ensures all in-flight tasks are completed before exiting.
 func (processor *RedisTaskProcessor) Shutdown() {
 	processor.server.Shutdown()
 }

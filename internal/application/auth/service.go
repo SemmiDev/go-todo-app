@@ -1,3 +1,5 @@
+// Package auth provides the application logic for user authentication and session management.
+// It handles OAuth2 flows, token issuance, validation, and session lifecycle.
 package auth
 
 import (
@@ -26,7 +28,7 @@ type Config struct {
 	GoogleCallbackURL    string
 }
 
-// Service implements input.AuthUseCase.
+// Service implements input.AuthUseCase and manages the authentication lifecycle.
 type Service struct {
 	userRepo    output.UserRepository
 	sessionRepo output.SessionRepository
@@ -39,6 +41,7 @@ type Service struct {
 // Compile-time interface conformance check.
 var _ input.AuthUseCase = (*Service)(nil)
 
+// NewService creates a new authentication service with the provided dependencies and configuration.
 func NewService(
 	userRepo output.UserRepository,
 	sessionRepo output.SessionRepository,
@@ -66,6 +69,7 @@ func NewService(
 	}
 }
 
+// BuildAuthURL generates the Google OAuth2 authorization URL.
 func (s *Service) BuildAuthURL(ctx context.Context, p input.BuildAuthURLParams) string {
 	return s.oauthCfg.AuthCodeURL(p.State)
 }
@@ -78,6 +82,7 @@ type GoogleUserInfo struct {
 	Name          string `json:"name"`
 }
 
+// ExchangeAndLogin exchanges an OAuth2 code for tokens and establishes a user session.
 func (s *Service) ExchangeAndLogin(ctx context.Context, p input.ExchangeAndLoginParams) (*input.LoginResult, error) {
 	tok, err := s.oauthCfg.Exchange(ctx, p.Code)
 	if err != nil {
@@ -167,6 +172,7 @@ func (s *Service) ExchangeAndLogin(ctx context.Context, p input.ExchangeAndLogin
 	}, nil
 }
 
+// ValidateToken verifies the authenticity and expiration of an access token.
 func (s *Service) ValidateToken(ctx context.Context, p input.ValidateTokenParams) (*user.User, error) {
 	payload, err := s.tokenMaker.VerifyToken(p.AccessToken, token.TokenTypeAccessToken)
 	if err != nil {
@@ -179,6 +185,7 @@ func (s *Service) ValidateToken(ctx context.Context, p input.ValidateTokenParams
 	return u, nil
 }
 
+// RenewAccessToken issues a new access token using a valid refresh token.
 func (s *Service) RenewAccessToken(ctx context.Context, p input.RenewAccessTokenParams) (*input.RenewTokenResult, error) {
 	refreshPayload, err := s.tokenMaker.VerifyToken(p.RefreshToken, token.TokenTypeRefreshToken)
 	if err != nil {
@@ -218,14 +225,17 @@ func (s *Service) RenewAccessToken(ctx context.Context, p input.RenewAccessToken
 	}, nil
 }
 
+// Logout invalidates a user session.
 func (s *Service) Logout(ctx context.Context, p input.LogoutParams) error {
 	return s.sessionRepo.Delete(ctx, p.SessionID)
 }
 
+// ListSessions retrieves all active sessions for a specific user.
 func (s *Service) ListSessions(ctx context.Context, p input.ListSessionsParams) ([]*session.Session, error) {
 	return s.sessionRepo.ListByUserID(ctx, p.UserID)
 }
 
+// RevokeSession terminates a specific session, ensuring it belongs to the requesting user.
 func (s *Service) RevokeSession(ctx context.Context, p input.RevokeSessionParams) error {
 	sess, err := s.sessionRepo.GetByID(ctx, p.SessionID)
 	if err != nil {

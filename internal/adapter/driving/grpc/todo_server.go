@@ -1,3 +1,4 @@
+// Package grpchandler provides gRPC implementations of the application services.
 package grpchandler
 
 import (
@@ -22,7 +23,7 @@ import (
 
 // ─── TagServer ────────────────────────────────────────────────────────────────
 
-// TagServer implements the gRPC TagService.
+// TagServer handles tag-related operations via gRPC.
 // It depends on the input.TagUseCase interface, NOT the concrete service.
 type TagServer struct {
 	pb.UnimplementedTagServiceServer
@@ -30,10 +31,12 @@ type TagServer struct {
 	validator *validation.Validator
 }
 
+// NewTagServer creates a new TagServer.
 func NewTagServer(svc input.TagUseCase, validator *validation.Validator) *TagServer {
 	return &TagServer{svc: svc, validator: validator}
 }
 
+// CreateTag creates a new tag for the authenticated user.
 func (s *TagServer) CreateTag(ctx context.Context, req *pb.CreateTagRequest) (*pb.Tag, error) {
 	u, ok := interceptor.UserFromContext(ctx)
 	if !ok {
@@ -52,6 +55,7 @@ func (s *TagServer) CreateTag(ctx context.Context, req *pb.CreateTagRequest) (*p
 	return tagToProto(t), nil
 }
 
+// GetTag retrieves a specific tag by its ID.
 func (s *TagServer) GetTag(ctx context.Context, req *pb.GetTagRequest) (*pb.Tag, error) {
 	u, ok := interceptor.UserFromContext(ctx)
 	if !ok {
@@ -72,6 +76,7 @@ func (s *TagServer) GetTag(ctx context.Context, req *pb.GetTagRequest) (*pb.Tag,
 	return tagToProto(t), nil
 }
 
+// UpdateTag updates an existing tag.
 func (s *TagServer) UpdateTag(ctx context.Context, req *pb.UpdateTagRequest) (*pb.Tag, error) {
 	u, ok := interceptor.UserFromContext(ctx)
 	if !ok {
@@ -94,6 +99,7 @@ func (s *TagServer) UpdateTag(ctx context.Context, req *pb.UpdateTagRequest) (*p
 	return tagToProto(t), nil
 }
 
+// DeleteTag removes a tag.
 func (s *TagServer) DeleteTag(ctx context.Context, req *pb.DeleteTagRequest) (*emptypb.Empty, error) {
 	u, ok := interceptor.UserFromContext(ctx)
 	if !ok {
@@ -113,6 +119,7 @@ func (s *TagServer) DeleteTag(ctx context.Context, req *pb.DeleteTagRequest) (*e
 	return &emptypb.Empty{}, nil
 }
 
+// ListTags returns all tags belonging to the authenticated user.
 func (s *TagServer) ListTags(ctx context.Context, _ *emptypb.Empty) (*pb.ListTagsResponse, error) {
 	u, ok := interceptor.UserFromContext(ctx)
 	if !ok {
@@ -137,7 +144,7 @@ var _ pb.TagServiceServer = (*TagServer)(nil)
 
 // ─── TodoServer ───────────────────────────────────────────────────────────────
 
-// TodoServer implements the gRPC TodoService.
+// TodoServer handles todo-related operations via gRPC.
 // It depends on the input.TodoUseCase interface, NOT the concrete service.
 type TodoServer struct {
 	pb.UnimplementedTodoServiceServer
@@ -145,10 +152,12 @@ type TodoServer struct {
 	validator *validation.Validator
 }
 
+// NewTodoServer creates a new TodoServer.
 func NewTodoServer(svc input.TodoUseCase, validator *validation.Validator) *TodoServer {
 	return &TodoServer{svc: svc, validator: validator}
 }
 
+// CreateTodo creates a new todo item.
 func (s *TodoServer) CreateTodo(ctx context.Context, req *pb.CreateTodoRequest) (*pb.Todo, error) {
 	u, ok := interceptor.UserFromContext(ctx)
 	if !ok {
@@ -184,6 +193,7 @@ func (s *TodoServer) CreateTodo(ctx context.Context, req *pb.CreateTodoRequest) 
 	return todoToProto(t), nil
 }
 
+// GetTodo retrieves a specific todo item.
 func (s *TodoServer) GetTodo(ctx context.Context, req *pb.GetTodoRequest) (*pb.Todo, error) {
 	u, ok := interceptor.UserFromContext(ctx)
 	if !ok {
@@ -205,6 +215,7 @@ func (s *TodoServer) GetTodo(ctx context.Context, req *pb.GetTodoRequest) (*pb.T
 	return todoToProto(t), nil
 }
 
+// UpdateTodo updates an existing todo item.
 func (s *TodoServer) UpdateTodo(ctx context.Context, req *pb.UpdateTodoRequest) (*pb.Todo, error) {
 	u, ok := interceptor.UserFromContext(ctx)
 	if !ok {
@@ -243,6 +254,7 @@ func (s *TodoServer) UpdateTodo(ctx context.Context, req *pb.UpdateTodoRequest) 
 	return todoToProto(t), nil
 }
 
+// DeleteTodo removes a todo item.
 func (s *TodoServer) DeleteTodo(ctx context.Context, req *pb.DeleteTodoRequest) (*emptypb.Empty, error) {
 	u, ok := interceptor.UserFromContext(ctx)
 	if !ok {
@@ -263,6 +275,7 @@ func (s *TodoServer) DeleteTodo(ctx context.Context, req *pb.DeleteTodoRequest) 
 	return &emptypb.Empty{}, nil
 }
 
+// ListTodos returns a paginated list of todos for the authenticated user.
 func (s *TodoServer) ListTodos(ctx context.Context, req *pb.ListTodosRequest) (*pb.ListTodosResponse, error) {
 	u, ok := interceptor.UserFromContext(ctx)
 	if !ok {
@@ -330,6 +343,7 @@ func (s *TodoServer) ListTodos(ctx context.Context, req *pb.ListTodosRequest) (*
 	}, nil
 }
 
+// AddTagToTodo associates a tag with a todo item.
 func (s *TodoServer) AddTagToTodo(ctx context.Context, req *pb.AddTagToTodoRequest) (*pb.Todo, error) {
 	u, ok := interceptor.UserFromContext(ctx)
 	if !ok {
@@ -354,6 +368,7 @@ func (s *TodoServer) AddTagToTodo(ctx context.Context, req *pb.AddTagToTodoReque
 	return todoToProto(t), nil
 }
 
+// RemoveTagFromTodo disassociates a tag from a todo item.
 func (s *TodoServer) RemoveTagFromTodo(ctx context.Context, req *pb.RemoveTagFromTodoRequest) (*pb.Todo, error) {
 	u, ok := interceptor.UserFromContext(ctx)
 	if !ok {
@@ -382,6 +397,7 @@ var _ pb.TodoServiceServer = (*TodoServer)(nil)
 
 // ── Paging helper ─────────────────────────────────────────────────────────────
 
+// pagingToProto converts a domain pagination model to its gRPC representation.
 func pagingToProto(p *filter.Paging) *pb.Paging {
 	if p == nil {
 		return &pb.Paging{}

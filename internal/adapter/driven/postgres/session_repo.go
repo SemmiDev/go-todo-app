@@ -1,3 +1,4 @@
+// Package postgres provides the PostgreSQL implementation of the driven adapters.
 package postgres
 
 import (
@@ -11,6 +12,7 @@ import (
 	"github.com/semmidev/go-todo-app/internal/domain/session"
 )
 
+// sessionModel represents the database schema for a session.
 type sessionModel struct {
 	ID           uuid.UUID `db:"id"`
 	UserID       uuid.UUID `db:"user_id"`
@@ -22,11 +24,13 @@ type sessionModel struct {
 	CreatedAt    time.Time `db:"created_at"`
 }
 
-// SessionRepo implements output.SessionRepository.
+// SessionRepo implements output.SessionRepository using PostgreSQL.
 type SessionRepo struct{ db *DB }
 
+// NewSessionRepo returns a new SessionRepo instance.
 func NewSessionRepo(db *DB) *SessionRepo { return &SessionRepo{db: db} }
 
+// Create inserts a new session into the database.
 func (r *SessionRepo) Create(ctx context.Context, s *session.Session) error {
 	const q = `INSERT INTO sessions (id, user_id, refresh_token, user_agent, client_ip, is_blocked, expires_at, created_at)
 	           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
@@ -36,6 +40,7 @@ func (r *SessionRepo) Create(ctx context.Context, s *session.Session) error {
 	return wrapErr(err, "create session")
 }
 
+// GetByID retrieves a session by its ID.
 func (r *SessionRepo) GetByID(ctx context.Context, id uuid.UUID) (*session.Session, error) {
 	var m sessionModel
 	err := r.db.GetQuerier(ctx).GetContext(ctx, &m, `SELECT * FROM sessions WHERE id = $1`, id)
@@ -57,6 +62,7 @@ func (r *SessionRepo) GetByID(ctx context.Context, id uuid.UUID) (*session.Sessi
 	}, nil
 }
 
+// ListByUserID retrieves all sessions associated with a user ID.
 func (r *SessionRepo) ListByUserID(ctx context.Context, userID uuid.UUID) ([]*session.Session, error) {
 	var models []sessionModel
 	err := r.db.GetQuerier(ctx).SelectContext(ctx, &models, `SELECT * FROM sessions WHERE user_id = $1 ORDER BY created_at DESC`, userID)
@@ -80,16 +86,19 @@ func (r *SessionRepo) ListByUserID(ctx context.Context, userID uuid.UUID) ([]*se
 	return sessions, nil
 }
 
+// Delete removes a session by its ID.
 func (r *SessionRepo) Delete(ctx context.Context, id uuid.UUID) error {
 	_, err := r.db.GetQuerier(ctx).ExecContext(ctx, `DELETE FROM sessions WHERE id = $1`, id)
 	return wrapErr(err, "delete session")
 }
 
+// DeleteByUserID removes all sessions associated with a user ID.
 func (r *SessionRepo) DeleteByUserID(ctx context.Context, userID uuid.UUID) error {
 	_, err := r.db.GetQuerier(ctx).ExecContext(ctx, `DELETE FROM sessions WHERE user_id = $1`, userID)
 	return wrapErr(err, "delete sessions by user")
 }
 
+// DeleteExpired removes all sessions that have passed their expiration time.
 func (r *SessionRepo) DeleteExpired(ctx context.Context) error {
 	_, err := r.db.GetQuerier(ctx).ExecContext(ctx, `DELETE FROM sessions WHERE expires_at < NOW()`)
 	return wrapErr(err, "delete expired sessions")

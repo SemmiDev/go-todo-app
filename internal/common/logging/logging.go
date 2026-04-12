@@ -1,3 +1,5 @@
+// Package logging provides structured logging setup for the application.
+// It uses slog with environment-aware handlers (JSON for production, Text for development).
 package logging
 
 import (
@@ -5,12 +7,14 @@ import (
 	"os"
 )
 
+// Config holds the configuration for the application logger.
 type Config struct {
 	Level       string
 	Environment string
 	ServiceName string
 }
 
+// NewLogger initializes a new slog.Logger instance with the given configuration.
 func NewLogger(cfg Config) *slog.Logger {
 	var level slog.Level
 	switch cfg.Level {

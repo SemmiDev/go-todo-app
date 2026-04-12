@@ -1,3 +1,4 @@
+// Package postgres provides the PostgreSQL implementation of the driven adapters.
 package postgres
 
 import (
@@ -14,6 +15,7 @@ import (
 	"github.com/semmidev/go-todo-app/internal/port/output"
 )
 
+// todoModel represents the database schema for a todo.
 type todoModel struct {
 	ID           uuid.UUID  `db:"id"`
 	UserID       uuid.UUID  `db:"user_id"`
@@ -36,9 +38,10 @@ func (m *todoModel) toDomain() *todo.Todo {
 	)
 }
 
-// TodoRepo implements output.TodoRepository.
+// TodoRepo implements output.TodoRepository using PostgreSQL.
 type TodoRepo struct{ db *DB }
 
+// NewTodoRepo returns a new TodoRepo instance.
 func NewTodoRepo(db *DB) *TodoRepo { return &TodoRepo{db: db} }
 
 // allowedSortColumns whitelists columns for ORDER BY to prevent SQL injection.
@@ -51,6 +54,7 @@ var allowedSortColumns = map[string]bool{
 	"due_date":   true,
 }
 
+// Create inserts a new todo into the database.
 func (r *TodoRepo) Create(ctx context.Context, t *todo.Todo) error {
 	const q = `
 		INSERT INTO todos (id, user_id, title, description, status, priority, due_date, created_at, updated_at)
@@ -62,6 +66,7 @@ func (r *TodoRepo) Create(ctx context.Context, t *todo.Todo) error {
 	return wrapErr(err, "create todo")
 }
 
+// GetByID retrieves a todo by its ID.
 func (r *TodoRepo) GetByID(ctx context.Context, id uuid.UUID) (*todo.Todo, error) {
 	var m todoModel
 	err := r.db.GetQuerier(ctx).GetContext(ctx, &m, `SELECT * FROM todos WHERE id = $1`, id)
@@ -71,6 +76,7 @@ func (r *TodoRepo) GetByID(ctx context.Context, id uuid.UUID) (*todo.Todo, error
 	return m.toDomain(), wrapErr(err, "get todo")
 }
 
+// Update modifies an existing todo.
 func (r *TodoRepo) Update(ctx context.Context, t *todo.Todo) error {
 	const q = `
 		UPDATE todos SET title=$1, description=$2, status=$3, priority=$4, due_date=$5, updated_at=$6
@@ -81,11 +87,13 @@ func (r *TodoRepo) Update(ctx context.Context, t *todo.Todo) error {
 	return wrapErr(err, "update todo")
 }
 
+// Delete removes a todo by its ID.
 func (r *TodoRepo) Delete(ctx context.Context, id uuid.UUID) error {
 	_, err := r.db.GetQuerier(ctx).ExecContext(ctx, `DELETE FROM todos WHERE id = $1`, id)
 	return wrapErr(err, "delete todo")
 }
 
+// List retrieves todos based on the provided filter and pagination parameters.
 func (r *TodoRepo) List(ctx context.Context, f output.TodoFilter) ([]*todo.Todo, int, error) {
 	// Enforce safe defaults on the embedded filter
 	f.Validate()

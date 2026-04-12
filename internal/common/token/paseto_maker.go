@@ -1,3 +1,4 @@
+// Package token provides the PASETO implementation of the Maker interface.
 package token
 
 import (
@@ -9,13 +10,13 @@ import (
 	"github.com/o1egl/paseto"
 )
 
-// PasetoMaker is a PASETO token maker.
+// PasetoMaker implements the Maker interface using PASETO v2.
 type PasetoMaker struct {
 	paseto       *paseto.V2
 	symmetricKey []byte
 }
 
-// NewPasetoMaker creates a new PasetoMaker.
+// NewPasetoMaker creates a new PasetoMaker with the given symmetric key.
 func NewPasetoMaker(symmetricKey string) (Maker, error) {
 	if len(symmetricKey) != chacha20poly1305.KeySize {
 		return nil, fmt.Errorf("invalid key size: must be exactly %d characters", chacha20poly1305.KeySize)
@@ -29,7 +30,7 @@ func NewPasetoMaker(symmetricKey string) (Maker, error) {
 	return maker, nil
 }
 
-// CreateToken creates a new token for a specific user and duration.
+// CreateToken generates a signed PASETO token for the given user.
 func (maker *PasetoMaker) CreateToken(userID uuid.UUID, email string, duration time.Duration, tokenType TokenType) (string, *Payload, error) {
 	payload, err := NewPayload(userID, email, duration, tokenType)
 	if err != nil {
@@ -40,7 +41,7 @@ func (maker *PasetoMaker) CreateToken(userID uuid.UUID, email string, duration t
 	return token, payload, err
 }
 
-// VerifyToken checks if the token is valid or not.
+// VerifyToken validates a PASETO token and returns its payload if valid.
 func (maker *PasetoMaker) VerifyToken(token string, tokenType TokenType) (*Payload, error) {
 	payload := &Payload{}
 

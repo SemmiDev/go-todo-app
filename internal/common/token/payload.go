@@ -1,4 +1,4 @@
-// Package token provides PASETO-based token creation and verification.
+// Package token defines the structure and validation for token payloads.
 package token
 
 import (
@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// Different types of error returned by the VerifyToken function.
+// Common token errors.
 var (
 	ErrInvalidToken = errors.New("token is invalid")
 	ErrExpiredToken = errors.New("token has expired")
@@ -22,7 +22,7 @@ const (
 	TokenTypeRefreshToken TokenType = 2
 )
 
-// Payload contains the payload data of the token.
+// Payload contains the claims/metadata stored inside a signed token.
 type Payload struct {
 	ID        uuid.UUID `json:"id"`
 	Type      TokenType `json:"token_type"`
@@ -32,7 +32,7 @@ type Payload struct {
 	ExpiredAt time.Time `json:"expired_at"`
 }
 
-// NewPayload creates a new token payload with a specific user ID, email and duration.
+// NewPayload creates a new token payload with a unique ID and specific claims.
 func NewPayload(userID uuid.UUID, email string, duration time.Duration, tokenType TokenType) (*Payload, error) {
 	tokenID, err := uuid.NewRandom()
 	if err != nil {
@@ -50,7 +50,7 @@ func NewPayload(userID uuid.UUID, email string, duration time.Duration, tokenTyp
 	return payload, nil
 }
 
-// Valid checks if the token payload is valid or not.
+// Valid checks if the payload has the correct type and has not expired.
 func (payload *Payload) Valid(tokenType TokenType) error {
 	if payload.Type != tokenType {
 		return ErrInvalidToken
