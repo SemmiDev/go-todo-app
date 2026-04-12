@@ -14,13 +14,15 @@ import (
 func (r *TodoRepo) FindDueSoon(ctx context.Context, _ time.Duration) ([]*todo.Todo, error) {
 	const q = `
 		WITH reminder_offsets AS (
-			SELECT t.*, jsonb_array_elements_text(COALESCE(t.reminders, '[]'::jsonb)) AS offset_text
-			FROM todos t
-			WHERE t.status != 'done' 
-			  AND t.due_date IS NOT NULL 
-			  AND jsonb_array_length(COALESCE(t.reminders, '[]'::jsonb)) > 0
+			SELECT 
+				id, user_id, title, description, status, priority, due_date, created_at, updated_at, reminders, triggered_reminders,
+				jsonb_array_elements_text(COALESCE(reminders, '[]'::jsonb)) AS offset_text
+			FROM todos
+			WHERE status != 'done' 
+			  AND due_date IS NOT NULL 
+			  AND jsonb_array_length(COALESCE(reminders, '[]'::jsonb)) > 0
 		)
-		SELECT *
+		SELECT id, user_id, title, description, status, priority, due_date, created_at, updated_at, reminders, triggered_reminders
 		FROM reminder_offsets
 		WHERE (due_date - (offset_text::interval)) <= NOW()
 		  AND NOT (COALESCE(triggered_reminders, '[]'::jsonb) ? offset_text)
