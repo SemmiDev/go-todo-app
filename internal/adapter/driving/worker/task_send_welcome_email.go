@@ -70,31 +70,46 @@ const welcomeHTMLTemplate = `<!DOCTYPE html>
   <meta charset="UTF-8"/>
   <title>Welcome to Todo App</title>
   <style>
-    body{margin:0;padding:0;background:#f4f6f9;font-family:'Segoe UI',Arial,sans-serif}
-    .wrapper{max-width:560px;margin:40px auto;background:#fff;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,.08);overflow:hidden}
-    .header{background:linear-gradient(135deg,#6366f1 0%,#8b5cf6 100%);padding:32px 40px;color:#fff;text-align:center}
-    .header h1{margin:0;font-size:24px;font-weight:700}
-    .body{padding:36px 40px;color:#1e1b4b;line-height:1.6}
-    .cta{text-align:center;margin:32px 0}
-    .cta a{display:inline-block;background:#6366f1;color:#fff;text-decoration:none;padding:12px 28px;border-radius:8px;font-weight:600;font-size:14px}
-    .footer{padding:20px 40px;text-align:center;font-size:12px;color:#94a3b8;border-top:1px solid #f1f5f9}
+    body { margin: 0; padding: 0; background-color: #F0FDFA; font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif; color: #0F172A; }
+    .wrapper { max-width: 600px; margin: 40px auto; padding: 20px; }
+    .container { background-color: #ffffff; border: 3px solid #0F172A; box-shadow: 8px 8px 0 0 #0F172A; padding: 40px; }
+    .header { margin-bottom: 30px; border-bottom: 3px solid #0F172A; padding-bottom: 20px; text-align: center; }
+    .header h1 { margin: 0; font-size: 28px; font-weight: 800; text-transform: uppercase; letter-spacing: -0.03em; }
+    .header h1 span { background-color: #06B6D4; color: #ffffff; padding: 0 12px; border: 2px solid #0F172A; display: inline-block; transform: rotate(1.5deg); }
+    .greeting { font-size: 20px; font-weight: 800; margin-bottom: 24px; }
+    .content { font-size: 16px; color: #475569; line-height: 1.6; font-weight: 600; }
+    .feature-card { background-color: #CFFAFE; border: 3px solid #0F172A; box-shadow: 4px 4px 0 0 #0F172A; padding: 20px; margin: 24px 0; }
+    .feature-card p { margin: 0; color: #0F172A; font-weight: 700; }
+    .cta { text-align: center; margin-top: 40px; }
+    .btn { display: inline-block; background-color: #06B6D4; color: #ffffff; text-decoration: none; padding: 16px 32px; font-weight: 800; text-transform: uppercase; border: 3px solid #0F172A; box-shadow: 5px 5px 0 0 #0F172A; font-size: 16px; }
+    .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #475569; font-weight: 600; border-top: 2px solid #0F172A; padding-top: 20px; }
   </style>
 </head>
 <body>
 <div class="wrapper">
-  <div class="header">
-    <h1>Welcome aboard! 🚀</h1>
-  </div>
-  <div class="body">
-    <p>Hi {{.UserName}},</p>
-    <p>We're thrilled to have you here! Todo App is designed to help you stay organized and crush your goals with ease.</p>
-    <p>Get started by creating your first task and setting up reminders so you never miss a deadline.</p>
-    <div class="cta"><a href="{{.AppURL}}">Get Started Now →</a></div>
-    <p>If you have any questions, feel free to reply to this email.</p>
-    <p>Happy productivity!<br/>The Todo App Team</p>
-  </div>
-  <div class="footer">
-    © Todo App — make it happen 🚀
+  <div class="container">
+    <div class="header">
+      <h1><span>WELCOME ABOARD!</span></h1>
+    </div>
+    
+    <div class="content">
+      <p class="greeting">HI {{.UserName}},</p>
+      <p>We're thrilled to have you here! Todo App is built for people who want to get things done without the fluff.</p>
+      
+      <div class="feature-card">
+        <p>🚀 Ready to crush your goals? Start by creating your first task and setting up a reminder.</p>
+      </div>
+
+      <p>No more missed deadlines. No more forgotten ideas. Just pure productivity.</p>
+    </div>
+
+    <div class="cta">
+      <a href="{{.AppURL}}" class="btn">GET STARTED NOW →</a>
+    </div>
+
+    <div class="footer">
+      © 2026 GO TODO APP — MAKE IT HAPPEN 🚀
+    </div>
   </div>
 </div>
 </body>

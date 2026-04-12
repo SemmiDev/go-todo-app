@@ -94,43 +94,52 @@ const reminderHTMLTemplate = `<!DOCTYPE html>
   <meta charset="UTF-8"/>
   <title>Todo Reminder</title>
   <style>
-    body{margin:0;padding:0;background:#f4f6f9;font-family:'Segoe UI',Arial,sans-serif}
-    .wrapper{max-width:560px;margin:40px auto;background:#fff;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,.08);overflow:hidden}
-    .header{background:linear-gradient(135deg,#6366f1 0%,#8b5cf6 100%);padding:32px 40px;color:#fff}
-    .header h1{margin:0;font-size:22px;font-weight:700}
-    .header p{margin:6px 0 0;opacity:.85;font-size:14px}
-    .body{padding:36px 40px}
-    .card{background:#f8f9ff;border:1.5px solid #e0e3ff;border-radius:10px;padding:20px 24px;margin-bottom:24px}
-    .title{font-size:18px;font-weight:600;color:#1e1b4b;margin:0 0 10px}
-    .desc{color:#64748b;font-size:14px;margin:0 0 10px}
-    .badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;text-transform:uppercase}
-    .badge-low{background:#dcfce7;color:#166534}
-    .badge-medium{background:#fef9c3;color:#854d0e}
-    .badge-high{background:#fee2e2;color:#991b1b}
-    .due{font-size:13px;color:#dc2626;font-weight:600;margin-top:12px}
-    .cta{text-align:center;margin-top:8px}
-    .cta a{display:inline-block;background:#6366f1;color:#fff;text-decoration:none;padding:12px 28px;border-radius:8px;font-weight:600;font-size:14px}
-    .footer{padding:20px 40px;text-align:center;font-size:12px;color:#94a3b8;border-top:1px solid #f1f5f9}
+    body { margin: 0; padding: 0; background-color: #F0FDFA; font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif; color: #0F172A; }
+    .wrapper { max-width: 600px; margin: 40px auto; padding: 20px; }
+    .container { background-color: #ffffff; border: 3px solid #0F172A; box-shadow: 8px 8px 0 0 #0F172A; padding: 40px; }
+    .header { margin-bottom: 30px; border-bottom: 3px solid #0F172A; padding-bottom: 20px; }
+    .header h1 { margin: 0; font-size: 28px; font-weight: 800; text-transform: uppercase; letter-spacing: -0.03em; }
+    .header h1 span { background-color: #06B6D4; color: #ffffff; padding: 0 8px; border: 2px solid #0F172A; display: inline-block; transform: rotate(-1deg); }
+    .greeting { font-size: 18px; font-weight: 700; margin-bottom: 24px; }
+    .todo-card { background-color: #ffffff; border: 3px solid #0F172A; box-shadow: 5px 5px 0 0 #0F172A; padding: 24px; margin-bottom: 30px; }
+    .todo-title { font-size: 20px; font-weight: 800; margin: 0 0 8px 0; color: #0F172A; }
+    .todo-desc { font-size: 16px; color: #475569; margin: 0 0 16px 0; font-weight: 500; }
+    .badge { display: inline-block; padding: 4px 12px; font-size: 12px; font-weight: 800; text-transform: uppercase; border: 2px solid #0F172A; box-shadow: 2px 2px 0 0 #0F172A; margin-right: 8px; }
+    .badge-low { background-color: #ECFDF5; color: #065F46; }
+    .badge-medium { background-color: #FFFBEB; color: #92400E; }
+    .badge-high { background-color: #FFF1F2; color: #9F1239; }
+    .due-date { margin-top: 16px; font-size: 14px; font-weight: 700; color: #F43F5E; }
+    .cta { text-align: center; margin-top: 40px; }
+    .btn { display: inline-block; background-color: #06B6D4; color: #ffffff; text-decoration: none; padding: 16px 32px; font-weight: 800; text-transform: uppercase; border: 3px solid #0F172A; box-shadow: 5px 5px 0 0 #0F172A; font-size: 16px; }
+    .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #475569; font-weight: 600; }
   </style>
 </head>
 <body>
 <div class="wrapper">
-  <div class="header">
-    <h1>⏰ Reminder: Todo Due Soon</h1>
-    <p>Hi {{.UserName}}, don't let this slip through!</p>
-  </div>
-  <div class="body">
-    <div class="card">
-      <div class="title">{{.TodoTitle}}</div>
-      {{if .TodoDescription}}<p class="desc">{{.TodoDescription}}</p>{{end}}
-      <span class="badge badge-{{.Priority}}">{{.Priority}}</span>
-      <div class="due">📅 Due: {{.DueDate}}</div>
+  <div class="container">
+    <div class="header">
+      <h1><span>⏰ REMINDER</span></h1>
     </div>
-    <div class="cta"><a href="{{.AppURL}}">Open Todo App →</a></div>
-  </div>
-  <div class="footer">
-    You received this because this todo is due within 24 hours.<br/>
-    © Todo App — keep crushing it 🚀
+    <p class="greeting">Hi {{.UserName}},</p>
+    <p style="margin-bottom: 24px; font-weight: 600;">Don't let this task slip away! It's due soon:</p>
+    
+    <div class="todo-card">
+      <h2 class="todo-title">{{.TodoTitle}}</h2>
+      {{if .TodoDescription}}<p class="todo-desc">{{.TodoDescription}}</p>{{end}}
+      <div style="margin-top: 12px;">
+        <span class="badge badge-{{.Priority}}">{{.Priority}}</span>
+      </div>
+      <div class="due-date">📅 DUE: {{.DueDate}}</div>
+    </div>
+
+    <div class="cta">
+      <a href="{{.AppURL}}" class="btn">VIEW MY TODOS →</a>
+    </div>
+
+    <div class="footer">
+      You're receiving this because you set a reminder for this task.<br/>
+      © 2026 GO TODO APP — STAY SHARP 🚀
+    </div>
   </div>
 </div>
 </body>
