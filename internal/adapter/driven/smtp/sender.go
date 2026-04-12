@@ -28,9 +28,14 @@ type Sender struct {
 func NewSender(cfg Config) (*Sender, error) {
 	opts := []gomail.Option{
 		gomail.WithPort(cfg.Port),
-		gomail.WithSMTPAuth(gomail.SMTPAuthPlain),
-		gomail.WithUsername(cfg.Username),
-		gomail.WithPassword(cfg.Password),
+	}
+
+	if cfg.Username != "" {
+		opts = append(opts,
+			gomail.WithSMTPAuth(gomail.SMTPAuthPlain),
+			gomail.WithUsername(cfg.Username),
+			gomail.WithPassword(cfg.Password),
+		)
 	}
 
 	// For local dev (Mailpit) skip TLS; for production enforce it.
