@@ -1,0 +1,51 @@
+---
+# ╔══════════════════════════════════════════════════════════════╗
+# ║  go-todo-app — Production Variables (EXAMPLE)                 ║
+# ╚══════════════════════════════════════════════════════════════╝
+
+env: production
+
+# ── Domain ───────────────────────────────────────────────────
+domain_name: "example.com"
+server_name: "example.com"
+
+# ── SSL ──────────────────────────────────────────────────────
+ssl_enabled: true
+certbot_email: "admin@example.com"
+
+# ── Database ─────────────────────────────────────────────────
+postgres_password: "your_secure_db_password"
+database_url: "postgres://{{ postgres_user }}:{{ postgres_password }}@gotodoapp-postgres:5432/{{ postgres_db }}?sslmode=disable"
+
+# ── Cache & Queue ────────────────────────────────────────────
+memcached_url: "gotodoapp-memcached:11211"
+redis_url: "gotodoapp-redis:6379"
+
+# ── Security ─────────────────────────────────────────────────
+# Should be a 32-character random string
+token_symmetric_key: "your_32_char_symmetric_key_here"
+access_token_duration: "15m"
+refresh_token_duration: "24h"
+
+# ── Google OAuth ─────────────────────────────────────────────
+google_client_id: "your_google_client_id.apps.googleusercontent.com"
+google_client_secret: "your_google_client_secret"
+google_callback_url: "https://example.com/auth/google/callback"
+
+# ── SMTP ─────────────────────────────────────────────────────
+smtp_host: "smtp.example.com"
+smtp_port: 587
+smtp_username: "user@example.com"
+smtp_password: "your_smtp_password"
+smtp_from: "Go Todo App <noreply@example.com>"
+
+# ── Scheduler ───────────────────────────────────────────────
+reminder_cron: "0 * * * *"
+reminder_window: "24h"
+app_url: "https://example.com"
+
+# ── Docker Resources ────────────────────────────────────────
+docker_cpu_limit: "1"
+docker_memory_limit: "1g"
+docker_tmpfs_size: "512m"
+postgres_expose_public: false

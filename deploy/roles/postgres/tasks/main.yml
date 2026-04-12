@@ -1,0 +1,90 @@
+---
+# ╔══════════════════════════════════════════════════════════════╗
+# ║  Role: postgres — PostgreSQL via Docker                     ║
+# ╚══════════════════════════════════════════════════════════════╝
+
+- name: Create PostgreSQL data directory
+  file:
+    path: "{{ postgres_data_dir }}"
+    state: directory
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: "0755"
+
+- name: Create backup directory
+  file:
+    path: "{{ postgres_backup_dir }}"
+    state: directory
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: "0755"
+
+- name: Copy init.sql to server
+  copy:
+    src: "{{ playbook_dir }}/../../init.sql"
+    dest: "{{ app_dir }}/init.sql"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: "0644"
+
+- name: Deploy PostgreSQL Docker Compose file
+  template:
+    src: docker-compose-db.yml.j2
+    dest: "{{ app_dir }}/docker-compose-db.yml"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: "0644"
+
+- name: Check if gotodoapp_network exists
+  command: docker network inspect gotodoapp_network
+  register: network_check
+  changed_when: false
+  ignore_errors: true
+  become_user: "{{ deploy_user }}"
+
+- name: Create external Docker network for database isolation
+  command: docker network create gotodoapp_network
+  when: network_check.rc != 0
+  become_user: "{{ deploy_user }}"
+
+- name: Start PostgreSQL container
+  command: docker compose -f docker-compose-db.yml up -d
+  args:
+    chdir: "{{ app_dir }}"
+  become_user: "{{ deploy_user }}"
+  register: compose_up
+  changed_when: "'Created' in compose_up.stderr or 'Started' in compose_up.stderr or 'Recreated' in compose_up.stderr"
+
+- name: Wait for PostgreSQL to be ready
+  command: >
+    docker exec gotodoapp-postgres
+    pg_isready -U {{ postgres_user }} -d {{ postgres_db }}
+  register: pg_ready
+  retries: 10
+  delay: 3
+  until: pg_ready.rc == 0
+  changed_when: false
+
+- name: Allow external PostgreSQL access through UFW
+  community.general.ufw:
+    rule: allow
+    port: "{{ postgres_port | string }}"
+    proto: tcp
+  when: postgres_expose_public | default(false) | bool
+
+# ── Backup Cron ──────────────────────────────────────────────
+- name: Setup daily database backup cron
+  cron:
+    name: "PostgreSQL daily backup"
+    minute: "{{ backup_cron_minute }}"
+    hour: "{{ backup_cron_hour }}"
+    job: "{{ app_dir }}/scripts/backup-db.sh > /dev/null 2>&1"
+    user: "{{ deploy_user }}"
+
+- name: Setup backup cleanup cron (remove old backups)
+  cron:
+    name: "Cleanup old PostgreSQL backups"
+    minute: "30"
+    hour: "3"
+    job: "find {{ postgres_backup_dir }} -name '*.sql.gz' -mtime +{{ backup_retention_days }} -delete > /dev/null 2>&1"
+    user: "{{ deploy_user }}"

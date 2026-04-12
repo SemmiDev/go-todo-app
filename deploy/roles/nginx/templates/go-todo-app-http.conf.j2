@@ -1,0 +1,17 @@
+# ╔══════════════════════════════════════════════════════════════╗
+# ║  go-todo-app — Nginx Pre-SSL Host — Managed by Ansible      ║
+# ╚══════════════════════════════════════════════════════════════╝
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name {{ server_name }};
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/html;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}

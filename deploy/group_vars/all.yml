@@ -1,0 +1,64 @@
+---
+# ╔══════════════════════════════════════════════════════════════╗
+# ║  go-todo-app — Shared Variables (all environments)           ║
+# ╚══════════════════════════════════════════════════════════════╝
+
+# ── SSH ──────────────────────────────────────────────────────
+ssh_port: 2222
+ansible_port: "{{ ssh_port }}"
+
+# ── Application ──────────────────────────────────────────────
+app_name: go-todo-app
+app_user: gotodoapp
+app_group: gotodoapp
+app_port: 8080
+app_dir: /opt/go-todo-app
+app_repo: "git@github.com:SemmiDev/go-todo-app.git"
+app_branch: main
+
+# ── Docker ───────────────────────────────────────────────────
+docker_compose_version: "v2.29.1"
+docker_edition: ce
+docker_users:
+  - deploy
+  - "{{ app_user }}"
+
+# ── Redis ────────────────────────────────────────────────────
+redis_version: "7-alpine"
+redis_port: 6379
+
+# ── Memcached ────────────────────────────────────────────────
+memcached_version: "1.6.41"
+memcached_port: 11211
+
+# ── PostgreSQL ───────────────────────────────────────────────
+postgres_version: "18"
+postgres_user: gotodoapp
+postgres_db: gotodoapp
+postgres_port: 5432
+postgres_data_dir: /opt/go-todo-app/data/postgres
+postgres_backup_dir: /opt/go-todo-app/backups
+
+# ── Nginx ────────────────────────────────────────────────────
+nginx_worker_processes: auto
+nginx_worker_connections: 1024
+nginx_client_max_body_size: 50m
+
+# ── Firewall (UFW) ──────────────────────────────────────────
+ufw_allowed_ports:
+  - { port: "{{ ssh_port }}", proto: tcp } # SSH
+  - { port: 80, proto: tcp } # HTTP
+  - { port: 443, proto: tcp } # HTTPS
+
+# ── System ───────────────────────────────────────────────────
+swap_size: 2G
+timezone: Asia/Jakarta
+deploy_user: deploy
+
+# ── SSL / Let's Encrypt ─────────────────────────────────────
+certbot_email: "sammidev4@gmail.com"
+
+# ── Backups ──────────────────────────────────────────────────
+backup_retention_days: 30
+backup_cron_hour: 2
+backup_cron_minute: 0

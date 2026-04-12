@@ -1,0 +1,15 @@
+# ╔══════════════════════════════════════════════════════════════╗
+# ║  go-todo-app — Production Inventory (EXAMPLE)               ║
+# ╚══════════════════════════════════════════════════════════════╝
+# Copy this file to production.ini and fill in your server details.
+# Do NOT commit production.ini to version control!
+
+[webservers]
+gotodoapp-prod ansible_host=YOUR_SERVER_IP
+
+[dbservers]
+gotodoapp-prod
+
+[all:vars]
+ansible_user=deploy
+ansible_python_interpreter=/usr/bin/python3

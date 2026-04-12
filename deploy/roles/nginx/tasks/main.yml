@@ -1,0 +1,113 @@
+---
+# ╔══════════════════════════════════════════════════════════════╗
+# ║  Role: nginx — Reverse Proxy + Let's Encrypt SSL            ║
+# ╚══════════════════════════════════════════════════════════════╝
+
+- name: Install Nginx
+  apt:
+    name: nginx
+    state: present
+    update_cache: yes
+
+- name: Install Certbot and Nginx plugin
+  apt:
+    name:
+      - certbot
+      - python3-certbot-nginx
+    state: present
+  when: ssl_enabled | default(true)
+
+- name: Remove default Nginx site
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: reload nginx
+
+- name: Deploy main Nginx config
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: reload nginx
+
+- name: Deploy HTTP-only go-todo-app vhost config for Certbot
+  template:
+    src: go-todo-app-http.conf.j2
+    dest: /etc/nginx/sites-available/go-todo-app.conf
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Enable go-todo-app vhost
+  file:
+    src: /etc/nginx/sites-available/go-todo-app.conf
+    dest: /etc/nginx/sites-enabled/go-todo-app.conf
+    state: link
+
+- name: Ensure Nginx is running (pre-SSL)
+  systemd:
+    name: nginx
+    enabled: yes
+    state: restarted
+
+# ── Let's Encrypt SSL ───────────────────────────────────────
+- name: Obtain SSL certificate with Certbot
+  command: >
+    certbot certonly --nginx
+    -d {{ domain_name }}
+    --non-interactive
+    --agree-tos
+    --email {{ certbot_email }}
+  args:
+    creates: /etc/letsencrypt/live/{{ domain_name }}/fullchain.pem
+  when: ssl_enabled | default(true)
+
+# ── Create Nginx log directory for app ──────────────────────
+- name: Create Nginx log directory
+  file:
+    path: /var/log/nginx/go-todo-app
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: "0755"
+
+- name: Deploy final SSL go-todo-app vhost config
+  template:
+    src: go-todo-app.conf.j2
+    dest: /etc/nginx/sites-available/go-todo-app.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: reload nginx
+
+- name: Test Nginx configuration
+  command: nginx -t
+  register: nginx_test
+  changed_when: false
+
+- name: Reload Nginx with SSL config
+  systemd:
+    name: nginx
+    state: reloaded
+
+# ── Log Rotation ────────────────────────────────────────────
+- name: Deploy Nginx log rotation config
+  template:
+    src: logrotate-gotodoapp.j2
+    dest: /etc/logrotate.d/go-todo-app-nginx
+    owner: root
+    group: root
+    mode: "0644"
+
+# ── Certbot auto-renewal cron ───────────────────────────────
+- name: Setup Certbot auto-renewal cron
+  cron:
+    name: "Certbot renewal"
+    minute: "30"
+    hour: "2"
+    weekday: "1,4"
+    job: "certbot renew --quiet --post-hook 'systemctl reload nginx' 2>&1 | logger -t certbot"
+    user: root
+  when: ssl_enabled | default(true)

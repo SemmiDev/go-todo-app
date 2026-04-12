@@ -1,0 +1,59 @@
+# ╔══════════════════════════════════════════════════════════════╗
+# ║  PostgreSQL Docker Compose — Managed by Ansible             ║
+# ╚══════════════════════════════════════════════════════════════╝
+
+services:
+  postgres:
+    image: postgres:{{ postgres_version }}-alpine
+    container_name: gotodoapp-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: "{{ postgres_user }}"
+      POSTGRES_PASSWORD: "{{ postgres_password }}"
+      POSTGRES_DB: "{{ postgres_db }}"
+    ports:
+{% if postgres_expose_public | default(false) | bool %}
+      - "0.0.0.0:{{ postgres_port }}:5432"
+{% else %}
+      - "127.0.0.1:{{ postgres_port }}:5432"
+{% endif %}
+    volumes:
+      - {{ postgres_data_dir }}:/var/lib/postgresql/data
+      - {{ app_dir }}/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - gotodoapp_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U {{ postgres_user }} -d {{ postgres_db }}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    mem_limit: 512m
+
+  redis:
+    image: redis:{{ redis_version }}
+    container_name: gotodoapp-redis
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:{{ redis_port }}:6379"
+    networks:
+      - gotodoapp_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    mem_limit: 256m
+
+  memcached:
+    image: memcached:{{ memcached_version }}
+    container_name: gotodoapp-memcached
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:{{ memcached_port }}:11211"
+    networks:
+      - gotodoapp_network
+    mem_limit: 256m
+
+networks:
+  gotodoapp_network:
+    external: true

@@ -1,0 +1,58 @@
+---
+# ╔══════════════════════════════════════════════════════════════╗
+# ║  go-todo-app — Application Deploy / Update                   ║
+# ║                                                              ║
+# ║  Usage:                                                      ║
+# ║    ansible-playbook playbooks/deploy.yml                     ║
+# ║    ansible-playbook playbooks/deploy.yml -e app_branch=dev   ║
+# ║                                                              ║
+# ║  Use this to deploy or update the app without re-running     ║
+# ║  the full server setup.                                      ║
+# ╚══════════════════════════════════════════════════════════════╝
+
+- name: "go-todo-app — Deploy Application"
+  hosts: webservers
+  become: true
+  gather_facts: true
+
+  vars_files:
+    - "../group_vars/all.yml"
+    - "../group_vars/{{ env | default('production') }}.yml"
+
+  pre_tasks:
+    - name: Display deploy info
+      debug:
+        msg: |
+          ╔══════════════════════════════════════════════╗
+          ║  Deploying: {{ app_name }}
+          ║  Branch:    {{ app_branch }}
+          ║  Domain:    {{ domain_name }}
+          ╚══════════════════════════════════════════════╝
+
+    - name: Verify Docker is running
+      command: docker info
+      changed_when: false
+      register: docker_info
+      failed_when: docker_info.rc != 0
+
+    - name: Verify PostgreSQL is running
+      command: >
+        docker exec gotodoapp-postgres
+        pg_isready -U {{ postgres_user }} -d {{ postgres_db }}
+      changed_when: false
+      register: pg_status
+      failed_when: pg_status.rc != 0
+
+  roles:
+    - role: app
+      tags: [app, deploy]
+
+  post_tasks:
+    - name: "🎉 Deploy complete!"
+      debug:
+        msg: |
+          ╔══════════════════════════════════════════════╗
+          ║  ✅ Application Updated Successfully!        ║
+          ║                                              ║
+          ║  URL: https://{{ domain_name }}              ║
+          ╚══════════════════════════════════════════════╝

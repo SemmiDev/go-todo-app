@@ -1,0 +1,55 @@
+# ╔══════════════════════════════════════════════════════════════╗
+# ║  go-todo-app Docker Compose (App) — Managed by Ansible       ║
+# ╚══════════════════════════════════════════════════════════════╝
+
+x-app-config: &app-config
+  image: {{ app_name }}:latest
+  restart: unless-stopped
+  env_file:
+    - "{{ app_dir }}/src/.env"
+  networks:
+    - gotodoapp_network
+  tmpfs:
+    - /tmp:size={{ docker_tmpfs_size }},mode=1777
+  mem_limit: {{ docker_memory_limit }}
+  cpus: {{ docker_cpu_limit }}
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
+services:
+  server:
+    <<: *app-config
+    container_name: {{ app_name }}-server
+    build:
+      context: "{{ app_dir }}/src"
+      dockerfile: Dockerfile
+    ports:
+      - "127.0.0.1:{{ app_port }}:8080"
+      - "127.0.0.1:9090:9090"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  scheduler:
+    <<: *app-config
+    container_name: {{ app_name }}-scheduler
+    build:
+      context: "{{ app_dir }}/src"
+      dockerfile: Dockerfile.scheduler
+
+  worker:
+    <<: *app-config
+    container_name: {{ app_name }}-worker
+    build:
+      context: "{{ app_dir }}/src"
+      dockerfile: Dockerfile.worker
+
+networks:
+  gotodoapp_network:
+    external: true

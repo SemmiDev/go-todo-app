@@ -1,0 +1,50 @@
+---
+# ╔══════════════════════════════════════════════════════════════╗
+# ║  go-todo-app — Initial Server Setup Only                     ║
+# ║                                                              ║
+# ║  Usage:                                                      ║
+# ║    ansible-playbook playbooks/setup.yml                      ║
+# ║                                                              ║
+# ║  Run this ONCE on a fresh server to install all              ║
+# ║  prerequisites: OS hardening, Docker, Nginx, PostgreSQL.     ║
+# ╚══════════════════════════════════════════════════════════════╝
+
+- name: "go-todo-app — Initial Server Setup"
+  hosts: webservers
+  become: true
+  gather_facts: true
+
+  vars_files:
+    - "../group_vars/all.yml"
+    - "../group_vars/{{ env | default('production') }}.yml"
+
+  pre_tasks:
+    - name: Display setup info
+      debug:
+        msg: |
+          ╔══════════════════════════════════════════════╗
+          ║  Setting up server for: {{ app_name }}
+          ║  Target: {{ ansible_host }}
+          ╚══════════════════════════════════════════════╝
+
+  roles:
+    - role: common
+      tags: [common]
+
+    - role: docker
+      tags: [docker]
+
+    - role: nginx
+      tags: [nginx]
+
+    - role: postgres
+      tags: [postgres]
+
+  post_tasks:
+    - name: "✅ Server setup complete"
+      debug:
+        msg: |
+          Server is ready for application deployment!
+
+          Next step:
+            ansible-playbook playbooks/deploy.yml

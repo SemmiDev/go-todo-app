@@ -1,0 +1,202 @@
+---
+# ╔══════════════════════════════════════════════════════════════╗
+# ║  Role: common — Base server setup & hardening               ║
+# ╚══════════════════════════════════════════════════════════════╝
+
+- name: Set timezone
+  community.general.timezone:
+    name: "{{ timezone }}"
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Install essential packages
+  apt:
+    name:
+      - curl
+      - wget
+      - git
+      - vim
+      - htop
+      - iotop
+      - unzip
+      - jq
+      - apt-transport-https
+      - ca-certificates
+      - gnupg
+      - lsb-release
+      - software-properties-common
+      - ufw
+      - fail2ban
+      - unattended-upgrades
+      - logrotate
+      - acl
+    state: present
+
+# ── Deploy User ──────────────────────────────────────────────
+- name: Create deploy user
+  user:
+    name: "{{ deploy_user }}"
+    shell: /bin/bash
+    groups: sudo
+    append: yes
+    create_home: yes
+
+- name: Allow deploy user passwordless sudo
+  lineinfile:
+    path: /etc/sudoers.d/{{ deploy_user }}
+    line: "{{ deploy_user }} ALL=(ALL) NOPASSWD: ALL"
+    create: yes
+    validate: "visudo -cf %s"
+
+- name: Ensure .ssh directory exists for deploy user
+  file:
+    path: "/home/{{ deploy_user }}/.ssh"
+    state: directory
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: "0700"
+
+- name: Set authorized key for deploy user
+  authorized_key:
+    user: "{{ deploy_user }}"
+    state: present
+    key: "{{ lookup('file', '~/.ssh/id_ed25519.pub') }}"
+  register: ssh_key_result
+  failed_when:
+    - ssh_key_result is failed
+    - "'could not find' not in (ssh_key_result.msg | default(''))"
+
+- name: Create SSH keypair for deploy user (for GitHub Deploy Keys)
+  community.crypto.openssh_keypair:
+    path: "/home/{{ deploy_user }}/.ssh/id_ed25519"
+    type: ed25519
+    comment: "deploy@go-todo-app"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+
+# ── Application User ────────────────────────────────────────
+- name: Create application user
+  user:
+    name: "{{ app_user }}"
+    uid: 1001
+    shell: /bin/bash
+    system: yes
+    create_home: yes
+
+# ── SSH Hardening ────────────────────────────────────────────
+- name: Harden SSH configuration
+  template:
+    src: sshd_config.j2
+    dest: /etc/ssh/sshd_config
+    owner: root
+    group: root
+    mode: "0644"
+    validate: "sshd -t -f %s"
+  notify: restart sshd
+
+# ── Firewall (UFW) ──────────────────────────────────────────
+- name: Set UFW default deny incoming
+  community.general.ufw:
+    direction: incoming
+    default: deny
+
+- name: Set UFW default allow outgoing
+  community.general.ufw:
+    direction: outgoing
+    default: allow
+
+- name: Allow required ports through UFW
+  community.general.ufw:
+    rule: allow
+    port: "{{ item.port | string }}"
+    proto: "{{ item.proto }}"
+  loop: "{{ ufw_allowed_ports }}"
+
+- name: Enable UFW
+  community.general.ufw:
+    state: enabled
+
+# ── Fail2Ban ─────────────────────────────────────────────────
+- name: Enable fail2ban service
+  systemd:
+    name: fail2ban
+    enabled: yes
+    state: started
+
+# ── Swap File ────────────────────────────────────────────────
+- name: Check if swap file exists
+  stat:
+    path: /swapfile
+  register: swap_file
+
+- name: Create swap file
+  command: fallocate -l {{ swap_size }} /swapfile
+  when: not swap_file.stat.exists
+
+- name: Set swap file permissions
+  file:
+    path: /swapfile
+    mode: "0600"
+  when: not swap_file.stat.exists
+
+- name: Make swap
+  command: mkswap /swapfile
+  when: not swap_file.stat.exists
+
+- name: Enable swap
+  command: swapon /swapfile
+  when: not swap_file.stat.exists
+
+- name: Add swap to fstab
+  lineinfile:
+    path: /etc/fstab
+    line: "/swapfile none swap sw 0 0"
+    state: present
+
+# ── Unattended Upgrades ─────────────────────────────────────
+- name: Enable unattended upgrades
+  copy:
+    dest: /etc/apt/apt.conf.d/20auto-upgrades
+    content: |
+      APT::Periodic::Update-Package-Lists "1";
+      APT::Periodic::Unattended-Upgrade "1";
+      APT::Periodic::AutocleanInterval "7";
+    owner: root
+    group: root
+    mode: "0644"
+
+# ── Create Application Directories ──────────────────────────
+- name: Create application directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: "0755"
+  loop:
+    - "{{ app_dir }}"
+    - "{{ app_dir }}/data"
+    - "{{ app_dir }}/backups"
+    - "{{ app_dir }}/logs"
+    - "{{ app_dir }}/scripts"
+
+# ── Extract Deploy User Public SSH Key ──────────────────────
+- name: Read deploy user SSH public key
+  command: cat /home/{{ deploy_user }}/.ssh/id_ed25519.pub
+  register: deploy_public_key
+  changed_when: false
+
+- name: Display deploy user SSH public key
+  debug:
+    msg: |
+
+      ========================================================================
+      Add the following public key as a Deploy Key in your GitHub repository:
+      ========================================================================
+
+      {{ deploy_public_key.stdout }}
+
+      ========================================================================

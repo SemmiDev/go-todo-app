@@ -1,0 +1,60 @@
+---
+# ╔══════════════════════════════════════════════════════════════╗
+# ║  go-todo-app — Full Server Provisioning                      ║
+# ║                                                              ║
+# ║  Usage:                                                      ║
+# ║    ansible-playbook playbooks/site.yml                       ║
+# ║    ansible-playbook playbooks/site.yml -i inventory/staging  ║
+# ╚══════════════════════════════════════════════════════════════╝
+
+- name: "go-todo-app — Full Server Setup & Deploy"
+  hosts: webservers
+  become: yes
+  gather_facts: yes
+
+  vars_files:
+    - "../group_vars/all.yml"
+    - "../group_vars/{{ env | default('production') }}.yml"
+
+  pre_tasks:
+    - name: Display deployment info
+      debug:
+        msg: |
+          ╔══════════════════════════════════════════════╗
+          ║  Deploying: {{ app_name }}
+          ║  Branch:    {{ app_branch }}
+          ║  Domain:    {{ domain_name }}
+          ║  Env:       {{ env | default('production') }}
+          ╚══════════════════════════════════════════════╝
+
+    - name: Verify minimum Ansible version
+      assert:
+        that: ansible_version.full is version('2.14', '>=')
+        msg: "Ansible 2.14+ required. Current: {{ ansible_version.full }}"
+
+  roles:
+    - role: common
+      tags: [common, setup]
+
+    - role: docker
+      tags: [docker, setup]
+
+    - role: nginx
+      tags: [nginx, web]
+
+    - role: postgres
+      tags: [postgres, db]
+
+    - role: app
+      tags: [app, deploy]
+
+  post_tasks:
+    - name: "🎉 Deployment complete!"
+      debug:
+        msg: |
+          ╔══════════════════════════════════════════════╗
+          ║  ✅ Deployment Successful!                   ║
+          ║                                              ║
+          ║  URL:  https://{{ domain_name }}             ║
+          ║  App:  http://{{ ansible_host }}:{{ app_port }}
+          ╚══════════════════════════════════════════════╝

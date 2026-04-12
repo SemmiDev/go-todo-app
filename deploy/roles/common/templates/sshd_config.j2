@@ -1,0 +1,32 @@
+# ╔══════════════════════════════════════════════════════════════╗
+# ║  SSH Hardening Configuration — Managed by Ansible           ║
+# ╚══════════════════════════════════════════════════════════════╝
+# Do NOT edit manually on the server. Changes here will be
+# overwritten on next playbook run.
+
+Port {{ ssh_port }}
+Protocol 2
+AddressFamily any
+ListenAddress 0.0.0.0
+
+# ── Authentication ───────────────────────────────────────────
+PermitRootLogin no
+PasswordAuthentication no
+PermitEmptyPasswords no
+PubkeyAuthentication yes
+AuthorizedKeysFile .ssh/authorized_keys
+KbdInteractiveAuthentication no
+UsePAM yes
+
+# ── Security ─────────────────────────────────────────────────
+X11Forwarding no
+MaxAuthTries 3
+MaxSessions 5
+LoginGraceTime 30
+ClientAliveInterval 300
+ClientAliveCountMax 2
+
+# ── Misc ─────────────────────────────────────────────────────
+PrintMotd no
+AcceptEnv LANG LC_*
+Subsystem sftp /usr/lib/openssh/sftp-server
