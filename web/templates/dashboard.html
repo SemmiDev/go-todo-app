@@ -540,17 +540,23 @@
         }
 
         try {
-            // Fetch the full todo first so we can send all required fields
-            const todo = await Api.request(`/todos/${id}`);
-            await Api.request(`/todos/${id}`, 'PUT', {
-                title: todo.title,
-                description: todo.description || '',
-                status: newStatus,
-                priority: protoEnumValue(todo.priority, 'TODO_PRIORITY_', 2),
-                tag_ids: (todo.tags || []).map(t => t.id),
-                reminders: todo.reminders || [],
+            await Api.request(`/todos/${id}/status`, 'PATCH', {
+                status: newStatus
             });
             showToast(newStatus === 3 ? 'Task completed! 🎉' : 'Task reopened', 'success');
+            await loadTodos();
+        } catch (err) {
+            showToast(err.message, 'error');
+        }
+    }
+
+    async function updateTodoStatus(id, newStatus) {
+        try {
+            await Api.request(`/todos/${id}/status`, 'PATCH', {
+                status: newStatus
+            });
+            showToast('Status updated', 'success');
+            closeModal('detail-modal');
             await loadTodos();
         } catch (err) {
             showToast(err.message, 'error');
@@ -599,6 +605,22 @@
                 </div>
                 ${reminders ? `<div style="margin-bottom: 1rem;"><div style="font-weight: 800; font-size: 0.75rem; text-transform: uppercase; margin-bottom: 0.4rem; color: var(--text-muted);">Reminders</div><div class="tag-list">${reminders}</div></div>` : ''}
                 ${tags ? `<div style="margin-bottom: 1rem;"><div style="font-weight: 800; font-size: 0.75rem; text-transform: uppercase; margin-bottom: 0.4rem; color: var(--text-muted);">Tags</div><div class="tag-list">${tags}</div></div>` : ''}
+                
+                <div style="margin-bottom: 1rem;">
+                    <div style="font-weight: 800; font-size: 0.75rem; text-transform: uppercase; margin-bottom: 0.6rem; color: var(--text-muted);">Update Status</div>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <button onclick="updateTodoStatus('${todo.id}', 1)" class="btn btn-sm ${todo.status === 'TODO_STATUS_PENDING' ? 'btn-primary' : 'btn-secondary'}" style="flex:1;">
+                             <i class="ph-bold ph-hourglass"></i> Pending
+                        </button>
+                        <button onclick="updateTodoStatus('${todo.id}', 2)" class="btn btn-sm ${todo.status === 'TODO_STATUS_IN_PROGRESS' ? 'btn-primary' : 'btn-secondary'}" style="flex:1;">
+                             <i class="ph-bold ph-spinner"></i> In Progress
+                        </button>
+                        <button onclick="updateTodoStatus('${todo.id}', 3)" class="btn btn-sm ${todo.status === 'TODO_STATUS_DONE' ? 'btn-primary' : 'btn-secondary'}" style="flex:1;">
+                             <i class="ph-bold ph-check-circle"></i> Done
+                        </button>
+                    </div>
+                </div>
+
                 <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
                     <button onclick="closeModal('detail-modal'); openEditTodoModal('${todo.id}')" class="btn btn-primary btn-sm" style="flex:1;"><i class="ph-bold ph-pencil-simple"></i> Edit</button>
                     <button onclick="closeModal('detail-modal'); confirmDeleteTodo('${todo.id}')" class="btn btn-danger btn-sm"><i class="ph-bold ph-trash"></i></button>

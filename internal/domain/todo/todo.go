@@ -232,6 +232,41 @@ func (t *Todo) MarkReminderTriggered(offset string) {
 	t.triggeredReminders = append(t.triggeredReminders, offset)
 }
 
+// TransitionStatus moves the todo to a new status based on allowed transitions.
+// Allowed:
+// - pending -> in_progress
+// - in_progress -> pending
+// - in_progress -> done
+// - done -> in_progress
+// - done -> pending
+// Not Allowed:
+// - pending -> done (directly)
+func (t *Todo) TransitionStatus(newStatus Status) error {
+	if !newStatus.IsValid() {
+		return errors.New("invalid status")
+	}
+
+	if t.status == newStatus {
+		return nil
+	}
+
+	// State machine logic
+	switch t.status {
+	case StatusPending:
+		if newStatus == StatusDone {
+			return errors.New("cannot transition directly from pending to done")
+		}
+	case StatusInProgress:
+		// All transitions allowed from in_progress
+	case StatusDone:
+		// All transitions allowed from done
+	}
+
+	t.status = newStatus
+	t.updatedAt = time.Now().UTC()
+	return nil
+}
+
 // Update modifies core fields of the Todo with validation.
 func (t *Todo) Update(title, description string, status Status, priority Priority, dueDate *time.Time, reminders []string) error {
 	title = strings.TrimSpace(title)
@@ -241,21 +276,14 @@ func (t *Todo) Update(title, description string, status Status, priority Priorit
 	if len(title) > 200 {
 		return errors.New("title must be at most 200 characters")
 	}
-	if !status.IsValid() {
-		return errors.New("invalid status")
-	}
-	if !priority.IsValid() {
-		priority = PriorityMedium
+	if err := t.TransitionStatus(status); err != nil {
+		return err
 	}
 	t.title = title
 	t.description = strings.TrimSpace(description)
-	t.status = status
 	t.priority = priority
 	t.dueDate = dueDate
 	t.reminders = reminders
-	// Reset triggered reminders if due date or reminders changed significantly?
-	// For simplicity, we just update them. 
-	// If the user adds a new one, it will be sent.
 	t.updatedAt = time.Now().UTC()
 	return nil
 }

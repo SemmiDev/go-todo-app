@@ -256,6 +256,35 @@ func (s *TodoServer) UpdateTodo(ctx context.Context, req *pb.UpdateTodoRequest) 
 	return todoToProto(t), nil
 }
 
+// UpdateTodoStatus updates only the status of a todo item.
+func (s *TodoServer) UpdateTodoStatus(ctx context.Context, req *pb.UpdateTodoStatusRequest) (*pb.Todo, error) {
+	u, ok := interceptor.UserFromContext(ctx)
+	if !ok {
+		return nil, status.Error(codes.Unauthenticated, "not authenticated")
+	}
+	todoID, err := uuid.Parse(req.GetTodoId())
+	if err != nil {
+		return nil, grpcerr.NewInvalidArgument("invalid todo_id")
+	}
+	params := input.UpdateTodoStatusParams{
+		TodoID: todoID, UserID: u.ID(),
+		Status: protoStatusToDomain(req.GetStatus()),
+	}
+	if err := s.validator.Struct(params); err != nil {
+		return nil, grpcerr.FromAppError(ctx, err)
+	}
+	// Enrich wide event with update context
+	wideevent.Add(ctx,
+		slog.String("todo_id", todoID.String()),
+		slog.String("todo_status", string(params.Status)),
+	)
+	t, err := s.svc.UpdateTodoStatus(ctx, params)
+	if err != nil {
+		return nil, grpcerr.FromAppError(ctx, err)
+	}
+	return todoToProto(t), nil
+}
+
 // DeleteTodo removes a todo item.
 func (s *TodoServer) DeleteTodo(ctx context.Context, req *pb.DeleteTodoRequest) (*emptypb.Empty, error) {
 	u, ok := interceptor.UserFromContext(ctx)

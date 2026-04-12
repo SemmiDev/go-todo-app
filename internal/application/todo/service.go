@@ -223,6 +223,31 @@ func (s *Service) UpdateTodo(ctx context.Context, p input.UpdateTodoParams) (*to
 	return t, nil
 }
 
+// UpdateTodoStatus modifies only the status of a todo, enforcing state machine rules.
+func (s *Service) UpdateTodoStatus(ctx context.Context, p input.UpdateTodoStatusParams) (*todo.Todo, error) {
+	t, err := s.todoRepo.GetByID(ctx, p.TodoID)
+	if err != nil {
+		return nil, apperr.ErrNotFound
+	}
+	if !t.IsOwnedBy(p.UserID) {
+		return nil, apperr.ErrForbidden
+	}
+
+	if err := t.TransitionStatus(p.Status); err != nil {
+		return nil, fmt.Errorf("%w: %s", apperr.ErrValidation, err)
+	}
+
+	if err := s.todoRepo.Update(ctx, t); err != nil {
+		return nil, err
+	}
+
+	tags, _ := s.todoTagRepo.GetTagsForTodo(ctx, t.ID())
+	t.SetTags(tags)
+
+	_ = s.cacheRepo.Delete(ctx, fmt.Sprintf("todo:%s", t.ID().String()))
+	return t, nil
+}
+
 // DeleteTodo removes a todo and cleans up related cache entries.
 func (s *Service) DeleteTodo(ctx context.Context, p input.DeleteTodoParams) error {
 	t, err := s.todoRepo.GetByID(ctx, p.TodoID)

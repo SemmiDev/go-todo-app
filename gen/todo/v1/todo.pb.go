@@ -824,6 +824,58 @@ func (x *UpdateTodoRequest) GetReminders() []string {
 	return nil
 }
 
+type UpdateTodoStatusRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TodoId        string                 `protobuf:"bytes,1,opt,name=todo_id,json=todoId,proto3" json:"todo_id,omitempty"`
+	Status        TodoStatus             `protobuf:"varint,2,opt,name=status,proto3,enum=todo.v1.TodoStatus" json:"status,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateTodoStatusRequest) Reset() {
+	*x = UpdateTodoStatusRequest{}
+	mi := &file_todo_v1_todo_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateTodoStatusRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateTodoStatusRequest) ProtoMessage() {}
+
+func (x *UpdateTodoStatusRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_todo_v1_todo_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateTodoStatusRequest.ProtoReflect.Descriptor instead.
+func (*UpdateTodoStatusRequest) Descriptor() ([]byte, []int) {
+	return file_todo_v1_todo_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *UpdateTodoStatusRequest) GetTodoId() string {
+	if x != nil {
+		return x.TodoId
+	}
+	return ""
+}
+
+func (x *UpdateTodoStatusRequest) GetStatus() TodoStatus {
+	if x != nil {
+		return x.Status
+	}
+	return TodoStatus_TODO_STATUS_UNSPECIFIED
+}
+
 type DeleteTodoRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	TodoId        string                 `protobuf:"bytes,1,opt,name=todo_id,json=todoId,proto3" json:"todo_id,omitempty"`
@@ -833,7 +885,7 @@ type DeleteTodoRequest struct {
 
 func (x *DeleteTodoRequest) Reset() {
 	*x = DeleteTodoRequest{}
-	mi := &file_todo_v1_todo_proto_msgTypes[10]
+	mi := &file_todo_v1_todo_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -845,7 +897,7 @@ func (x *DeleteTodoRequest) String() string {
 func (*DeleteTodoRequest) ProtoMessage() {}
 
 func (x *DeleteTodoRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_todo_v1_todo_proto_msgTypes[10]
+	mi := &file_todo_v1_todo_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -858,7 +910,7 @@ func (x *DeleteTodoRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteTodoRequest.ProtoReflect.Descriptor instead.
 func (*DeleteTodoRequest) Descriptor() ([]byte, []int) {
-	return file_todo_v1_todo_proto_rawDescGZIP(), []int{10}
+	return file_todo_v1_todo_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *DeleteTodoRequest) GetTodoId() string {
@@ -886,7 +938,7 @@ type Paging struct {
 
 func (x *Paging) Reset() {
 	*x = Paging{}
-	mi := &file_todo_v1_todo_proto_msgTypes[11]
+	mi := &file_todo_v1_todo_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -898,7 +950,7 @@ func (x *Paging) String() string {
 func (*Paging) ProtoMessage() {}
 
 func (x *Paging) ProtoReflect() protoreflect.Message {
-	mi := &file_todo_v1_todo_proto_msgTypes[11]
+	mi := &file_todo_v1_todo_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -911,7 +963,7 @@ func (x *Paging) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Paging.ProtoReflect.Descriptor instead.
 func (*Paging) Descriptor() ([]byte, []int) {
-	return file_todo_v1_todo_proto_rawDescGZIP(), []int{11}
+	return file_todo_v1_todo_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *Paging) GetHasPreviousPage() bool {
@@ -992,7 +1044,7 @@ type ListTodosRequest struct {
 
 func (x *ListTodosRequest) Reset() {
 	*x = ListTodosRequest{}
-	mi := &file_todo_v1_todo_proto_msgTypes[12]
+	mi := &file_todo_v1_todo_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1004,7 +1056,7 @@ func (x *ListTodosRequest) String() string {
 func (*ListTodosRequest) ProtoMessage() {}
 
 func (x *ListTodosRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_todo_v1_todo_proto_msgTypes[12]
+	mi := &file_todo_v1_todo_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1017,7 +1069,7 @@ func (x *ListTodosRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListTodosRequest.ProtoReflect.Descriptor instead.
 func (*ListTodosRequest) Descriptor() ([]byte, []int) {
-	return file_todo_v1_todo_proto_rawDescGZIP(), []int{12}
+	return file_todo_v1_todo_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *ListTodosRequest) GetStatus() TodoStatus {
@@ -1079,7 +1131,7 @@ type ListTodosResponse struct {
 
 func (x *ListTodosResponse) Reset() {
 	*x = ListTodosResponse{}
-	mi := &file_todo_v1_todo_proto_msgTypes[13]
+	mi := &file_todo_v1_todo_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1091,7 +1143,7 @@ func (x *ListTodosResponse) String() string {
 func (*ListTodosResponse) ProtoMessage() {}
 
 func (x *ListTodosResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_todo_v1_todo_proto_msgTypes[13]
+	mi := &file_todo_v1_todo_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1104,7 +1156,7 @@ func (x *ListTodosResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListTodosResponse.ProtoReflect.Descriptor instead.
 func (*ListTodosResponse) Descriptor() ([]byte, []int) {
-	return file_todo_v1_todo_proto_rawDescGZIP(), []int{13}
+	return file_todo_v1_todo_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *ListTodosResponse) GetTodos() []*Todo {
@@ -1131,7 +1183,7 @@ type AddTagToTodoRequest struct {
 
 func (x *AddTagToTodoRequest) Reset() {
 	*x = AddTagToTodoRequest{}
-	mi := &file_todo_v1_todo_proto_msgTypes[14]
+	mi := &file_todo_v1_todo_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1143,7 +1195,7 @@ func (x *AddTagToTodoRequest) String() string {
 func (*AddTagToTodoRequest) ProtoMessage() {}
 
 func (x *AddTagToTodoRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_todo_v1_todo_proto_msgTypes[14]
+	mi := &file_todo_v1_todo_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1156,7 +1208,7 @@ func (x *AddTagToTodoRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AddTagToTodoRequest.ProtoReflect.Descriptor instead.
 func (*AddTagToTodoRequest) Descriptor() ([]byte, []int) {
-	return file_todo_v1_todo_proto_rawDescGZIP(), []int{14}
+	return file_todo_v1_todo_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *AddTagToTodoRequest) GetTodoId() string {
@@ -1183,7 +1235,7 @@ type RemoveTagFromTodoRequest struct {
 
 func (x *RemoveTagFromTodoRequest) Reset() {
 	*x = RemoveTagFromTodoRequest{}
-	mi := &file_todo_v1_todo_proto_msgTypes[15]
+	mi := &file_todo_v1_todo_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1195,7 +1247,7 @@ func (x *RemoveTagFromTodoRequest) String() string {
 func (*RemoveTagFromTodoRequest) ProtoMessage() {}
 
 func (x *RemoveTagFromTodoRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_todo_v1_todo_proto_msgTypes[15]
+	mi := &file_todo_v1_todo_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1208,7 +1260,7 @@ func (x *RemoveTagFromTodoRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveTagFromTodoRequest.ProtoReflect.Descriptor instead.
 func (*RemoveTagFromTodoRequest) Descriptor() ([]byte, []int) {
-	return file_todo_v1_todo_proto_rawDescGZIP(), []int{15}
+	return file_todo_v1_todo_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *RemoveTagFromTodoRequest) GetTodoId() string {
@@ -1286,7 +1338,10 @@ const file_todo_v1_todo_proto_rawDesc = "" +
 	"\bpriority\x18\x05 \x01(\x0e2\x15.todo.v1.TodoPriorityR\bpriority\x125\n" +
 	"\bdue_date\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\adueDate\x12\x17\n" +
 	"\atag_ids\x18\a \x03(\tR\x06tagIds\x12\x1c\n" +
-	"\treminders\x18\b \x03(\tR\treminders\",\n" +
+	"\treminders\x18\b \x03(\tR\treminders\"_\n" +
+	"\x17UpdateTodoStatusRequest\x12\x17\n" +
+	"\atodo_id\x18\x01 \x01(\tR\x06todoId\x12+\n" +
+	"\x06status\x18\x02 \x01(\x0e2\x13.todo.v1.TodoStatusR\x06status\",\n" +
 	"\x11DeleteTodoRequest\x12\x17\n" +
 	"\atodo_id\x18\x01 \x01(\tR\x06todoId\"\xb2\x02\n" +
 	"\x06Paging\x12*\n" +
@@ -1335,13 +1390,14 @@ const file_todo_v1_todo_proto_rawDesc = "" +
 	"\tUpdateTag\x12\x19.todo.v1.UpdateTagRequest\x1a\f.todo.v1.Tag\"\x1c\x82\xd3\xe4\x93\x02\x16:\x01*\x1a\x11/v1/tags/{tag_id}\x12Y\n" +
 	"\tDeleteTag\x12\x19.todo.v1.DeleteTagRequest\x1a\x16.google.protobuf.Empty\"\x19\x82\xd3\xe4\x93\x02\x13*\x11/v1/tags/{tag_id}\x12O\n" +
 	"\bListTags\x12\x16.google.protobuf.Empty\x1a\x19.todo.v1.ListTagsResponse\"\x10\x82\xd3\xe4\x93\x02\n" +
-	"\x12\b/v1/tags2\x95\x05\n" +
+	"\x12\b/v1/tags2\x81\x06\n" +
 	"\vTodoService\x12M\n" +
 	"\n" +
 	"CreateTodo\x12\x1a.todo.v1.CreateTodoRequest\x1a\r.todo.v1.Todo\"\x14\x82\xd3\xe4\x93\x02\x0e:\x01*\"\t/v1/todos\x12N\n" +
 	"\aGetTodo\x12\x17.todo.v1.GetTodoRequest\x1a\r.todo.v1.Todo\"\x1b\x82\xd3\xe4\x93\x02\x15\x12\x13/v1/todos/{todo_id}\x12W\n" +
 	"\n" +
-	"UpdateTodo\x12\x1a.todo.v1.UpdateTodoRequest\x1a\r.todo.v1.Todo\"\x1e\x82\xd3\xe4\x93\x02\x18:\x01*\x1a\x13/v1/todos/{todo_id}\x12]\n" +
+	"UpdateTodo\x12\x1a.todo.v1.UpdateTodoRequest\x1a\r.todo.v1.Todo\"\x1e\x82\xd3\xe4\x93\x02\x18:\x01*\x1a\x13/v1/todos/{todo_id}\x12j\n" +
+	"\x10UpdateTodoStatus\x12 .todo.v1.UpdateTodoStatusRequest\x1a\r.todo.v1.Todo\"%\x82\xd3\xe4\x93\x02\x1f:\x01*2\x1a/v1/todos/{todo_id}/status\x12]\n" +
 	"\n" +
 	"DeleteTodo\x12\x1a.todo.v1.DeleteTodoRequest\x1a\x16.google.protobuf.Empty\"\x1b\x82\xd3\xe4\x93\x02\x15*\x13/v1/todos/{todo_id}\x12U\n" +
 	"\tListTodos\x12\x19.todo.v1.ListTodosRequest\x1a\x1a.todo.v1.ListTodosResponse\"\x11\x82\xd3\xe4\x93\x02\v\x12\t/v1/todos\x12f\n" +
@@ -1361,7 +1417,7 @@ func file_todo_v1_todo_proto_rawDescGZIP() []byte {
 }
 
 var file_todo_v1_todo_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_todo_v1_todo_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
+var file_todo_v1_todo_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
 var file_todo_v1_todo_proto_goTypes = []any{
 	(TodoStatus)(0),                  // 0: todo.v1.TodoStatus
 	(TodoPriority)(0),                // 1: todo.v1.TodoPriority
@@ -1375,62 +1431,66 @@ var file_todo_v1_todo_proto_goTypes = []any{
 	(*CreateTodoRequest)(nil),        // 9: todo.v1.CreateTodoRequest
 	(*GetTodoRequest)(nil),           // 10: todo.v1.GetTodoRequest
 	(*UpdateTodoRequest)(nil),        // 11: todo.v1.UpdateTodoRequest
-	(*DeleteTodoRequest)(nil),        // 12: todo.v1.DeleteTodoRequest
-	(*Paging)(nil),                   // 13: todo.v1.Paging
-	(*ListTodosRequest)(nil),         // 14: todo.v1.ListTodosRequest
-	(*ListTodosResponse)(nil),        // 15: todo.v1.ListTodosResponse
-	(*AddTagToTodoRequest)(nil),      // 16: todo.v1.AddTagToTodoRequest
-	(*RemoveTagFromTodoRequest)(nil), // 17: todo.v1.RemoveTagFromTodoRequest
-	(*timestamppb.Timestamp)(nil),    // 18: google.protobuf.Timestamp
-	(*emptypb.Empty)(nil),            // 19: google.protobuf.Empty
+	(*UpdateTodoStatusRequest)(nil),  // 12: todo.v1.UpdateTodoStatusRequest
+	(*DeleteTodoRequest)(nil),        // 13: todo.v1.DeleteTodoRequest
+	(*Paging)(nil),                   // 14: todo.v1.Paging
+	(*ListTodosRequest)(nil),         // 15: todo.v1.ListTodosRequest
+	(*ListTodosResponse)(nil),        // 16: todo.v1.ListTodosResponse
+	(*AddTagToTodoRequest)(nil),      // 17: todo.v1.AddTagToTodoRequest
+	(*RemoveTagFromTodoRequest)(nil), // 18: todo.v1.RemoveTagFromTodoRequest
+	(*timestamppb.Timestamp)(nil),    // 19: google.protobuf.Timestamp
+	(*emptypb.Empty)(nil),            // 20: google.protobuf.Empty
 }
 var file_todo_v1_todo_proto_depIdxs = []int32{
-	18, // 0: todo.v1.Tag.created_at:type_name -> google.protobuf.Timestamp
-	18, // 1: todo.v1.Tag.updated_at:type_name -> google.protobuf.Timestamp
+	19, // 0: todo.v1.Tag.created_at:type_name -> google.protobuf.Timestamp
+	19, // 1: todo.v1.Tag.updated_at:type_name -> google.protobuf.Timestamp
 	0,  // 2: todo.v1.Todo.status:type_name -> todo.v1.TodoStatus
 	1,  // 3: todo.v1.Todo.priority:type_name -> todo.v1.TodoPriority
-	18, // 4: todo.v1.Todo.due_date:type_name -> google.protobuf.Timestamp
-	18, // 5: todo.v1.Todo.created_at:type_name -> google.protobuf.Timestamp
-	18, // 6: todo.v1.Todo.updated_at:type_name -> google.protobuf.Timestamp
+	19, // 4: todo.v1.Todo.due_date:type_name -> google.protobuf.Timestamp
+	19, // 5: todo.v1.Todo.created_at:type_name -> google.protobuf.Timestamp
+	19, // 6: todo.v1.Todo.updated_at:type_name -> google.protobuf.Timestamp
 	2,  // 7: todo.v1.Todo.tags:type_name -> todo.v1.Tag
 	2,  // 8: todo.v1.ListTagsResponse.tags:type_name -> todo.v1.Tag
 	1,  // 9: todo.v1.CreateTodoRequest.priority:type_name -> todo.v1.TodoPriority
-	18, // 10: todo.v1.CreateTodoRequest.due_date:type_name -> google.protobuf.Timestamp
+	19, // 10: todo.v1.CreateTodoRequest.due_date:type_name -> google.protobuf.Timestamp
 	0,  // 11: todo.v1.UpdateTodoRequest.status:type_name -> todo.v1.TodoStatus
 	1,  // 12: todo.v1.UpdateTodoRequest.priority:type_name -> todo.v1.TodoPriority
-	18, // 13: todo.v1.UpdateTodoRequest.due_date:type_name -> google.protobuf.Timestamp
-	0,  // 14: todo.v1.ListTodosRequest.status:type_name -> todo.v1.TodoStatus
-	3,  // 15: todo.v1.ListTodosResponse.todos:type_name -> todo.v1.Todo
-	13, // 16: todo.v1.ListTodosResponse.paging:type_name -> todo.v1.Paging
-	4,  // 17: todo.v1.TagService.CreateTag:input_type -> todo.v1.CreateTagRequest
-	7,  // 18: todo.v1.TagService.GetTag:input_type -> todo.v1.GetTagRequest
-	5,  // 19: todo.v1.TagService.UpdateTag:input_type -> todo.v1.UpdateTagRequest
-	6,  // 20: todo.v1.TagService.DeleteTag:input_type -> todo.v1.DeleteTagRequest
-	19, // 21: todo.v1.TagService.ListTags:input_type -> google.protobuf.Empty
-	9,  // 22: todo.v1.TodoService.CreateTodo:input_type -> todo.v1.CreateTodoRequest
-	10, // 23: todo.v1.TodoService.GetTodo:input_type -> todo.v1.GetTodoRequest
-	11, // 24: todo.v1.TodoService.UpdateTodo:input_type -> todo.v1.UpdateTodoRequest
-	12, // 25: todo.v1.TodoService.DeleteTodo:input_type -> todo.v1.DeleteTodoRequest
-	14, // 26: todo.v1.TodoService.ListTodos:input_type -> todo.v1.ListTodosRequest
-	16, // 27: todo.v1.TodoService.AddTagToTodo:input_type -> todo.v1.AddTagToTodoRequest
-	17, // 28: todo.v1.TodoService.RemoveTagFromTodo:input_type -> todo.v1.RemoveTagFromTodoRequest
-	2,  // 29: todo.v1.TagService.CreateTag:output_type -> todo.v1.Tag
-	2,  // 30: todo.v1.TagService.GetTag:output_type -> todo.v1.Tag
-	2,  // 31: todo.v1.TagService.UpdateTag:output_type -> todo.v1.Tag
-	19, // 32: todo.v1.TagService.DeleteTag:output_type -> google.protobuf.Empty
-	8,  // 33: todo.v1.TagService.ListTags:output_type -> todo.v1.ListTagsResponse
-	3,  // 34: todo.v1.TodoService.CreateTodo:output_type -> todo.v1.Todo
-	3,  // 35: todo.v1.TodoService.GetTodo:output_type -> todo.v1.Todo
-	3,  // 36: todo.v1.TodoService.UpdateTodo:output_type -> todo.v1.Todo
-	19, // 37: todo.v1.TodoService.DeleteTodo:output_type -> google.protobuf.Empty
-	15, // 38: todo.v1.TodoService.ListTodos:output_type -> todo.v1.ListTodosResponse
-	3,  // 39: todo.v1.TodoService.AddTagToTodo:output_type -> todo.v1.Todo
-	3,  // 40: todo.v1.TodoService.RemoveTagFromTodo:output_type -> todo.v1.Todo
-	29, // [29:41] is the sub-list for method output_type
-	17, // [17:29] is the sub-list for method input_type
-	17, // [17:17] is the sub-list for extension type_name
-	17, // [17:17] is the sub-list for extension extendee
-	0,  // [0:17] is the sub-list for field type_name
+	19, // 13: todo.v1.UpdateTodoRequest.due_date:type_name -> google.protobuf.Timestamp
+	0,  // 14: todo.v1.UpdateTodoStatusRequest.status:type_name -> todo.v1.TodoStatus
+	0,  // 15: todo.v1.ListTodosRequest.status:type_name -> todo.v1.TodoStatus
+	3,  // 16: todo.v1.ListTodosResponse.todos:type_name -> todo.v1.Todo
+	14, // 17: todo.v1.ListTodosResponse.paging:type_name -> todo.v1.Paging
+	4,  // 18: todo.v1.TagService.CreateTag:input_type -> todo.v1.CreateTagRequest
+	7,  // 19: todo.v1.TagService.GetTag:input_type -> todo.v1.GetTagRequest
+	5,  // 20: todo.v1.TagService.UpdateTag:input_type -> todo.v1.UpdateTagRequest
+	6,  // 21: todo.v1.TagService.DeleteTag:input_type -> todo.v1.DeleteTagRequest
+	20, // 22: todo.v1.TagService.ListTags:input_type -> google.protobuf.Empty
+	9,  // 23: todo.v1.TodoService.CreateTodo:input_type -> todo.v1.CreateTodoRequest
+	10, // 24: todo.v1.TodoService.GetTodo:input_type -> todo.v1.GetTodoRequest
+	11, // 25: todo.v1.TodoService.UpdateTodo:input_type -> todo.v1.UpdateTodoRequest
+	12, // 26: todo.v1.TodoService.UpdateTodoStatus:input_type -> todo.v1.UpdateTodoStatusRequest
+	13, // 27: todo.v1.TodoService.DeleteTodo:input_type -> todo.v1.DeleteTodoRequest
+	15, // 28: todo.v1.TodoService.ListTodos:input_type -> todo.v1.ListTodosRequest
+	17, // 29: todo.v1.TodoService.AddTagToTodo:input_type -> todo.v1.AddTagToTodoRequest
+	18, // 30: todo.v1.TodoService.RemoveTagFromTodo:input_type -> todo.v1.RemoveTagFromTodoRequest
+	2,  // 31: todo.v1.TagService.CreateTag:output_type -> todo.v1.Tag
+	2,  // 32: todo.v1.TagService.GetTag:output_type -> todo.v1.Tag
+	2,  // 33: todo.v1.TagService.UpdateTag:output_type -> todo.v1.Tag
+	20, // 34: todo.v1.TagService.DeleteTag:output_type -> google.protobuf.Empty
+	8,  // 35: todo.v1.TagService.ListTags:output_type -> todo.v1.ListTagsResponse
+	3,  // 36: todo.v1.TodoService.CreateTodo:output_type -> todo.v1.Todo
+	3,  // 37: todo.v1.TodoService.GetTodo:output_type -> todo.v1.Todo
+	3,  // 38: todo.v1.TodoService.UpdateTodo:output_type -> todo.v1.Todo
+	3,  // 39: todo.v1.TodoService.UpdateTodoStatus:output_type -> todo.v1.Todo
+	20, // 40: todo.v1.TodoService.DeleteTodo:output_type -> google.protobuf.Empty
+	16, // 41: todo.v1.TodoService.ListTodos:output_type -> todo.v1.ListTodosResponse
+	3,  // 42: todo.v1.TodoService.AddTagToTodo:output_type -> todo.v1.Todo
+	3,  // 43: todo.v1.TodoService.RemoveTagFromTodo:output_type -> todo.v1.Todo
+	31, // [31:44] is the sub-list for method output_type
+	18, // [18:31] is the sub-list for method input_type
+	18, // [18:18] is the sub-list for extension type_name
+	18, // [18:18] is the sub-list for extension extendee
+	0,  // [0:18] is the sub-list for field type_name
 }
 
 func init() { file_todo_v1_todo_proto_init() }
@@ -1444,7 +1504,7 @@ func file_todo_v1_todo_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_todo_v1_todo_proto_rawDesc), len(file_todo_v1_todo_proto_rawDesc)),
 			NumEnums:      2,
-			NumMessages:   16,
+			NumMessages:   17,
 			NumExtensions: 0,
 			NumServices:   2,
 		},

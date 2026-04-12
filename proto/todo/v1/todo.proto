@@ -102,6 +102,11 @@ message UpdateTodoRequest {
   repeated string reminders = 8;
 }
 
+message UpdateTodoStatusRequest {
+  string     todo_id = 1;
+  TodoStatus status  = 2;
+}
+
 message DeleteTodoRequest {
   string todo_id = 1;
 }
@@ -191,6 +196,12 @@ service TodoService {
   rpc UpdateTodo(UpdateTodoRequest) returns (Todo) {
     option (google.api.http) = {
       put: "/v1/todos/{todo_id}"
+      body: "*"
+    };
+  }
+  rpc UpdateTodoStatus(UpdateTodoStatusRequest) returns (Todo) {
+    option (google.api.http) = {
+      patch: "/v1/todos/{todo_id}/status"
       body: "*"
     };
   }

@@ -107,6 +107,16 @@ type UpdateTodoParams struct {
 	Reminders []string `json:"reminders" validate:"omitempty,dive,duration"`
 }
 
+// UpdateTodoStatusParams holds parameters for updating a todo's status.
+type UpdateTodoStatusParams struct {
+	// TodoID is the unique identifier of the todo to update.
+	TodoID uuid.UUID `json:"todo_id" validate:"required,uuid"`
+	// UserID is the unique identifier of the user who owns the todo.
+	UserID uuid.UUID `json:"user_id" validate:"required,uuid"`
+	// Status is the new current state of the todo (pending, in_progress, done).
+	Status todo.Status `json:"status" validate:"required,oneof=pending in_progress done"`
+}
+
 // DeleteTodoParams holds parameters for deleting a todo.
 type DeleteTodoParams struct {
 	// TodoID is the unique identifier of the todo to delete.
@@ -181,6 +191,8 @@ type TodoUseCase interface {
 	GetTodo(ctx context.Context, p GetTodoParams) (*todo.Todo, error)
 	// UpdateTodo modifies an existing todo's details.
 	UpdateTodo(ctx context.Context, p UpdateTodoParams) (*todo.Todo, error)
+	// UpdateTodoStatus modifies only the status of an existing todo.
+	UpdateTodoStatus(ctx context.Context, p UpdateTodoStatusParams) (*todo.Todo, error)
 	// DeleteTodo removes a todo item from the system.
 	DeleteTodo(ctx context.Context, p DeleteTodoParams) error
 	// ListTodos returns a paginated list of todos based on filters.

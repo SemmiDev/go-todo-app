@@ -277,6 +277,7 @@ const (
 	TodoService_CreateTodo_FullMethodName        = "/todo.v1.TodoService/CreateTodo"
 	TodoService_GetTodo_FullMethodName           = "/todo.v1.TodoService/GetTodo"
 	TodoService_UpdateTodo_FullMethodName        = "/todo.v1.TodoService/UpdateTodo"
+	TodoService_UpdateTodoStatus_FullMethodName  = "/todo.v1.TodoService/UpdateTodoStatus"
 	TodoService_DeleteTodo_FullMethodName        = "/todo.v1.TodoService/DeleteTodo"
 	TodoService_ListTodos_FullMethodName         = "/todo.v1.TodoService/ListTodos"
 	TodoService_AddTagToTodo_FullMethodName      = "/todo.v1.TodoService/AddTagToTodo"
@@ -290,6 +291,7 @@ type TodoServiceClient interface {
 	CreateTodo(ctx context.Context, in *CreateTodoRequest, opts ...grpc.CallOption) (*Todo, error)
 	GetTodo(ctx context.Context, in *GetTodoRequest, opts ...grpc.CallOption) (*Todo, error)
 	UpdateTodo(ctx context.Context, in *UpdateTodoRequest, opts ...grpc.CallOption) (*Todo, error)
+	UpdateTodoStatus(ctx context.Context, in *UpdateTodoStatusRequest, opts ...grpc.CallOption) (*Todo, error)
 	DeleteTodo(ctx context.Context, in *DeleteTodoRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	ListTodos(ctx context.Context, in *ListTodosRequest, opts ...grpc.CallOption) (*ListTodosResponse, error)
 	AddTagToTodo(ctx context.Context, in *AddTagToTodoRequest, opts ...grpc.CallOption) (*Todo, error)
@@ -328,6 +330,16 @@ func (c *todoServiceClient) UpdateTodo(ctx context.Context, in *UpdateTodoReques
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Todo)
 	err := c.cc.Invoke(ctx, TodoService_UpdateTodo_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *todoServiceClient) UpdateTodoStatus(ctx context.Context, in *UpdateTodoStatusRequest, opts ...grpc.CallOption) (*Todo, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Todo)
+	err := c.cc.Invoke(ctx, TodoService_UpdateTodoStatus_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -381,6 +393,7 @@ type TodoServiceServer interface {
 	CreateTodo(context.Context, *CreateTodoRequest) (*Todo, error)
 	GetTodo(context.Context, *GetTodoRequest) (*Todo, error)
 	UpdateTodo(context.Context, *UpdateTodoRequest) (*Todo, error)
+	UpdateTodoStatus(context.Context, *UpdateTodoStatusRequest) (*Todo, error)
 	DeleteTodo(context.Context, *DeleteTodoRequest) (*emptypb.Empty, error)
 	ListTodos(context.Context, *ListTodosRequest) (*ListTodosResponse, error)
 	AddTagToTodo(context.Context, *AddTagToTodoRequest) (*Todo, error)
@@ -403,6 +416,9 @@ func (UnimplementedTodoServiceServer) GetTodo(context.Context, *GetTodoRequest) 
 }
 func (UnimplementedTodoServiceServer) UpdateTodo(context.Context, *UpdateTodoRequest) (*Todo, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateTodo not implemented")
+}
+func (UnimplementedTodoServiceServer) UpdateTodoStatus(context.Context, *UpdateTodoStatusRequest) (*Todo, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateTodoStatus not implemented")
 }
 func (UnimplementedTodoServiceServer) DeleteTodo(context.Context, *DeleteTodoRequest) (*emptypb.Empty, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteTodo not implemented")
@@ -487,6 +503,24 @@ func _TodoService_UpdateTodo_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TodoServiceServer).UpdateTodo(ctx, req.(*UpdateTodoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TodoService_UpdateTodoStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateTodoStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TodoServiceServer).UpdateTodoStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TodoService_UpdateTodoStatus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TodoServiceServer).UpdateTodoStatus(ctx, req.(*UpdateTodoStatusRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -581,6 +615,10 @@ var TodoService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateTodo",
 			Handler:    _TodoService_UpdateTodo_Handler,
+		},
+		{
+			MethodName: "UpdateTodoStatus",
+			Handler:    _TodoService_UpdateTodoStatus_Handler,
 		},
 		{
 			MethodName: "DeleteTodo",

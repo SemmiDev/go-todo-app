@@ -572,6 +572,44 @@
         ]
       }
     },
+    "/v1/todos/{todoId}/status": {
+      "patch": {
+        "operationId": "TodoService_UpdateTodoStatus",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1Todo"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "todoId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/TodoServiceUpdateTodoStatusBody"
+            }
+          }
+        ],
+        "tags": [
+          "TodoService"
+        ]
+      }
+    },
     "/v1/todos/{todoId}/tags/{tagId}": {
       "delete": {
         "operationId": "TodoService_RemoveTagFromTodo",
@@ -685,6 +723,14 @@
           "items": {
             "type": "string"
           }
+        }
+      }
+    },
+    "TodoServiceUpdateTodoStatusBody": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "$ref": "#/definitions/v1TodoStatus"
         }
       }
     },
