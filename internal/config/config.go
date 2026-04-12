@@ -1,42 +1,44 @@
 package config
 
 import (
+	"fmt"
 	"log"
 	"time"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/spf13/viper"
 )
 
 type AppConfig struct {
-	GRPCPort    string `mapstructure:"GRPC_PORT"`
-	HTTPPort    string `mapstructure:"HTTP_PORT"`
-	Environment string `mapstructure:"ENVIRONMENT"`
+	GRPCPort    string `mapstructure:"GRPC_PORT" validate:"required"`
+	HTTPPort    string `mapstructure:"HTTP_PORT" validate:"required"`
+	Environment string `mapstructure:"ENVIRONMENT" validate:"required,oneof=development production staging"`
 
-	DatabaseURL string `mapstructure:"DATABASE_URL"`
+	DatabaseURL string `mapstructure:"DATABASE_URL" validate:"required,url"`
 
-	TokenSymmetricKey    string        `mapstructure:"TOKEN_SYMMETRIC_KEY"`
-	AccessTokenDuration  time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
-	RefreshTokenDuration time.Duration `mapstructure:"REFRESH_TOKEN_DURATION"`
+	TokenSymmetricKey    string        `mapstructure:"TOKEN_SYMMETRIC_KEY" validate:"required,len=32"`
+	AccessTokenDuration  time.Duration `mapstructure:"ACCESS_TOKEN_DURATION" validate:"required"`
+	RefreshTokenDuration time.Duration `mapstructure:"REFRESH_TOKEN_DURATION" validate:"required"`
 
-	MemcachedURL string `mapstructure:"MEMCACHED_URL"`
-	RedisURL     string `mapstructure:"REDIS_URL"`
+	MemcachedURL string `mapstructure:"MEMCACHED_URL" validate:"required"`
+	RedisURL     string `mapstructure:"REDIS_URL" validate:"required"`
 
-	GoogleClientID     string `mapstructure:"GOOGLE_CLIENT_ID"`
-	GoogleClientSecret string `mapstructure:"GOOGLE_CLIENT_SECRET"`
-	GoogleCallbackURL  string `mapstructure:"GOOGLE_CALLBACK_URL"`
+	GoogleClientID     string `mapstructure:"GOOGLE_CLIENT_ID" validate:"required"`
+	GoogleClientSecret string `mapstructure:"GOOGLE_CLIENT_SECRET" validate:"required"`
+	GoogleCallbackURL  string `mapstructure:"GOOGLE_CALLBACK_URL" validate:"required,url"`
 
-	LogLevel string `mapstructure:"LOG_LEVEL"`
+	LogLevel string `mapstructure:"LOG_LEVEL" validate:"required"`
 
 	// SMTP
-	SMTPHost     string `mapstructure:"SMTP_HOST"`
-	SMTPPort     int    `mapstructure:"SMTP_PORT"`
+	SMTPHost     string `mapstructure:"SMTP_HOST" validate:"required"`
+	SMTPPort     int    `mapstructure:"SMTP_PORT" validate:"required,gt=0"`
 	SMTPUsername string `mapstructure:"SMTP_USERNAME"`
 	SMTPPassword string `mapstructure:"SMTP_PASSWORD"`
-	SMTPFrom     string `mapstructure:"SMTP_FROM"`
+	SMTPFrom     string `mapstructure:"SMTP_FROM" validate:"required"`
 
 	// Scheduler
-	ReminderCron string `mapstructure:"REMINDER_CRON"`
-	AppURL       string `mapstructure:"APP_URL"`
+	ReminderCron string `mapstructure:"REMINDER_CRON" validate:"required"`
+	AppURL       string `mapstructure:"APP_URL" validate:"required,url"`
 }
 
 func Load() *AppConfig {
@@ -68,6 +70,15 @@ func Load() *AppConfig {
 	if err := viper.Unmarshal(&cfg); err != nil {
 		log.Fatalf("unmarshal config: %v", err)
 	}
+
+	validate := validator.New()
+	if err := validate.Struct(&cfg); err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			fmt.Printf("Config error: Field '%s' failed on the '%s' tag\n", err.Field(), err.Tag())
+		}
+		log.Fatalf("Config validation failed")
+	}
+
 	return &cfg
 }
 

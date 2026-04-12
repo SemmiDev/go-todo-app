@@ -52,50 +52,30 @@ func (s *Service) SendDueSoonReminders(ctx context.Context) error {
 
 	enqueued, failed := 0, 0
 	for _, t := range todos {
-		triggered := t.TriggeredReminders()
-		triggeredMap := make(map[string]bool)
-		for _, offset := range triggered {
-			triggeredMap[offset] = true
-		}
+		dueOffsets := t.GetDueReminders(start)
+		for _, offset := range dueOffsets {
+			payload := &output.TaskPayloadSendReminderEmail{
+				TodoID: t.ID(),
+			}
 
-		for _, offset := range t.Reminders() {
-			// Skip if already sent
-			if triggeredMap[offset] {
+			if err := s.taskDistributor.DistributeTaskSendReminderEmail(ctx, payload); err != nil {
+				s.logger.ErrorContext(ctx, "reminder: enqueue failed",
+					slog.String("todo_id", t.ID().String()),
+					slog.String("offset", offset),
+					slog.Any("error", err),
+				)
+				failed++
 				continue
 			}
 
-			// Parse offset (e.g., "1h", "15m")
-			d, err := time.ParseDuration(offset)
-			if err != nil {
-				s.logger.WarnContext(ctx, "reminder: invalid offset", slog.String("offset", offset))
-				continue
+			if err := s.todoRepo.MarkReminderTriggered(ctx, t.ID(), offset); err != nil {
+				s.logger.WarnContext(ctx, "reminder: mark triggered failed",
+					slog.String("todo_id", t.ID().String()),
+					slog.String("offset", offset),
+					slog.Any("error", err),
+				)
 			}
-
-			// Check if it's time to send (due_date - offset <= now)
-			if t.DueDate().Add(-d).Before(time.Now()) {
-				payload := &output.TaskPayloadSendReminderEmail{
-					TodoID: t.ID(),
-				}
-
-				if err := s.taskDistributor.DistributeTaskSendReminderEmail(ctx, payload); err != nil {
-					s.logger.ErrorContext(ctx, "reminder: enqueue failed",
-						slog.String("todo_id", t.ID().String()),
-						slog.String("offset", offset),
-						slog.Any("error", err),
-					)
-					failed++
-					continue
-				}
-
-				if err := s.todoRepo.MarkReminderTriggered(ctx, t.ID(), offset); err != nil {
-					s.logger.WarnContext(ctx, "reminder: mark triggered failed",
-						slog.String("todo_id", t.ID().String()),
-						slog.String("offset", offset),
-						slog.Any("error", err),
-					)
-				}
-				enqueued++
-			}
+			enqueued++
 		}
 	}
 

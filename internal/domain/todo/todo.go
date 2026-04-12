@@ -232,6 +232,37 @@ func (t *Todo) MarkReminderTriggered(offset string) {
 	t.triggeredReminders = append(t.triggeredReminders, offset)
 }
 
+// GetDueReminders returns a list of reminder offsets that are now due to be sent
+// but have not been triggered yet.
+func (t *Todo) GetDueReminders(now time.Time) []string {
+	if t.status == StatusDone || t.dueDate == nil {
+		return nil
+	}
+
+	triggeredMap := make(map[string]bool)
+	for _, offset := range t.triggeredReminders {
+		triggeredMap[offset] = true
+	}
+
+	var due []string
+	for _, offset := range t.reminders {
+		if triggeredMap[offset] {
+			continue
+		}
+
+		d, err := time.ParseDuration(offset)
+		if err != nil {
+			continue
+		}
+
+		// (due_date - offset) <= now
+		if t.dueDate.Add(-d).Before(now) || t.dueDate.Add(-d).Equal(now) {
+			due = append(due, offset)
+		}
+	}
+	return due
+}
+
 // TransitionStatus moves the todo to a new status based on allowed transitions.
 // Allowed:
 // - pending -> in_progress

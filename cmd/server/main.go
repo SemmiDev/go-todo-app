@@ -115,9 +115,12 @@ func runGRPCServer(
 	todoSvc *todoapp.Service,
 	val *validation.Validator,
 ) {
+	limiter := interceptor.NewRateLimiter(10, 20) // 10 rps, 20 burst
+
 	grpcSrv := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
 			interceptor.RecoveryUnaryInterceptor(logger),
+			interceptor.RateLimitUnaryInterceptor(limiter),
 			interceptor.LoggingUnaryInterceptor(logger),
 			interceptor.AuthUnaryInterceptor(authSvc),
 		),
@@ -154,6 +157,8 @@ func runGatewayServer(
 	cfg *config.AppConfig,
 	logger *slog.Logger,
 ) {
+	limiter := interceptor.NewRateLimiter(50, 100) // 50 rps, 100 burst for HTTP/Gateway
+
 	gwMux := runtime.NewServeMux(
 		runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{
 			MarshalOptions:   protojson.MarshalOptions{UseProtoNames: true},
@@ -245,7 +250,7 @@ func runGatewayServer(
 
 	srv := &http.Server{
 		Addr:         ":" + cfg.HTTPPort,
-		Handler:      withCORS(mux),
+		Handler:      withCORS(withRateLimit(mux, limiter)),
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 30 * time.Second,
 		IdleTimeout:  120 * time.Second,
@@ -265,6 +270,20 @@ func runGatewayServer(
 		_ = srv.Shutdown(shutCtx)
 		_ = conn.Close()
 		return nil
+	})
+}
+
+func withRateLimit(h http.Handler, rl *interceptor.RateLimiter) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Use a simple global limiter for now, similar to gRPC.
+		// In production, use client IP from r.RemoteAddr or X-Forwarded-For.
+		if !rl.Allow("global") {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusTooManyRequests)
+			_, _ = w.Write([]byte(`{"message":"too many requests"}`))
+			return
+		}
+		h.ServeHTTP(w, r)
 	})
 }
 
