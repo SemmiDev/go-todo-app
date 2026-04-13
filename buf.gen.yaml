@@ -28,3 +28,7 @@ plugins:
       - output_format=json
       - allow_merge=true
       - merge_file_name=api
+
+  - remote: buf.build/bufbuild/validate-go
+    out: gen
+    opt: paths=source_relative

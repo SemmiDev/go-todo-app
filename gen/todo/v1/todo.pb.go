@@ -7,6 +7,7 @@
 package todov1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -1297,7 +1298,7 @@ var File_todo_v1_todo_proto protoreflect.FileDescriptor
 
 const file_todo_v1_todo_proto_rawDesc = "" +
 	"\n" +
-	"\x12todo/v1/todo.proto\x12\atodo.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bgoogle/protobuf/empty.proto\"\xce\x01\n" +
+	"\x12todo/v1/todo.proto\x12\atodo.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1bbuf/validate/validate.proto\"\xce\x01\n" +
 	"\x03Tag\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x12\n" +
@@ -1336,20 +1337,20 @@ const file_todo_v1_todo_proto_rawDesc = "" +
 	"\x06tag_id\x18\x01 \x01(\tR\x05tagId\"J\n" +
 	"\x10ListTagsResponse\x12 \n" +
 	"\x04tags\x18\x01 \x03(\v2\f.todo.v1.TagR\x04tags\x12\x14\n" +
-	"\x05total\x18\x02 \x01(\x05R\x05total\"\xec\x01\n" +
-	"\x11CreateTodoRequest\x12\x14\n" +
-	"\x05title\x18\x01 \x01(\tR\x05title\x12 \n" +
-	"\vdescription\x18\x02 \x01(\tR\vdescription\x121\n" +
+	"\x05total\x18\x02 \x01(\x05R\x05total\"\x81\x02\n" +
+	"\x11CreateTodoRequest\x12\x1f\n" +
+	"\x05title\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x10\x03\x18dR\x05title\x12*\n" +
+	"\vdescription\x18\x02 \x01(\tB\b\xbaH\x05r\x03\x18\xf4\x03R\vdescription\x121\n" +
 	"\bpriority\x18\x03 \x01(\x0e2\x15.todo.v1.TodoPriorityR\bpriority\x125\n" +
 	"\bdue_date\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\adueDate\x12\x17\n" +
 	"\atag_ids\x18\x05 \x03(\tR\x06tagIds\x12\x1c\n" +
-	"\treminders\x18\x06 \x03(\tR\treminders\")\n" +
-	"\x0eGetTodoRequest\x12\x17\n" +
-	"\atodo_id\x18\x01 \x01(\tR\x06todoId\"\xb2\x02\n" +
-	"\x11UpdateTodoRequest\x12\x17\n" +
-	"\atodo_id\x18\x01 \x01(\tR\x06todoId\x12\x14\n" +
-	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\x12+\n" +
+	"\treminders\x18\x06 \x03(\tR\treminders\"3\n" +
+	"\x0eGetTodoRequest\x12!\n" +
+	"\atodo_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06todoId\"\xd1\x02\n" +
+	"\x11UpdateTodoRequest\x12!\n" +
+	"\atodo_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06todoId\x12\x1f\n" +
+	"\x05title\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x10\x03\x18dR\x05title\x12*\n" +
+	"\vdescription\x18\x03 \x01(\tB\b\xbaH\x05r\x03\x18\xf4\x03R\vdescription\x12+\n" +
 	"\x06status\x18\x04 \x01(\x0e2\x13.todo.v1.TodoStatusR\x06status\x121\n" +
 	"\bpriority\x18\x05 \x01(\x0e2\x15.todo.v1.TodoPriorityR\bpriority\x125\n" +
 	"\bdue_date\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\adueDate\x12\x17\n" +

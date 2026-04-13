@@ -39,9 +39,12 @@ import (
 	"github.com/semmidev/go-todo-app/internal/common/validation"
 	"github.com/semmidev/go-todo-app/internal/config"
 	"github.com/semmidev/go-todo-app/web"
-)
 
-func main() {
+	"buf.build/go/protovalidate"
+	)
+
+	func main() {
+
 	cfg := config.Load()
 	logger := logging.NewLogger(logging.Config{
 		Level:       cfg.LogLevel,
@@ -119,9 +122,16 @@ func runGRPCServer(
 ) {
 	limiter := interceptor.NewRateLimiter(10, 20) // 10 rps, 20 burst
 
+	protoValidator, err := protovalidate.New()
+	if err != nil {
+		logger.Error("failed to create protovalidate validator", slog.Any("error", err))
+		return
+	}
+
 	grpcSrv := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
 			interceptor.RecoveryUnaryInterceptor(logger),
+			interceptor.ValidatorUnaryInterceptor(protoValidator),
 			interceptor.RateLimitUnaryInterceptor(limiter),
 			interceptor.LoggingUnaryInterceptor(logger),
 			interceptor.AuthUnaryInterceptor(authSvc),
