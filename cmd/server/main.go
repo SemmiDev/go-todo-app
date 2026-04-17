@@ -41,10 +41,9 @@ import (
 	"github.com/semmidev/go-todo-app/web"
 
 	"buf.build/go/protovalidate"
-	)
+)
 
-	func main() {
-
+func main() {
 	cfg := config.Load()
 	logger := logging.NewLogger(logging.Config{
 		Level:       cfg.LogLevel,

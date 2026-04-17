@@ -133,12 +133,12 @@ func (s *AuthServer) ListSessions(ctx context.Context, _ *emptypb.Empty) (*pb.Li
 	var pbSessions []*pb.Session
 	for _, sess := range sessions {
 		pbSessions = append(pbSessions, &pb.Session{
-			Id:         sess.ID.String(),
-			UserAgent:  sess.UserAgent,
-			ClientIp:   sess.ClientIP,
-			IsCurrent:  false, // Keep it false for now, or match it if we extract session ID later
-			CreatedAt:  timestamppb.New(sess.CreatedAt),
-			ExpiresAt:  timestamppb.New(sess.ExpiresAt),
+			Id:        sess.ID.String(),
+			UserAgent: sess.UserAgent,
+			ClientIp:  sess.ClientIP,
+			IsCurrent: false, // Keep it false for now, or match it if we extract session ID later
+			CreatedAt: timestamppb.New(sess.CreatedAt),
+			ExpiresAt: timestamppb.New(sess.ExpiresAt),
 		})
 	}
 

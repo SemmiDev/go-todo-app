@@ -45,7 +45,7 @@ func RateLimitUnaryInterceptor(rl *RateLimiter) grpc.UnaryServerInterceptor {
 		// In a real gRPC setup with a proxy, you'd extract the client IP from metadata (e.g., X-Forwarded-For).
 		// For simplicity, we use a global limiter or a dummy "global" key if IP isn't easily accessible.
 		// If you want per-IP gRPC limiting, extract it from peer.FromContext(ctx) or metadata.
-		
+
 		// For now, let's use a global limit for all gRPC calls to protect the server.
 		// A more advanced version would use peer IP.
 		if !rl.Allow("global") {

@@ -44,15 +44,25 @@ func (r *TodoRepo) List(ctx context.Context, f output.TodoFilter) ([]*todo.Todo,
 		From("todos").
 		Where(squirrel.Eq{"user_id": f.UserID}). // basic filters for count
 		ToSql()
-	
+
 	// Re-building the count query with all filters to be accurate
 	countBuilder := psql.Select("COUNT(*)").From("todos").Where(squirrel.Eq{"user_id": f.UserID})
-	if f.Status != nil { countBuilder = countBuilder.Where(squirrel.Eq{"status": string(*f.Status)}) }
-	if f.TagID != nil { countBuilder = countBuilder.Where("id IN (SELECT todo_id FROM todo_tags WHERE tag_id = ?)", f.TagID) }
-	if f.HasKeyword() { countBuilder = countBuilder.Where("title ILIKE ?", "%"+f.Keyword+"%") }
-	if f.StartDate != nil { countBuilder = countBuilder.Where("due_date >= ?", f.StartDate) }
-	if f.EndDate != nil { countBuilder = countBuilder.Where("due_date <= ?", f.EndDate) }
-	
+	if f.Status != nil {
+		countBuilder = countBuilder.Where(squirrel.Eq{"status": string(*f.Status)})
+	}
+	if f.TagID != nil {
+		countBuilder = countBuilder.Where("id IN (SELECT todo_id FROM todo_tags WHERE tag_id = ?)", f.TagID)
+	}
+	if f.HasKeyword() {
+		countBuilder = countBuilder.Where("title ILIKE ?", "%"+f.Keyword+"%")
+	}
+	if f.StartDate != nil {
+		countBuilder = countBuilder.Where("due_date >= ?", f.StartDate)
+	}
+	if f.EndDate != nil {
+		countBuilder = countBuilder.Where("due_date <= ?", f.EndDate)
+	}
+
 	countQuery, countArgs, err = countBuilder.ToSql()
 	if err != nil {
 		return nil, 0, wrapErr(err, "build count query")

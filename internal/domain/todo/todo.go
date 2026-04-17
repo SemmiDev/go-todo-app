@@ -78,16 +78,16 @@ func ReconstituteTag(id, userID uuid.UUID, name, color string, createdAt, update
 }
 
 // ID returns the unique identifier for the tag.
-func (t *Tag) ID() uuid.UUID        { return t.id }
+func (t *Tag) ID() uuid.UUID { return t.id }
 
 // UserID returns the owner's identifier.
-func (t *Tag) UserID() uuid.UUID    { return t.userID }
+func (t *Tag) UserID() uuid.UUID { return t.userID }
 
 // Name returns the tag's display name.
-func (t *Tag) Name() string         { return t.name }
+func (t *Tag) Name() string { return t.name }
 
 // Color returns the tag's hexadecimal color code.
-func (t *Tag) Color() string        { return t.color }
+func (t *Tag) Color() string { return t.color }
 
 // CreatedAt returns the timestamp when the tag was created.
 func (t *Tag) CreatedAt() time.Time { return t.createdAt }
@@ -184,31 +184,31 @@ func Reconstitute(
 }
 
 // ID returns the unique identifier for the todo.
-func (t *Todo) ID() uuid.UUID                { return t.id }
+func (t *Todo) ID() uuid.UUID { return t.id }
 
 // UserID returns the owner's identifier.
-func (t *Todo) UserID() uuid.UUID            { return t.userID }
+func (t *Todo) UserID() uuid.UUID { return t.userID }
 
 // Title returns the todo's short headline.
-func (t *Todo) Title() string                { return t.title }
+func (t *Todo) Title() string { return t.title }
 
 // Description returns the detailed content of the todo.
-func (t *Todo) Description() string          { return t.description }
+func (t *Todo) Description() string { return t.description }
 
 // Status returns the current state (Pending, InProgress, Done).
-func (t *Todo) Status() Status               { return t.status }
+func (t *Todo) Status() Status { return t.status }
 
 // Priority returns the importance level (Low, Medium, High).
-func (t *Todo) Priority() Priority           { return t.priority }
+func (t *Todo) Priority() Priority { return t.priority }
 
 // DueDate returns the optional deadline for the task.
-func (t *Todo) DueDate() *time.Time          { return t.dueDate }
+func (t *Todo) DueDate() *time.Time { return t.dueDate }
 
 // CreatedAt returns the timestamp when the todo was created.
-func (t *Todo) CreatedAt() time.Time         { return t.createdAt }
+func (t *Todo) CreatedAt() time.Time { return t.createdAt }
 
 // UpdatedAt returns the timestamp when the todo was last modified.
-func (t *Todo) UpdatedAt() time.Time         { return t.updatedAt }
+func (t *Todo) UpdatedAt() time.Time { return t.updatedAt }
 
 // Tags returns the list of associated tags.
 func (t *Todo) Tags() []*Tag { return t.tags }

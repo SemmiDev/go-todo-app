@@ -1,4 +1,4 @@
-// Package asynqtask provides the Asynq-based implementation for distributing 
+// Package asynqtask provides the Asynq-based implementation for distributing
 // background tasks to Redis-backed queues.
 package asynqtask
 
@@ -39,7 +39,7 @@ func NewDistributor(redisOpt asynq.RedisClientOpt) *Distributor {
 	}
 }
 
-// DistributeTaskSendReminderEmail serializes the payload and enqueues a SendReminderEmail task 
+// DistributeTaskSendReminderEmail serializes the payload and enqueues a SendReminderEmail task
 // into the default queue with a maximum of 5 retries.
 func (d *Distributor) DistributeTaskSendReminderEmail(
 	ctx context.Context,
@@ -48,7 +48,7 @@ func (d *Distributor) DistributeTaskSendReminderEmail(
 	return d.enqueueTask(ctx, TaskSendReminderEmail, payload, QueueDefault)
 }
 
-// DistributeTaskSendWelcomeEmail serializes the payload and enqueues a SendWelcomeEmail task 
+// DistributeTaskSendWelcomeEmail serializes the payload and enqueues a SendWelcomeEmail task
 // into the critical queue with a maximum of 5 retries.
 func (d *Distributor) DistributeTaskSendWelcomeEmail(
 	ctx context.Context,
