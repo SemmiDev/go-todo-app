@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/fs"
 	"log/slog"
 	"net"
 	"net/http"
@@ -13,23 +12,17 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
-	"google.golang.org/protobuf/encoding/protojson"
 
-	"html/template"
-
-	"github.com/semmidev/go-todo-app/docs"
 	pb "github.com/semmidev/go-todo-app/gen/todo/v1"
 	"github.com/semmidev/go-todo-app/internal/adapter/driven/asynqtask"
 	"github.com/semmidev/go-todo-app/internal/adapter/driven/memcached"
 	"github.com/semmidev/go-todo-app/internal/adapter/driven/postgres"
 	grpchandler "github.com/semmidev/go-todo-app/internal/adapter/driving/grpc"
-	"github.com/semmidev/go-todo-app/internal/adapter/driving/grpc/httperr"
 	"github.com/semmidev/go-todo-app/internal/adapter/driving/grpc/interceptor"
+	httpdrv "github.com/semmidev/go-todo-app/internal/adapter/driving/http"
 	authapp "github.com/semmidev/go-todo-app/internal/application/auth"
 	todoapp "github.com/semmidev/go-todo-app/internal/application/todo"
 	"github.com/semmidev/go-todo-app/internal/common/logging"
@@ -38,7 +31,6 @@ import (
 	"github.com/hibiken/asynq"
 	"github.com/semmidev/go-todo-app/internal/common/validation"
 	"github.com/semmidev/go-todo-app/internal/config"
-	"github.com/semmidev/go-todo-app/web"
 
 	"buf.build/go/protovalidate"
 )
@@ -170,98 +162,19 @@ func runGatewayServer(
 ) {
 	limiter := interceptor.NewRateLimiter(50, 100) // 50 rps, 100 burst for HTTP/Gateway
 
-	gwMux := runtime.NewServeMux(
-		runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{
-			MarshalOptions:   protojson.MarshalOptions{UseProtoNames: true},
-			UnmarshalOptions: protojson.UnmarshalOptions{DiscardUnknown: true},
-		}),
-		// RFC 7807 Problem Details for all HTTP errors (via grpc-gateway translation)
-		runtime.WithErrorHandler(httperr.GatewayErrorHandler),
-	)
-
-	conn, err := grpc.NewClient(
-		"passthrough:///localhost:"+cfg.GRPCPort,
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	)
-	if err != nil {
-		logger.Error("dial grpc for gateway failed", slog.Any("error", err))
-		return
-	}
-
-	if err := pb.RegisterAuthServiceHandler(ctx, gwMux, conn); err != nil {
-		logger.Error("register auth gateway", slog.Any("error", err))
-		return
-	}
-	if err := pb.RegisterTagServiceHandler(ctx, gwMux, conn); err != nil {
-		logger.Error("register tag gateway", slog.Any("error", err))
-		return
-	}
-	if err := pb.RegisterTodoServiceHandler(ctx, gwMux, conn); err != nil {
-		logger.Error("register todo gateway", slog.Any("error", err))
-		return
-	}
-
-	swaggerFS, err := fs.Sub(docs.SwaggerFS, "swagger")
-	if err != nil {
-		logger.Error("swagger fs", slog.Any("error", err))
-		return
-	}
-
-	tmplBase, err := template.ParseFS(web.TemplateFS, "layout.html")
-	if err != nil {
-		logger.Error("parse base template", slog.Any("error", err))
-		return
-	}
-	tmplIndex, err := template.Must(tmplBase.Clone()).ParseFS(web.TemplateFS, "index.html")
-	if err != nil {
-		logger.Error("parse index template", slog.Any("error", err))
-		return
-	}
-	tmplDashboard, err := template.Must(tmplBase.Clone()).ParseFS(web.TemplateFS, "dashboard.html")
-	if err != nil {
-		logger.Error("parse dashboard template", slog.Any("error", err))
-		return
-	}
-	tmplCallback, err := template.Must(tmplBase.Clone()).ParseFS(web.TemplateFS, "callback.html")
-	if err != nil {
-		logger.Error("parse callback template", slog.Any("error", err))
-		return
-	}
-
-	mux := http.NewServeMux()
-	mux.Handle("/v1/", gwMux)
-	mux.Handle("/swagger/", http.StripPrefix("/swagger/", http.FileServer(http.FS(swaggerFS))))
-	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(web.StaticFS))))
-	mux.HandleFunc("/healthz", func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write([]byte(`{"status":"ok"}`))
+	handler, conn, err := httpdrv.NewRouter(ctx, httpdrv.RouterConfig{
+		GRPCPort:    cfg.GRPCPort,
+		Logger:      logger,
+		RateLimiter: limiter,
 	})
-
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/" {
-			http.NotFound(w, r)
-			return
-		}
-		if err := tmplIndex.ExecuteTemplate(w, "layout", nil); err != nil {
-			logger.Error("execute template index", slog.Any("error", err))
-		}
-	})
-
-	mux.HandleFunc("/dashboard", func(w http.ResponseWriter, r *http.Request) {
-		if err := tmplDashboard.ExecuteTemplate(w, "layout", nil); err != nil {
-			logger.Error("execute template dashboard", slog.Any("error", err))
-		}
-	})
-
-	mux.HandleFunc("/auth/google/callback", func(w http.ResponseWriter, r *http.Request) {
-		if err := tmplCallback.ExecuteTemplate(w, "layout", nil); err != nil {
-			logger.Error("execute template callback", slog.Any("error", err))
-		}
-	})
+	if err != nil {
+		logger.Error("setup http router failed", slog.Any("error", err))
+		return
+	}
 
 	srv := &http.Server{
 		Addr:         ":" + cfg.HTTPPort,
-		Handler:      withCORS(withRateLimit(mux, limiter)),
+		Handler:      handler,
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 30 * time.Second,
 		IdleTimeout:  120 * time.Second,
@@ -281,33 +194,5 @@ func runGatewayServer(
 		_ = srv.Shutdown(shutCtx)
 		_ = conn.Close()
 		return nil
-	})
-}
-
-func withRateLimit(h http.Handler, rl *interceptor.RateLimiter) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Use a simple global limiter for now, similar to gRPC.
-		// In production, use client IP from r.RemoteAddr or X-Forwarded-For.
-		if !rl.Allow("global") {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusTooManyRequests)
-			_, _ = w.Write([]byte(`{"message":"too many requests"}`))
-			return
-		}
-		h.ServeHTTP(w, r)
-	})
-}
-
-func withCORS(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-		w.Header().Set("Access-Control-Allow-Credentials", "true")
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		h.ServeHTTP(w, r)
 	})
 }
