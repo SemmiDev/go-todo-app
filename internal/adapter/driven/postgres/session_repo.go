@@ -24,6 +24,13 @@ type sessionModel struct {
 	CreatedAt    time.Time `db:"created_at"`
 }
 
+func (m *sessionModel) toDomain() *session.Session {
+	return session.Reconstitute(
+		m.ID, m.UserID, m.RefreshToken, m.UserAgent, m.ClientIP,
+		m.IsBlocked, m.ExpiresAt, m.CreatedAt,
+	)
+}
+
 // SessionRepo implements output.SessionRepository using PostgreSQL.
 type SessionRepo struct{ db *DB }
 
@@ -35,7 +42,7 @@ func (r *SessionRepo) Create(ctx context.Context, s *session.Session) error {
 	const q = `INSERT INTO sessions (id, user_id, refresh_token, user_agent, client_ip, is_blocked, expires_at, created_at)
 	           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
 	_, err := r.db.GetQuerier(ctx).ExecContext(ctx, q,
-		s.ID, s.UserID, s.RefreshToken, s.UserAgent, s.ClientIP, s.IsBlocked, s.ExpiresAt, s.CreatedAt,
+		s.ID(), s.UserID(), s.RefreshToken(), s.UserAgent(), s.ClientIP(), s.IsBlocked(), s.ExpiresAt(), s.CreatedAt(),
 	)
 	return wrapErr(err, "create session")
 }
@@ -50,16 +57,7 @@ func (r *SessionRepo) GetByID(ctx context.Context, id uuid.UUID) (*session.Sessi
 	if err != nil {
 		return nil, wrapErr(err, "get session")
 	}
-	return &session.Session{
-		ID:           m.ID,
-		UserID:       m.UserID,
-		RefreshToken: m.RefreshToken,
-		UserAgent:    m.UserAgent,
-		ClientIP:     m.ClientIP,
-		IsBlocked:    m.IsBlocked,
-		ExpiresAt:    m.ExpiresAt,
-		CreatedAt:    m.CreatedAt,
-	}, nil
+	return m.toDomain(), nil
 }
 
 // ListByUserID retrieves all sessions associated with a user ID.
@@ -72,16 +70,7 @@ func (r *SessionRepo) ListByUserID(ctx context.Context, userID uuid.UUID) ([]*se
 
 	sessions := make([]*session.Session, 0, len(models))
 	for _, m := range models {
-		sessions = append(sessions, &session.Session{
-			ID:           m.ID,
-			UserID:       m.UserID,
-			RefreshToken: m.RefreshToken,
-			UserAgent:    m.UserAgent,
-			ClientIP:     m.ClientIP,
-			IsBlocked:    m.IsBlocked,
-			ExpiresAt:    m.ExpiresAt,
-			CreatedAt:    m.CreatedAt,
-		})
+		sessions = append(sessions, m.toDomain())
 	}
 	return sessions, nil
 }

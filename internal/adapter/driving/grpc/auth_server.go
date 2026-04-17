@@ -10,13 +10,11 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"errors"
 	"github.com/google/uuid"
 
 	pb "github.com/semmidev/go-todo-app/gen/todo/v1"
 	"github.com/semmidev/go-todo-app/internal/adapter/driving/grpc/grpcerr"
 	"github.com/semmidev/go-todo-app/internal/adapter/driving/grpc/interceptor"
-	"github.com/semmidev/go-todo-app/internal/common/apperr"
 	"github.com/semmidev/go-todo-app/internal/common/validation"
 	"github.com/semmidev/go-todo-app/internal/port/input"
 )
@@ -127,18 +125,18 @@ func (s *AuthServer) ListSessions(ctx context.Context, _ *emptypb.Empty) (*pb.Li
 		UserID: u.ID(),
 	})
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to list sessions: %v", err)
+		return nil, grpcerr.FromAppError(ctx, err)
 	}
 
 	var pbSessions []*pb.Session
 	for _, sess := range sessions {
 		pbSessions = append(pbSessions, &pb.Session{
-			Id:        sess.ID.String(),
-			UserAgent: sess.UserAgent,
-			ClientIp:  sess.ClientIP,
+			Id:        sess.ID().String(),
+			UserAgent: sess.UserAgent(),
+			ClientIp:  sess.ClientIP(),
 			IsCurrent: false, // Keep it false for now, or match it if we extract session ID later
-			CreatedAt: timestamppb.New(sess.CreatedAt),
-			ExpiresAt: timestamppb.New(sess.ExpiresAt),
+			CreatedAt: timestamppb.New(sess.CreatedAt()),
+			ExpiresAt: timestamppb.New(sess.ExpiresAt()),
 		})
 	}
 
@@ -156,18 +154,14 @@ func (s *AuthServer) RevokeSession(ctx context.Context, req *pb.RevokeSessionReq
 
 	sessionID, err := uuid.Parse(req.SessionId)
 	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "invalid session ID format")
+		return nil, grpcerr.NewInvalidArgument("invalid session ID format")
 	}
 
-	err = s.svc.RevokeSession(ctx, input.RevokeSessionParams{
+	if err := s.svc.RevokeSession(ctx, input.RevokeSessionParams{
 		SessionID: sessionID,
 		UserID:    u.ID(),
-	})
-	if err != nil {
-		if errors.Is(err, apperr.ErrNotFound) || errors.Is(err, apperr.ErrUnauthorized) {
-			return nil, status.Errorf(codes.NotFound, "session not found")
-		}
-		return nil, status.Errorf(codes.Internal, "failed to revoke session: %v", err)
+	}); err != nil {
+		return nil, grpcerr.FromAppError(ctx, err)
 	}
 
 	return &emptypb.Empty{}, nil

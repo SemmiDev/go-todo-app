@@ -1,3 +1,5 @@
+// Package memcached provides the Memcached implementation of the driven adapters.
+// It is used as an ephemeral cache for quick lookups of frequently accessed domain objects.
 package memcached
 
 import (

@@ -26,6 +26,7 @@ import (
 	authapp "github.com/semmidev/go-todo-app/internal/application/auth"
 	todoapp "github.com/semmidev/go-todo-app/internal/application/todo"
 	"github.com/semmidev/go-todo-app/internal/common/logging"
+	"github.com/semmidev/go-todo-app/internal/common/ratelimit"
 	"github.com/semmidev/go-todo-app/internal/common/token"
 
 	"github.com/hibiken/asynq"
@@ -111,7 +112,7 @@ func runGRPCServer(
 	todoSvc *todoapp.Service,
 	val *validation.Validator,
 ) {
-	limiter := interceptor.NewRateLimiter(10, 20) // 10 rps, 20 burst
+	limiter := ratelimit.NewRateLimiter(10, 20) // 10 rps, 20 burst
 
 	protoValidator, err := protovalidate.New()
 	if err != nil {
@@ -160,7 +161,7 @@ func runGatewayServer(
 	cfg *config.AppConfig,
 	logger *slog.Logger,
 ) {
-	limiter := interceptor.NewRateLimiter(50, 100) // 50 rps, 100 burst for HTTP/Gateway
+	limiter := ratelimit.NewRateLimiter(50, 100) // 50 rps, 100 burst for HTTP/Gateway
 
 	handler, conn, err := httpdrv.NewRouter(ctx, httpdrv.RouterConfig{
 		GRPCPort:    cfg.GRPCPort,

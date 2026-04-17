@@ -165,10 +165,3 @@ func NewPaging(currentPage, perPage, totalData int) (*Paging, error) {
 		TotalDataInCurrentPage: to - offset,
 	}, nil
 }
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}

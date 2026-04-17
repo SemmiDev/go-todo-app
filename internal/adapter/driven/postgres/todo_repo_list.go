@@ -40,12 +40,6 @@ func (r *TodoRepo) List(ctx context.Context, f output.TodoFilter) ([]*todo.Todo,
 	}
 
 	// ── Count query ───────────────────────────────────────────────────────────
-	countQuery, countArgs, err := psql.Select("COUNT(*)").
-		From("todos").
-		Where(squirrel.Eq{"user_id": f.UserID}). // basic filters for count
-		ToSql()
-
-	// Re-building the count query with all filters to be accurate
 	countBuilder := psql.Select("COUNT(*)").From("todos").Where(squirrel.Eq{"user_id": f.UserID})
 	if f.Status != nil {
 		countBuilder = countBuilder.Where(squirrel.Eq{"status": string(*f.Status)})
@@ -63,7 +57,7 @@ func (r *TodoRepo) List(ctx context.Context, f output.TodoFilter) ([]*todo.Todo,
 		countBuilder = countBuilder.Where("due_date <= ?", f.EndDate)
 	}
 
-	countQuery, countArgs, err = countBuilder.ToSql()
+	countQuery, countArgs, err := countBuilder.ToSql()
 	if err != nil {
 		return nil, 0, wrapErr(err, "build count query")
 	}

@@ -14,8 +14,8 @@ import (
 
 	"github.com/semmidev/go-todo-app/docs"
 	pb "github.com/semmidev/go-todo-app/gen/todo/v1"
-	"github.com/semmidev/go-todo-app/internal/adapter/driving/grpc/httperr"
-	"github.com/semmidev/go-todo-app/internal/adapter/driving/grpc/interceptor"
+	"github.com/semmidev/go-todo-app/internal/adapter/driving/http/httperr"
+	"github.com/semmidev/go-todo-app/internal/common/ratelimit"
 	"github.com/semmidev/go-todo-app/web"
 )
 
@@ -26,7 +26,7 @@ type RouterConfig struct {
 	// Logger is used for template-rendering errors.
 	Logger *slog.Logger
 	// RateLimiter is applied as HTTP middleware.
-	RateLimiter *interceptor.RateLimiter
+	RateLimiter *ratelimit.RateLimiter
 }
 
 // NewRouter builds the fully configured HTTP handler with all routes registered.

@@ -5,7 +5,7 @@ package http
 import (
 	"net/http"
 
-	"github.com/semmidev/go-todo-app/internal/adapter/driving/grpc/interceptor"
+	"github.com/semmidev/go-todo-app/internal/common/ratelimit"
 )
 
 // WithCORS wraps a handler with permissive CORS headers that reflect
@@ -26,7 +26,7 @@ func WithCORS(h http.Handler) http.Handler {
 
 // WithRateLimit wraps a handler with a global token-bucket rate limiter.
 // Requests that exceed the limit receive 429 Too Many Requests.
-func WithRateLimit(h http.Handler, rl *interceptor.RateLimiter) http.Handler {
+func WithRateLimit(h http.Handler, rl *ratelimit.RateLimiter) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Use a simple global limiter for now, similar to gRPC.
 		// In production, use client IP from r.RemoteAddr or X-Forwarded-For.

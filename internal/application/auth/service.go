@@ -145,16 +145,11 @@ func (s *Service) ExchangeAndLogin(ctx context.Context, p input.ExchangeAndLogin
 		}
 
 		// Persist session with the refresh token.
-		if txErr := s.sessionRepo.Create(txCtx, &session.Session{
-			ID:           refreshPayload.ID,
-			UserID:       u.ID(),
-			RefreshToken: refreshToken,
-			UserAgent:    p.UserAgent,
-			ClientIP:     p.ClientIP,
-			IsBlocked:    false,
-			ExpiresAt:    refreshPayload.ExpiredAt,
-			CreatedAt:    time.Now().UTC(),
-		}); txErr != nil {
+		sess := session.New(
+			refreshPayload.ID, u.ID(), refreshToken,
+			p.UserAgent, p.ClientIP, refreshPayload.ExpiredAt,
+		)
+		if txErr := s.sessionRepo.Create(txCtx, sess); txErr != nil {
 			return fmt.Errorf("create session: %w", txErr)
 		}
 
@@ -207,15 +202,15 @@ func (s *Service) RenewAccessToken(ctx context.Context, p input.RenewAccessToken
 		return nil, apperr.ErrInvalidToken
 	}
 
-	if sess.IsBlocked {
+	if sess.IsBlocked() {
 		return nil, apperr.ErrUnauthorized
 	}
 
-	if sess.UserID != refreshPayload.UserID {
+	if sess.UserID() != refreshPayload.UserID {
 		return nil, apperr.ErrUnauthorized
 	}
 
-	if sess.RefreshToken != p.RefreshToken {
+	if sess.RefreshToken() != p.RefreshToken {
 		return nil, apperr.ErrUnauthorized
 	}
 
@@ -251,7 +246,7 @@ func (s *Service) RevokeSession(ctx context.Context, p input.RevokeSessionParams
 	if err != nil {
 		return apperr.ErrNotFound
 	}
-	if sess.UserID != p.UserID {
+	if sess.UserID() != p.UserID {
 		return apperr.ErrUnauthorized
 	}
 	return s.sessionRepo.Delete(ctx, p.SessionID)
