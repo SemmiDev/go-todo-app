@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	"github.com/Masterminds/squirrel"
-	"github.com/semmidev/go-todo-app/internal/common/filter"
-	"github.com/semmidev/go-todo-app/internal/domain/todo"
-	"github.com/semmidev/go-todo-app/internal/port/output"
+	"github.com/semmidev/todo-app/internal/common/filter"
+	"github.com/semmidev/todo-app/internal/domain/todo"
+	"github.com/semmidev/todo-app/internal/port/output"
 )
 
 // List retrieves todos based on the provided filter and pagination parameters.

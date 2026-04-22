@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/semmidev/go-todo-app/internal/common/apperr"
-	"github.com/semmidev/go-todo-app/internal/domain/user"
+	"github.com/semmidev/todo-app/internal/common/apperr"
+	"github.com/semmidev/todo-app/internal/domain/user"
 )
 
 // userModel represents the database schema for a user.

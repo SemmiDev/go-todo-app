@@ -3,7 +3,7 @@ package postgres
 import (
 	"context"
 
-	"github.com/semmidev/go-todo-app/internal/port/output"
+	"github.com/semmidev/todo-app/internal/port/output"
 )
 
 type unitOfWork struct {

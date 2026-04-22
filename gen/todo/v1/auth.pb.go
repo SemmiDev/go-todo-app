@@ -675,7 +675,7 @@ const file_todo_v1_auth_proto_rawDesc = "" +
 	"\x06Logout\x12\x16.google.protobuf.Empty\x1a\x16.google.protobuf.Empty\"\x1a\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/v1/auth/logout\x12L\n" +
 	"\x05GetMe\x12\x16.google.protobuf.Empty\x1a\x16.todo.v1.GetMeResponse\"\x13\x82\xd3\xe4\x93\x02\r\x12\v/v1/auth/me\x12`\n" +
 	"\fListSessions\x12\x16.google.protobuf.Empty\x1a\x1d.todo.v1.ListSessionsResponse\"\x19\x82\xd3\xe4\x93\x02\x13\x12\x11/v1/auth/sessions\x12n\n" +
-	"\rRevokeSession\x12\x1d.todo.v1.RevokeSessionRequest\x1a\x16.google.protobuf.Empty\"&\x82\xd3\xe4\x93\x02 *\x1e/v1/auth/sessions/{session_id}B4Z2github.com/semmidev/go-todo-app/gen/todo/v1;todov1b\x06proto3"
+	"\rRevokeSession\x12\x1d.todo.v1.RevokeSessionRequest\x1a\x16.google.protobuf.Empty\"&\x82\xd3\xe4\x93\x02 *\x1e/v1/auth/sessions/{session_id}B4Z2github.com/semmidev/todo-app/gen/todo/v1;todov1b\x06proto3"
 
 var (
 	file_todo_v1_auth_proto_rawDescOnce sync.Once

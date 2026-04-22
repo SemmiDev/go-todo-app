@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/semmidev/go-todo-app/internal/common/apperr"
+	"github.com/semmidev/todo-app/internal/common/apperr"
 	"time"
 )
 

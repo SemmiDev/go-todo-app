@@ -4,8 +4,8 @@ import (
 	"github.com/google/uuid"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	pb "github.com/semmidev/go-todo-app/gen/todo/v1"
-	"github.com/semmidev/go-todo-app/internal/domain/todo"
+	pb "github.com/semmidev/todo-app/gen/todo/v1"
+	"github.com/semmidev/todo-app/internal/domain/todo"
 )
 
 // ─── Proto ↔ Domain mappers ──────────────────────────────────────────────────

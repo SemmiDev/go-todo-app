@@ -2,7 +2,7 @@ version: v2
 
 modules:
   - path: proto
-    name: buf.build/sammi-lab/go-todo-app
+    name: buf.build/sammi-lab/todo-app
 
 lint:
   use:

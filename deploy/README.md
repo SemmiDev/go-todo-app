@@ -1,6 +1,6 @@
-# go-todo-app — Deploy dengan Ansible 🚀
+# todo-app — Deploy dengan Ansible 🚀
 
-Direktori ini berisi konfigurasi *Infrastructure-as-Code* (IaC) lengkap untuk mend-deploy **go-todo-app** ke server *production* Ubuntu menggunakan Ansible.
+Direktori ini berisi konfigurasi *Infrastructure-as-Code* (IaC) lengkap untuk mend-deploy **todo-app** ke server *production* Ubuntu menggunakan Ansible.
 
 Setup ini secara otomatis menginstal Docker, Nginx (beserta sertifikat SSL dari Let's Encrypt), PostgreSQL, serta menangani proses *build*, *deploy*, dan *rollback* aplikasi Go.
 
@@ -30,7 +30,7 @@ deploy/
 │   ├── setup.yml            # Hanya infrastruktur (tanpa deploy aplikasi)
 │   └── deploy.yml           # Hanya untuk deploy & pembaruan aplikasi
 ├── roles/                   # Ansible roles (common, docker, nginx, postgres, app)
-└── scripts/                 # Utility shell scripts yang diinstal ke /opt/go-todo-app/scripts
+└── scripts/                 # Utility shell scripts yang diinstal ke /opt/todo-app/scripts
 ```
 
 ---
@@ -116,12 +116,12 @@ ansible-playbook -i inventory/production.ini playbooks/site.yml --tags postgres
 
 ## 🛠 Skrip Utilitas Server
 
-Selama masa setup, Ansible menginstal beberapa skrip pembantu yang berguna di server yang berada di `/opt/go-todo-app/scripts/`.
+Selama masa setup, Ansible menginstal beberapa skrip pembantu yang berguna di server yang berada di `/opt/todo-app/scripts/`.
 
 Anda dapat mengakses skrip-skrip ini dengan melakukan koneksi SSH ke server:
 ```bash
 ssh deploy@<IP_SERVER_ANDA>
-cd /opt/go-todo-app/scripts/
+cd /opt/todo-app/scripts/
 ```
 
 ### 1. Backup Database
@@ -129,19 +129,19 @@ cd /opt/go-todo-app/scripts/
 ```bash
 sudo ./backup-db.sh
 ```
-*Backup akan disimpan sebagai file `.sql.gz` di dalam `/opt/go-todo-app/backups/`.*
+*Backup akan disimpan sebagai file `.sql.gz` di dalam `/opt/todo-app/backups/`.*
 *Backup juga akan dikirimkan ke Telegram jika `TELEGRAM_BOT_TOKEN` dan `TELEGRAM_CHAT_ID` sudah diatur di dalam skrip `backup-db.sh`.*
 
 **Memperbarui Skrip Backup Tanpa Deploy Ulang:**
 Jika Anda hanya memperbarui skrip `backup-db.sh` (misal: menambahkan konfigurasi Telegram baru) dan ingin menerapkannya ke server tanpa menjalankan seluruh *deploy* proses aplikasi, Anda dapat menggunakan modul `copy` Ansible:
 ```bash
-ansible -i inventory/production.ini webservers -m copy -a "src=scripts/backup-db.sh dest=/opt/go-todo-app/scripts/backup-db.sh owner=deploy group=deploy mode=0755" -b
+ansible -i inventory/production.ini webservers -m copy -a "src=scripts/backup-db.sh dest=/opt/todo-app/scripts/backup-db.sh owner=deploy group=deploy mode=0755" -b
 ```
 
 ### 2. Pemulihan Database (Restore)
 Untuk memulihkan database dari file *backup* spesifik (skrip ini akan otomatis membuat *backup* keamanan internal sebelum melakukan *restore*):
 ```bash
-sudo ./restore-db.sh /opt/go-todo-app/backups/backup_YYYYMMDD_HHMMSS.sql.gz
+sudo ./restore-db.sh /opt/todo-app/backups/backup_YYYYMMDD_HHMMSS.sql.gz
 ```
 
 ### 3. Pengecekan Kesehatan Server (Health Checks)

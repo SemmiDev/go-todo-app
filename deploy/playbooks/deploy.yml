@@ -1,6 +1,6 @@
 ---
 # ╔══════════════════════════════════════════════════════════════╗
-# ║  go-todo-app — Application Deploy / Update                   ║
+# ║  todo-app — Application Deploy / Update                   ║
 # ║                                                              ║
 # ║  Usage:                                                      ║
 # ║    ansible-playbook playbooks/deploy.yml                     ║
@@ -10,13 +10,13 @@
 # ║  the full server setup.                                      ║
 # ╚══════════════════════════════════════════════════════════════╝
 
-- name: "go-todo-app — Deploy Application"
+- name: 'todo-app — Deploy Application'
   hosts: webservers
   become: true
   gather_facts: true
 
   vars_files:
-    - "../group_vars/all.yml"
+    - '../group_vars/all.yml'
     - "../group_vars/{{ env | default('production') }}.yml"
 
   pre_tasks:
@@ -48,7 +48,7 @@
       tags: [app, deploy]
 
   post_tasks:
-    - name: "🎉 Deploy complete!"
+    - name: '🎉 Deploy complete!'
       debug:
         msg: |
           ╔══════════════════════════════════════════════╗

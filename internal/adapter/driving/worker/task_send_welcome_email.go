@@ -9,7 +9,7 @@ import (
 	"log/slog"
 
 	"github.com/hibiken/asynq"
-	"github.com/semmidev/go-todo-app/internal/port/output"
+	"github.com/semmidev/todo-app/internal/port/output"
 )
 
 // welcomeTmpl holds the compiled welcome email template.
@@ -91,11 +91,11 @@ const welcomeHTMLTemplate = `<!DOCTYPE html>
     <div class="header">
       <h1><span>WELCOME ABOARD!</span></h1>
     </div>
-    
+
     <div class="content">
       <p class="greeting">HI {{.UserName}},</p>
       <p>We're thrilled to have you here! Todo App is built for people who want to get things done without the fluff.</p>
-      
+
       <div class="feature-card">
         <p>🚀 Ready to crush your goals? Start by creating your first task and setting up a reminder.</p>
       </div>

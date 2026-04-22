@@ -1422,7 +1422,7 @@ const file_todo_v1_todo_proto_rawDesc = "" +
 	"DeleteTodo\x12\x1a.todo.v1.DeleteTodoRequest\x1a\x16.google.protobuf.Empty\"\x1b\x82\xd3\xe4\x93\x02\x15*\x13/v1/todos/{todo_id}\x12U\n" +
 	"\tListTodos\x12\x19.todo.v1.ListTodosRequest\x1a\x1a.todo.v1.ListTodosResponse\"\x11\x82\xd3\xe4\x93\x02\v\x12\t/v1/todos\x12f\n" +
 	"\fAddTagToTodo\x12\x1c.todo.v1.AddTagToTodoRequest\x1a\r.todo.v1.Todo\")\x82\xd3\xe4\x93\x02#\"!/v1/todos/{todo_id}/tags/{tag_id}\x12p\n" +
-	"\x11RemoveTagFromTodo\x12!.todo.v1.RemoveTagFromTodoRequest\x1a\r.todo.v1.Todo\")\x82\xd3\xe4\x93\x02#*!/v1/todos/{todo_id}/tags/{tag_id}B4Z2github.com/semmidev/go-todo-app/gen/todo/v1;todov1b\x06proto3"
+	"\x11RemoveTagFromTodo\x12!.todo.v1.RemoveTagFromTodoRequest\x1a\r.todo.v1.Todo\")\x82\xd3\xe4\x93\x02#*!/v1/todos/{todo_id}/tags/{tag_id}B4Z2github.com/semmidev/todo-app/gen/todo/v1;todov1b\x06proto3"
 
 var (
 	file_todo_v1_todo_proto_rawDescOnce sync.Once

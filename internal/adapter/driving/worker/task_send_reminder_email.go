@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/hibiken/asynq"
-	"github.com/semmidev/go-todo-app/internal/port/output"
+	"github.com/semmidev/todo-app/internal/port/output"
 )
 
 // templateFS holds the compiled reminder email template.
@@ -122,7 +122,7 @@ const reminderHTMLTemplate = `<!DOCTYPE html>
     </div>
     <p class="greeting">Hi {{.UserName}},</p>
     <p style="margin-bottom: 24px; font-weight: 600;">Don't let this task slip away! It's due soon:</p>
-    
+
     <div class="todo-card">
       <h2 class="todo-title">{{.TodoTitle}}</h2>
       {{if .TodoDescription}}<p class="todo-desc">{{.TodoDescription}}</p>{{end}}

@@ -1,6 +1,6 @@
 ---
 # ╔══════════════════════════════════════════════════════════════╗
-# ║  go-todo-app — Initial Server Setup Only                     ║
+# ║  todo-app — Initial Server Setup Only                     ║
 # ║                                                              ║
 # ║  Usage:                                                      ║
 # ║    ansible-playbook playbooks/setup.yml                      ║
@@ -9,13 +9,13 @@
 # ║  prerequisites: OS hardening, Docker, Nginx, PostgreSQL.     ║
 # ╚══════════════════════════════════════════════════════════════╝
 
-- name: "go-todo-app — Initial Server Setup"
+- name: 'todo-app — Initial Server Setup'
   hosts: webservers
   become: true
   gather_facts: true
 
   vars_files:
-    - "../group_vars/all.yml"
+    - '../group_vars/all.yml'
     - "../group_vars/{{ env | default('production') }}.yml"
 
   pre_tasks:
@@ -41,7 +41,7 @@
       tags: [postgres]
 
   post_tasks:
-    - name: "✅ Server setup complete"
+    - name: '✅ Server setup complete'
       debug:
         msg: |
           Server is ready for application deployment!

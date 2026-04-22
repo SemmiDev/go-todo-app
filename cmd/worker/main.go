@@ -14,11 +14,11 @@ import (
 	"syscall"
 
 	"github.com/hibiken/asynq"
-	"github.com/semmidev/go-todo-app/internal/adapter/driven/postgres"
-	smtpadapter "github.com/semmidev/go-todo-app/internal/adapter/driven/smtp"
-	"github.com/semmidev/go-todo-app/internal/adapter/driving/worker"
-	"github.com/semmidev/go-todo-app/internal/common/logging"
-	"github.com/semmidev/go-todo-app/internal/config"
+	"github.com/semmidev/todo-app/internal/adapter/driven/postgres"
+	smtpadapter "github.com/semmidev/todo-app/internal/adapter/driven/smtp"
+	"github.com/semmidev/todo-app/internal/adapter/driving/worker"
+	"github.com/semmidev/todo-app/internal/common/logging"
+	"github.com/semmidev/todo-app/internal/config"
 )
 
 func main() {

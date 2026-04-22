@@ -1,5 +1,5 @@
 # ╔══════════════════════════════════════════════════════════════╗
-# ║  go-todo-app — Production Inventory (EXAMPLE)               ║
+# ║  todo-app — Production Inventory (EXAMPLE)               ║
 # ╚══════════════════════════════════════════════════════════════╝
 # Copy this file to production.ini and fill in your server details.
 # Do NOT commit production.ini to version control!

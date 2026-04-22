@@ -6,7 +6,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/semmidev/go-todo-app/internal/domain/session"
+	"github.com/semmidev/todo-app/internal/domain/session"
 )
 
 // SessionRepository is the driven port for managing authentication sessions in the database.

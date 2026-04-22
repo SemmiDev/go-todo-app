@@ -29,21 +29,21 @@
     dest: /etc/nginx/nginx.conf
     owner: root
     group: root
-    mode: "0644"
+    mode: '0644'
   notify: reload nginx
 
-- name: Deploy HTTP-only go-todo-app vhost config for Certbot
+- name: Deploy HTTP-only todo-app vhost config for Certbot
   template:
-    src: go-todo-app-http.conf.j2
-    dest: /etc/nginx/sites-available/go-todo-app.conf
+    src: todo-app-http.conf.j2
+    dest: /etc/nginx/sites-available/todo-app.conf
     owner: root
     group: root
-    mode: "0644"
+    mode: '0644'
 
-- name: Enable go-todo-app vhost
+- name: Enable todo-app vhost
   file:
-    src: /etc/nginx/sites-available/go-todo-app.conf
-    dest: /etc/nginx/sites-enabled/go-todo-app.conf
+    src: /etc/nginx/sites-available/todo-app.conf
+    dest: /etc/nginx/sites-enabled/todo-app.conf
     state: link
 
 - name: Ensure Nginx is running (pre-SSL)
@@ -67,19 +67,19 @@
 # ── Create Nginx log directory for app ──────────────────────
 - name: Create Nginx log directory
   file:
-    path: /var/log/nginx/go-todo-app
+    path: /var/log/nginx/todo-app
     state: directory
     owner: www-data
     group: www-data
-    mode: "0755"
+    mode: '0755'
 
-- name: Deploy final SSL go-todo-app vhost config
+- name: Deploy final SSL todo-app vhost config
   template:
-    src: go-todo-app.conf.j2
-    dest: /etc/nginx/sites-available/go-todo-app.conf
+    src: todo-app.conf.j2
+    dest: /etc/nginx/sites-available/todo-app.conf
     owner: root
     group: root
-    mode: "0644"
+    mode: '0644'
   notify: reload nginx
 
 - name: Test Nginx configuration
@@ -96,18 +96,18 @@
 - name: Deploy Nginx log rotation config
   template:
     src: logrotate-gotodoapp.j2
-    dest: /etc/logrotate.d/go-todo-app-nginx
+    dest: /etc/logrotate.d/todo-app-nginx
     owner: root
     group: root
-    mode: "0644"
+    mode: '0644'
 
 # ── Certbot auto-renewal cron ───────────────────────────────
 - name: Setup Certbot auto-renewal cron
   cron:
-    name: "Certbot renewal"
-    minute: "30"
-    hour: "2"
-    weekday: "1,4"
+    name: 'Certbot renewal'
+    minute: '30'
+    hour: '2'
+    weekday: '1,4'
     job: "certbot renew --quiet --post-hook 'systemctl reload nginx' 2>&1 | logger -t certbot"
     user: root
   when: ssl_enabled | default(true)

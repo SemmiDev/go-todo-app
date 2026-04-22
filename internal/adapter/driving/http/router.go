@@ -12,11 +12,11 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/encoding/protojson"
 
-	"github.com/semmidev/go-todo-app/docs"
-	pb "github.com/semmidev/go-todo-app/gen/todo/v1"
-	"github.com/semmidev/go-todo-app/internal/adapter/driving/http/httperr"
-	"github.com/semmidev/go-todo-app/internal/common/ratelimit"
-	"github.com/semmidev/go-todo-app/web"
+	"github.com/semmidev/todo-app/docs"
+	pb "github.com/semmidev/todo-app/gen/todo/v1"
+	"github.com/semmidev/todo-app/internal/adapter/driving/http/httperr"
+	"github.com/semmidev/todo-app/internal/common/ratelimit"
+	"github.com/semmidev/todo-app/web"
 )
 
 // RouterConfig holds the dependencies needed by NewRouter.

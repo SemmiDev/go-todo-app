@@ -9,11 +9,11 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/semmidev/go-todo-app/internal/common/apperr"
-	"github.com/semmidev/go-todo-app/internal/common/filter"
-	"github.com/semmidev/go-todo-app/internal/domain/todo"
-	"github.com/semmidev/go-todo-app/internal/port/input"
-	"github.com/semmidev/go-todo-app/internal/port/output"
+	"github.com/semmidev/todo-app/internal/common/apperr"
+	"github.com/semmidev/todo-app/internal/common/filter"
+	"github.com/semmidev/todo-app/internal/domain/todo"
+	"github.com/semmidev/todo-app/internal/port/input"
+	"github.com/semmidev/todo-app/internal/port/output"
 )
 
 // Service implements both input.TagUseCase and input.TodoUseCase to handle todo-related workflows.

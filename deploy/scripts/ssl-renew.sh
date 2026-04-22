@@ -7,7 +7,7 @@
 # ║    ./scripts/ssl-renew.sh --force                            ║
 # ║                                                              ║
 # ║  Cron (auto-renewal every day at 2 AM):                      ║
-# ║    0 2 * * * /opt/go-todo-app/scripts/ssl-renew.sh            ║
+# ║    0 2 * * * /opt/todo-app/scripts/ssl-renew.sh            ║
 # ╚══════════════════════════════════════════════════════════════╝
 
 set -euo pipefail

@@ -11,14 +11,14 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 
-	pb "github.com/semmidev/go-todo-app/gen/todo/v1"
-	"github.com/semmidev/go-todo-app/internal/adapter/driving/grpc/grpcerr"
-	"github.com/semmidev/go-todo-app/internal/adapter/driving/grpc/interceptor"
-	"github.com/semmidev/go-todo-app/internal/common/filter"
-	"github.com/semmidev/go-todo-app/internal/common/validation"
-	"github.com/semmidev/go-todo-app/internal/common/wideevent"
-	"github.com/semmidev/go-todo-app/internal/domain/todo"
-	"github.com/semmidev/go-todo-app/internal/port/input"
+	pb "github.com/semmidev/todo-app/gen/todo/v1"
+	"github.com/semmidev/todo-app/internal/adapter/driving/grpc/grpcerr"
+	"github.com/semmidev/todo-app/internal/adapter/driving/grpc/interceptor"
+	"github.com/semmidev/todo-app/internal/common/filter"
+	"github.com/semmidev/todo-app/internal/common/validation"
+	"github.com/semmidev/todo-app/internal/common/wideevent"
+	"github.com/semmidev/todo-app/internal/domain/todo"
+	"github.com/semmidev/todo-app/internal/port/input"
 )
 
 // ─── TagServer ────────────────────────────────────────────────────────────────

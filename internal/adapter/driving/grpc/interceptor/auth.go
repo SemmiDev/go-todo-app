@@ -10,9 +10,9 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
-	"github.com/semmidev/go-todo-app/internal/common/wideevent"
-	"github.com/semmidev/go-todo-app/internal/domain/user"
-	"github.com/semmidev/go-todo-app/internal/port/input"
+	"github.com/semmidev/todo-app/internal/common/wideevent"
+	"github.com/semmidev/todo-app/internal/domain/user"
+	"github.com/semmidev/todo-app/internal/port/input"
 )
 
 // Public methods that do NOT require authentication.

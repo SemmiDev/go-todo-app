@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/bradfitz/gomemcache/memcache"
-	"github.com/semmidev/go-todo-app/internal/common/apperr"
+	"github.com/semmidev/todo-app/internal/common/apperr"
 )
 
 // CacheRepo implements output.CacheRepository using Memcached.

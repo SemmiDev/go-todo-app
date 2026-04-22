@@ -11,7 +11,7 @@ set -euo pipefail
 
 # ── Configuration ────────────────────────────────────────────
 APP_URL="${APP_URL:-http://127.0.0.1:8080}"
-CONTAINER_NAME="${CONTAINER_NAME:-go-todo-app}"
+CONTAINER_NAME="${CONTAINER_NAME:-todo-app}"
 DB_CONTAINER="${DB_CONTAINER:-gotodoapp-postgres}"
 VERBOSE="${1:-}"
 
@@ -25,7 +25,7 @@ NC='\033[0m'
 ERRORS=0
 
 echo -e "${BLUE}╔══════════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║  go-todo-app — Health Check                   ║${NC}"
+echo -e "${BLUE}║  todo-app — Health Check                   ║${NC}"
 echo -e "${BLUE}╚══════════════════════════════════════════════╝${NC}"
 echo ""
 
@@ -121,7 +121,7 @@ if [[ "${VERBOSE}" == "--verbose" || "${VERBOSE}" == "-v" ]]; then
 
     echo ""
     echo -e "${BLUE}── Docker Images ──${NC}"
-    docker images go-todo-app --format "table {{.Tag}}\t{{.CreatedAt}}\t{{.Size}}" 2>/dev/null
+    docker images todo-app --format "table {{.Tag}}\t{{.CreatedAt}}\t{{.Size}}" 2>/dev/null
 fi
 
 # ── Summary ──────────────────────────────────────────────────

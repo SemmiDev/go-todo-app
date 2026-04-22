@@ -12,11 +12,11 @@ import (
 
 	"github.com/google/uuid"
 
-	pb "github.com/semmidev/go-todo-app/gen/todo/v1"
-	"github.com/semmidev/go-todo-app/internal/adapter/driving/grpc/grpcerr"
-	"github.com/semmidev/go-todo-app/internal/adapter/driving/grpc/interceptor"
-	"github.com/semmidev/go-todo-app/internal/common/validation"
-	"github.com/semmidev/go-todo-app/internal/port/input"
+	pb "github.com/semmidev/todo-app/gen/todo/v1"
+	"github.com/semmidev/todo-app/internal/adapter/driving/grpc/grpcerr"
+	"github.com/semmidev/todo-app/internal/adapter/driving/grpc/interceptor"
+	"github.com/semmidev/todo-app/internal/common/validation"
+	"github.com/semmidev/todo-app/internal/port/input"
 )
 
 // AuthServer handles authentication and session management via gRPC.

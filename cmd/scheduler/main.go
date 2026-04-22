@@ -17,12 +17,12 @@ import (
 
 	"github.com/hibiken/asynq"
 	"github.com/robfig/cron/v3"
-	"github.com/semmidev/go-todo-app/internal/adapter/driven/asynqtask"
-	"github.com/semmidev/go-todo-app/internal/adapter/driven/memcached"
-	"github.com/semmidev/go-todo-app/internal/adapter/driven/postgres"
-	reminderapp "github.com/semmidev/go-todo-app/internal/application/reminder"
-	"github.com/semmidev/go-todo-app/internal/common/logging"
-	"github.com/semmidev/go-todo-app/internal/config"
+	"github.com/semmidev/todo-app/internal/adapter/driven/asynqtask"
+	"github.com/semmidev/todo-app/internal/adapter/driven/memcached"
+	"github.com/semmidev/todo-app/internal/adapter/driven/postgres"
+	reminderapp "github.com/semmidev/todo-app/internal/application/reminder"
+	"github.com/semmidev/todo-app/internal/common/logging"
+	"github.com/semmidev/todo-app/internal/config"
 )
 
 func main() {

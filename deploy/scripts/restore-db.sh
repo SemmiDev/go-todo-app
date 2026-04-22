@@ -4,7 +4,7 @@
 # ║                                                              ║
 # ║  Usage:                                                      ║
 # ║    ./scripts/restore-db.sh <backup_file.sql.gz>              ║
-# ║    ./scripts/restore-db.sh /opt/go-todo-app/backups/gotodoapp_20260223.sql.gz
+# ║    ./scripts/restore-db.sh /opt/todo-app/backups/gotodoapp_20260223.sql.gz
 # ╚══════════════════════════════════════════════════════════════╝
 
 set -euo pipefail
@@ -25,7 +25,7 @@ if [[ $# -lt 1 ]]; then
     echo -e "${RED}❌ Usage: $0 <backup_file.sql.gz>${NC}"
     echo ""
     echo "Available backups:"
-    ls -lhrt /opt/go-todo-app/backups/gotodoapp_*.sql.gz 2>/dev/null | tail -10
+    ls -lhrt /opt/todo-app/backups/gotodoapp_*.sql.gz 2>/dev/null | tail -10
     exit 1
 fi
 
@@ -58,7 +58,7 @@ fi
 # ── Create safety backup first ──────────────────────────────
 echo ""
 echo -e "${YELLOW}📦 Creating safety backup before restore...${NC}"
-SAFETY_BACKUP="/opt/go-todo-app/backups/pre_restore_$(date +%Y%m%d_%H%M%S).sql.gz"
+SAFETY_BACKUP="/opt/todo-app/backups/pre_restore_$(date +%Y%m%d_%H%M%S).sql.gz"
 
 docker exec "${CONTAINER_NAME}" \
     pg_dump -U "${DB_USER}" -d "${DB_NAME}" \

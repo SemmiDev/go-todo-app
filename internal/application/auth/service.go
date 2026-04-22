@@ -9,12 +9,12 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/semmidev/go-todo-app/internal/common/apperr"
-	"github.com/semmidev/go-todo-app/internal/common/token"
-	"github.com/semmidev/go-todo-app/internal/domain/session"
-	"github.com/semmidev/go-todo-app/internal/domain/user"
-	"github.com/semmidev/go-todo-app/internal/port/input"
-	"github.com/semmidev/go-todo-app/internal/port/output"
+	"github.com/semmidev/todo-app/internal/common/apperr"
+	"github.com/semmidev/todo-app/internal/common/token"
+	"github.com/semmidev/todo-app/internal/domain/session"
+	"github.com/semmidev/todo-app/internal/domain/user"
+	"github.com/semmidev/todo-app/internal/port/input"
+	"github.com/semmidev/todo-app/internal/port/output"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 )

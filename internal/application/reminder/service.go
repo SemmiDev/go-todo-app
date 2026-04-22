@@ -7,7 +7,7 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/semmidev/go-todo-app/internal/port/output"
+	"github.com/semmidev/todo-app/internal/port/output"
 )
 
 // Service orchestrates the workflow of finding due todos and enqueuing reminder tasks.

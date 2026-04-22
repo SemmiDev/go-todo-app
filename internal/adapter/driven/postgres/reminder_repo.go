@@ -5,7 +5,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/semmidev/go-todo-app/internal/domain/todo"
+	"github.com/semmidev/todo-app/internal/domain/todo"
 )
 
 // FindDueSoon returns todos that have configured reminders that are now due

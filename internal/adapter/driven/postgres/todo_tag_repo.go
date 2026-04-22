@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/semmidev/go-todo-app/internal/domain/todo"
+	"github.com/semmidev/todo-app/internal/domain/todo"
 )
 
 // TodoTagRepo implements output.TodoTagRepository using PostgreSQL.

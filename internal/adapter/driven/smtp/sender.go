@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/semmidev/go-todo-app/internal/port/output"
+	"github.com/semmidev/todo-app/internal/port/output"
 	gomail "github.com/wneessen/go-mail"
 )
 

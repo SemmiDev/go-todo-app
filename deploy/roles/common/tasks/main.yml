@@ -5,7 +5,7 @@
 
 - name: Set timezone
   community.general.timezone:
-    name: "{{ timezone }}"
+    name: '{{ timezone }}'
 
 - name: Update apt cache
   apt:
@@ -38,7 +38,7 @@
 # ── Deploy User ──────────────────────────────────────────────
 - name: Create deploy user
   user:
-    name: "{{ deploy_user }}"
+    name: '{{ deploy_user }}'
     shell: /bin/bash
     groups: sudo
     append: yes
@@ -47,21 +47,21 @@
 - name: Allow deploy user passwordless sudo
   lineinfile:
     path: /etc/sudoers.d/{{ deploy_user }}
-    line: "{{ deploy_user }} ALL=(ALL) NOPASSWD: ALL"
+    line: '{{ deploy_user }} ALL=(ALL) NOPASSWD: ALL'
     create: yes
-    validate: "visudo -cf %s"
+    validate: 'visudo -cf %s'
 
 - name: Ensure .ssh directory exists for deploy user
   file:
-    path: "/home/{{ deploy_user }}/.ssh"
+    path: '/home/{{ deploy_user }}/.ssh'
     state: directory
-    owner: "{{ deploy_user }}"
-    group: "{{ deploy_user }}"
-    mode: "0700"
+    owner: '{{ deploy_user }}'
+    group: '{{ deploy_user }}'
+    mode: '0700'
 
 - name: Set authorized key for deploy user
   authorized_key:
-    user: "{{ deploy_user }}"
+    user: '{{ deploy_user }}'
     state: present
     key: "{{ lookup('file', '~/.ssh/id_ed25519.pub') }}"
   register: ssh_key_result
@@ -71,16 +71,16 @@
 
 - name: Create SSH keypair for deploy user (for GitHub Deploy Keys)
   community.crypto.openssh_keypair:
-    path: "/home/{{ deploy_user }}/.ssh/id_ed25519"
+    path: '/home/{{ deploy_user }}/.ssh/id_ed25519'
     type: ed25519
-    comment: "deploy@go-todo-app"
-    owner: "{{ deploy_user }}"
-    group: "{{ deploy_user }}"
+    comment: 'deploy@todo-app'
+    owner: '{{ deploy_user }}'
+    group: '{{ deploy_user }}'
 
 # ── Application User ────────────────────────────────────────
 - name: Create application user
   user:
-    name: "{{ app_user }}"
+    name: '{{ app_user }}'
     uid: 1001
     shell: /bin/bash
     system: yes
@@ -93,8 +93,8 @@
     dest: /etc/ssh/sshd_config
     owner: root
     group: root
-    mode: "0644"
-    validate: "sshd -t -f %s"
+    mode: '0644'
+    validate: 'sshd -t -f %s'
   notify: restart sshd
 
 # ── Firewall (UFW) ──────────────────────────────────────────
@@ -111,9 +111,9 @@
 - name: Allow required ports through UFW
   community.general.ufw:
     rule: allow
-    port: "{{ item.port | string }}"
-    proto: "{{ item.proto }}"
-  loop: "{{ ufw_allowed_ports }}"
+    port: '{{ item.port | string }}'
+    proto: '{{ item.proto }}'
+  loop: '{{ ufw_allowed_ports }}'
 
 - name: Enable UFW
   community.general.ufw:
@@ -139,7 +139,7 @@
 - name: Set swap file permissions
   file:
     path: /swapfile
-    mode: "0600"
+    mode: '0600'
   when: not swap_file.stat.exists
 
 - name: Make swap
@@ -153,7 +153,7 @@
 - name: Add swap to fstab
   lineinfile:
     path: /etc/fstab
-    line: "/swapfile none swap sw 0 0"
+    line: '/swapfile none swap sw 0 0'
     state: present
 
 # ── Unattended Upgrades ─────────────────────────────────────
@@ -166,22 +166,22 @@
       APT::Periodic::AutocleanInterval "7";
     owner: root
     group: root
-    mode: "0644"
+    mode: '0644'
 
 # ── Create Application Directories ──────────────────────────
 - name: Create application directories
   file:
-    path: "{{ item }}"
+    path: '{{ item }}'
     state: directory
-    owner: "{{ deploy_user }}"
-    group: "{{ deploy_user }}"
-    mode: "0755"
+    owner: '{{ deploy_user }}'
+    group: '{{ deploy_user }}'
+    mode: '0755'
   loop:
-    - "{{ app_dir }}"
-    - "{{ app_dir }}/data"
-    - "{{ app_dir }}/backups"
-    - "{{ app_dir }}/logs"
-    - "{{ app_dir }}/scripts"
+    - '{{ app_dir }}'
+    - '{{ app_dir }}/data'
+    - '{{ app_dir }}/backups'
+    - '{{ app_dir }}/logs'
+    - '{{ app_dir }}/scripts'
 
 # ── Extract Deploy User Public SSH Key ──────────────────────
 - name: Read deploy user SSH public key

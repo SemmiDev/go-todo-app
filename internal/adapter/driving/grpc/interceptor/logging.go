@@ -13,7 +13,7 @@ import (
 	"google.golang.org/grpc/peer"
 	"google.golang.org/grpc/status"
 
-	"github.com/semmidev/go-todo-app/internal/common/wideevent"
+	"github.com/semmidev/todo-app/internal/common/wideevent"
 )
 
 // LoggingUnaryInterceptor implements the Wide Event / Canonical Log Line pattern.

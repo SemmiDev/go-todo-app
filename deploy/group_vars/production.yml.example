@@ -1,6 +1,6 @@
 ---
 # ╔══════════════════════════════════════════════════════════════╗
-# ║  go-todo-app — Production Variables (EXAMPLE)                 ║
+# ║  todo-app — Production Variables (EXAMPLE)                 ║
 # ╚══════════════════════════════════════════════════════════════╝
 
 env: production

@@ -55,8 +55,8 @@ Everything operates smoothly inside Docker. No local dependencies required excep
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/SemmiDev/go-todo-app.git
-cd go-todo-app
+git clone https://github.com/SemmiDev/todo-app.git
+cd todo-app
 
 # 2. Set up your environment variables
 # Note: You MUST update .env with your own Google OAuth client credentials for login to work!

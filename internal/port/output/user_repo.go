@@ -6,7 +6,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/semmidev/go-todo-app/internal/domain/user"
+	"github.com/semmidev/todo-app/internal/domain/user"
 )
 
 // UserRepository is the driven port for user persistence.

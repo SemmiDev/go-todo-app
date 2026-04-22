@@ -1,5 +1,5 @@
 # ╔══════════════════════════════════════════════════════════════╗
-# ║  go-todo-app — Nginx Virtual Host — Managed by Ansible      ║
+# ║  todo-app — Nginx Virtual Host — Managed by Ansible      ║
 # ╚══════════════════════════════════════════════════════════════╝
 
 # ── Upstream (HTTP) ──────────────────────────────────────────
@@ -53,8 +53,8 @@ server {
     add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
 
     # ── Logging ──────────────────────────────────────────────
-    access_log /var/log/nginx/go-todo-app/access.log main;
-    error_log  /var/log/nginx/go-todo-app/error.log warn;
+    access_log /var/log/nginx/todo-app/access.log main;
+    error_log  /var/log/nginx/todo-app/error.log warn;
 
     # ── Client Settings ──────────────────────────────────────
     client_max_body_size {{ nginx_client_max_body_size }};
@@ -106,12 +106,12 @@ server {
     ssl_certificate     /etc/letsencrypt/live/{{ domain_name }}/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/{{ domain_name }}/privkey.pem;
 
-    access_log /var/log/nginx/go-todo-app/grpc-access.log main;
-    error_log  /var/log/nginx/go-todo-app/grpc-error.log warn;
+    access_log /var/log/nginx/todo-app/grpc-access.log main;
+    error_log  /var/log/nginx/todo-app/grpc-error.log warn;
 
     location / {
         grpc_pass grpc://gotodoapp_grpc;
-        
+
         grpc_set_header Host $host;
         grpc_set_header X-Real-IP $remote_addr;
         grpc_set_header X-Forwarded-For $proxy_add_x_forwarded_for;

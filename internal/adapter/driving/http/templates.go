@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"html/template"
 
-	"github.com/semmidev/go-todo-app/web"
+	"github.com/semmidev/todo-app/web"
 )
 
 // templates holds the pre-parsed HTML templates used by the page handlers.

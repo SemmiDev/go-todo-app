@@ -5,7 +5,7 @@ package http
 import (
 	"net/http"
 
-	"github.com/semmidev/go-todo-app/internal/common/ratelimit"
+	"github.com/semmidev/todo-app/internal/common/ratelimit"
 )
 
 // WithCORS wraps a handler with permissive CORS headers that reflect

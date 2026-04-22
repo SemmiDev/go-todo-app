@@ -6,8 +6,8 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	"github.com/semmidev/go-todo-app/internal/common/apperr"
-	"github.com/semmidev/go-todo-app/internal/domain/todo"
+	"github.com/semmidev/todo-app/internal/common/apperr"
+	"github.com/semmidev/todo-app/internal/domain/todo"
 )
 
 // Create inserts a new todo into the database.

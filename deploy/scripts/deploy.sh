@@ -79,7 +79,7 @@ done
 
 # ── Pre-flight Checks ───────────────────────────────────────
 echo -e "${BLUE}╔══════════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║  go-todo-app Deployment                       ║${NC}"
+echo -e "${BLUE}║  todo-app Deployment                       ║${NC}"
 echo -e "${BLUE}╚══════════════════════════════════════════════╝${NC}"
 echo ""
 

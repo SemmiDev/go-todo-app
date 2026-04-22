@@ -1,4 +1,4 @@
-module github.com/semmidev/go-todo-app
+module github.com/semmidev/todo-app
 
 go 1.26.0
 

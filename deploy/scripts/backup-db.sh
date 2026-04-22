@@ -13,7 +13,7 @@ set -euo pipefail
 CONTAINER_NAME="gotodoapp-postgres"
 DB_USER="${POSTGRES_USER:-gotodoapp}"
 DB_NAME="${POSTGRES_DB:-gotodoapp}"
-BACKUP_DIR="${1:-/opt/go-todo-app/backups}"
+BACKUP_DIR="${1:-/opt/todo-app/backups}"
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 BACKUP_FILE="${BACKUP_DIR}/gotodoapp_${TIMESTAMP}.sql.gz"
 RETENTION_DAYS="${BACKUP_RETENTION_DAYS:-30}"

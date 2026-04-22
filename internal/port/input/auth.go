@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/semmidev/go-todo-app/internal/domain/session"
-	"github.com/semmidev/go-todo-app/internal/domain/user"
+	"github.com/semmidev/todo-app/internal/domain/session"
+	"github.com/semmidev/todo-app/internal/domain/user"
 )
 
 // ─── Auth Params ───────────────────────────────────────────────────────────────

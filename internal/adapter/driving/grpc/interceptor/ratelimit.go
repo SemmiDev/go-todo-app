@@ -3,7 +3,7 @@ package interceptor
 import (
 	"context"
 
-	"github.com/semmidev/go-todo-app/internal/common/ratelimit"
+	"github.com/semmidev/todo-app/internal/common/ratelimit"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

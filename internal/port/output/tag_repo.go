@@ -6,7 +6,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/semmidev/go-todo-app/internal/domain/todo"
+	"github.com/semmidev/todo-app/internal/domain/todo"
 )
 
 // TagRepository is the driven port for managing tags in the database.

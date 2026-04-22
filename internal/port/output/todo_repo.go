@@ -6,8 +6,8 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/semmidev/go-todo-app/internal/common/filter"
-	"github.com/semmidev/go-todo-app/internal/domain/todo"
+	"github.com/semmidev/todo-app/internal/common/filter"
+	"github.com/semmidev/todo-app/internal/domain/todo"
 )
 
 // TodoFilter holds the canonical criteria for querying todos.

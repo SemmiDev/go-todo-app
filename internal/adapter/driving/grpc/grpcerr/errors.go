@@ -9,7 +9,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/semmidev/go-todo-app/internal/common/apperr"
+	"github.com/semmidev/todo-app/internal/common/apperr"
 )
 
 // FromAppError maps a unified application error to the appropriate gRPC status.
